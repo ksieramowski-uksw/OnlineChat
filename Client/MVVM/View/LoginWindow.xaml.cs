@@ -40,5 +40,38 @@ namespace ChatClient.MVVM.View
             RegisterPage ??= new();
             MainFrame.Navigate(RegisterPage);
         }
+
+        private void LoginWindow_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void CloseButton_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("");
+            Close();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            //MessageBox.Show("");
+            (sender as Button).Background = new SolidColorBrush(Color.FromRgb(0xFF, 0, 0));
+        }
+
+        private void CloseButton_MouseLeave(object sender, MouseEventArgs e)
+        {
+            (sender as Button).Background = new SolidColorBrush(Color.FromRgb(34, 34, 34));
+        }
     }
 }

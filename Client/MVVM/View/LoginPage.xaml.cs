@@ -39,9 +39,9 @@ namespace ChatClient.MVVM.View
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("{ email: \"");
-            builder.Append(EmailTextBox.Text);
+            builder.Append(Login_EmailTextBox.Text);
             builder.Append("\", password: \"");
-            builder.Append(PasswordTextBox.Text);
+            builder.Append(Login_PasswordTextBox.Text);
             builder.Append("\" }");
             Server.SendMessageToServer(builder.ToString());
 
@@ -53,5 +53,6 @@ namespace ChatClient.MVVM.View
                 _window.Close();
             }
         }
+
     }
 }
