@@ -1,0 +1,123 @@
+﻿<Page x:Class="ChatClient.MVVM.View.RegisterPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ChatClient.MVVM.View"
+      d:DesignHeight="500" d:DesignWidth="240"
+      mc:Ignorable="d" 
+      
+      Title="RegisterPage">
+
+    <Page.Resources>
+        <Style x:Key="RoundButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#4060F0"/>
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3050C0"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="Background" Value="#4060F0"/>
+                </Trigger>
+            </Style.Triggers>
+            <Style.Resources>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="CornerRadius" Value="5"/>
+                    <Setter Property="BorderThickness" Value="0.5"/>
+                    <Setter Property="BorderBrush" Value="#000000"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+
+        <Style x:Key="RoundTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Background" Value="#282828"/>
+            <Setter Property="Foreground" Value="#EEEEEE"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="5"/>
+                    <Setter Property="BorderThickness" Value="0.5"/>
+                    <Setter Property="BorderBrush" Value="#000000"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+
+    </Page.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="E-mail" FontSize="16" Foreground="#EEEEEE"/>
+                <TextBlock x:Name="EmailPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+            </StackPanel>
+            <TextBox x:Name="Register_EmailTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="30,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
+                <TextBlock x:Name="PasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+            </StackPanel>
+            <TextBox x:Name="Register_PasswordTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="30,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Confirm password" FontSize="16" Foreground="#EEEEEE"/>
+                <TextBlock x:Name="ConfirmPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+            </StackPanel>
+            <TextBox x:Name="Register_ConfirmPasswordTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="30,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Nickname" FontSize="16" Foreground="#EEEEEE"/>
+                <TextBlock x:Name="NicknameMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+            </StackPanel>
+            <TextBox x:Name="Register_NicknameTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+        </StackPanel>
+
+
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="45,0,45,0" VerticalAlignment="Bottom">
+            <TextBlock x:Name="RegisterMessageTextBox" Text="Please, fill all fields marked with '*'."
+                       Margin="0,0,0,15"  FontSize="14" Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
+        </StackPanel>
+
+        
+
+        <Button x:Name="RegisterButton" Grid.Column="0" Grid.Row="6" FontSize="16" Margin="20,10,10,10" Content="Register"
+                Click="RegisterButton_Click" Style="{StaticResource RoundButtonStyle}"/>
+
+        <Button x:Name="BackButton" Grid.Column="1" Grid.Row="6" FontSize="16" Margin="10,10,20,10" Content="Back"
+                Click="BackButton_Click" Style="{StaticResource RoundButtonStyle}"/>
+
+
+
+    </Grid>
+</Page>
