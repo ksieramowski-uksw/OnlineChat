@@ -10,7 +10,7 @@ namespace ChatServer.Network
 {
     public class NetworkClient
     {
-        private Socket _socket;
+        private readonly Socket _socket;
 
         private readonly ushort _maxMessageLength;
         
@@ -27,7 +27,7 @@ namespace ChatServer.Network
             {
                 var buffer = new byte[_maxMessageLength];
                 var received = await _socket.ReceiveAsync(buffer, SocketFlags.None);
-                string? response = Encoding.UTF8.GetString(buffer, 5, received);
+                string? response = Encoding.UTF8.GetString(buffer, 0, received);
 
                 if (string.IsNullOrWhiteSpace(response))
                 {

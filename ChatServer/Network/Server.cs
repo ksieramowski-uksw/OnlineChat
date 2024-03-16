@@ -47,13 +47,12 @@ namespace ChatServer.Network
             while (true)
             {
                 Socket? client = _listener.Accept();
-
                 if (client == null)
                 {
                     Logger.Warning("Newly accepted client is null.");
                     continue;
                 }
-
+                Logger.Info($"Accepted new client: {client.RemoteEndPoint?.ToString()}");
                 HandleClientConnection(client);
             }
         }
