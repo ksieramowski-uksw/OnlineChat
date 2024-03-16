@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Net\**" />
+    <EmbeddedResource Remove="Net\**" />
+    <None Remove="Net\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Client.cs" />
   </ItemGroup>
 
