@@ -9,6 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="MVVM\**" />
+    <Compile Remove="Net\**" />
+    <EmbeddedResource Remove="MVVM\**" />
+    <EmbeddedResource Remove="Net\**" />
+    <None Remove="MVVM\**" />
+    <None Remove="Net\**" />
+    <Page Remove="MVVM\**" />
+    <Page Remove="Net\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

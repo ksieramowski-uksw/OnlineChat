@@ -1,10 +1,9 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 
-
-namespace ChatClient.Config {
+namespace ChatServer.Config {
     public class Config {
-        private string ServerConfigFileName { get; set; }
+        private string? _serverConfigFileName;
+
         public ServerConfig ServerConfig { get; private set; }
 
         public Config() {
@@ -12,9 +11,8 @@ namespace ChatClient.Config {
             LoadConfig();
         }
 
-
         private void LoadConfigFileNames() {
-            ServerConfigFileName = "Config/ServerConfig.json";
+            _serverConfigFileName = "Config/ServerConfig.json";
         }
 
         public void LoadConfig() {
@@ -22,18 +20,18 @@ namespace ChatClient.Config {
         }
 
         private bool LoadServerConfig() {
-            if (string.IsNullOrWhiteSpace(ServerConfigFileName) || !File.Exists(ServerConfigFileName)) {
-                ServerConfig = ServerConfig.Default();
+            if (string.IsNullOrWhiteSpace(_serverConfigFileName) || !File.Exists(_serverConfigFileName)) {
+                ServerConfig = new ServerConfig();
                 return false;
             }
-            string serverConfigJson = File.ReadAllText(ServerConfigFileName);
+            string serverConfigJson = File.ReadAllText(_serverConfigFileName);
             if (string.IsNullOrWhiteSpace(serverConfigJson)) {
-                ServerConfig = ServerConfig.Default();
+                ServerConfig = new ServerConfig();
                 return false;
             }
             var serverConfig = JsonSerializer.Deserialize<ServerConfig>(serverConfigJson);
             if (serverConfig == null) {
-                ServerConfig = ServerConfig.Default();
+                ServerConfig = new ServerConfig();
                 return false;
             }
             ServerConfig = serverConfig;

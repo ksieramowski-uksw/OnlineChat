@@ -1,21 +1,21 @@
-﻿using ChatServer.Net.IO;
-using ChatServer.Network;
+﻿using ChatServer.Network;
+using Newtonsoft.Json;
 using System.Net;
 using System.Net.Sockets;
+using ChatServer.Config;
 using System.Security.Cryptography.X509Certificates;
 
-namespace ChatServer
-{
-    internal class Program
-    {
+
+namespace ChatServer {
+    internal class Program {
         //static List<Client> users;
         //static Socket listener;
         //
-        static void Main(string[] args)
-        {
-            var address = new IPAddress([127, 0, 0, 1]);//IPAddress.Parse("127.0.0.1");
-            ushort port = 21370;
-            Server server = new(address, port);
+        static void Main(string[] args) {
+
+            Config.Config config = new();
+
+            Server server = new(config.ServerConfig);
             server.Start();
 
 

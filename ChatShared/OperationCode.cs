@@ -1,19 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
-namespace ChatClient
-{
-    public enum OperationCode : byte
-    {
+namespace ChatClient {
+    public enum OperationCode : byte {
+        InvalidOperation = 0,
+
         LogIn = 1,
-        LogOut = 2,
-        Register = 3,
+        LogInSuccess = 2,
+        LogInFail = 3,
 
-        SimpleTextMessage = 11,
+        LogOut = 4,
+        LogOutSuccess = 5,
+        LogOutFail = 6,
+
+        Register = 7,
+        RegisterSuccess = 8,
+        RegisterFail = 9,
 
 
+
+        SimpleTextMessage = 255
     }
 }

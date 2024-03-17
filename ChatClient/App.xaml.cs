@@ -1,21 +1,18 @@
-﻿using ChatClient.Config;
-using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using ChatClient.Network;
+
 
 namespace ChatClient
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-
-
-    public partial class App : Application
-    {
-        App()
-        {
+    public partial class App : Application {
+        public static Client Client { get; private set; }
+        App() {
             InitializeComponent();
 
+            Client = new Client();
             Client.Connect();
         }
 
