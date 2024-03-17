@@ -1,6 +1,6 @@
 ﻿using ChatClient;
 using ChatShared.DataModels;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 
 namespace ChatServer.Network {
@@ -34,7 +34,7 @@ namespace ChatServer.Network {
             }
 
             private async void LogIn(string message) {
-                LoginData? data = JsonConvert.DeserializeObject<LoginData>(message);
+                LoginData? data = JsonSerializer.Deserialize<LoginData>(message);
                 if (data == null) {
                     string errorMsg = "We couldn't log you in with what you have entered.";
                     await _client.Send(OperationCode.LogInFail, errorMsg);
@@ -44,7 +44,7 @@ namespace ChatServer.Network {
 
                 ClientData? clientData = _database.TryLogIn(data);
                 if (clientData != null) {
-                    string json = JsonConvert.SerializeObject(clientData);
+                    string json = JsonSerializer.Serialize(clientData);
                     await _client.Send(OperationCode.LogInSuccess, json);
                     Logger.Info($"Succesfully logged in with email \"{data.Email}\".");
                 }
@@ -61,7 +61,7 @@ namespace ChatServer.Network {
 
 
             private void Register(string message) {
-                RegisterData? data = JsonConvert.DeserializeObject<RegisterData>(message);
+                RegisterData? data = JsonSerializer.Deserialize<RegisterData>(message);
                 if (data == null) {
                     Logger.Info($"Failed to register user, data was NULL.");
                     return;

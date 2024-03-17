@@ -1,6 +1,4 @@
 ﻿using ChatClient;
-using ChatShared.DataModels;
-using Newtonsoft.Json;
 using System.Net.Sockets;
 using System.Text;
 
