@@ -68,7 +68,7 @@
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="60"/>
-            <RowDefinition Height="10"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,0">
@@ -76,7 +76,8 @@
                 <TextBlock Text="E-mail" FontSize="16" Foreground="#EEEEEE"/>
                 <TextBlock x:Name="EmailPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Register_EmailTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox x:Name="Register_EmailTextBox" Text="{Binding Email}"
+                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="30,0">
@@ -84,7 +85,8 @@
                 <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
                 <TextBlock x:Name="PasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Register_PasswordTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox x:Name="Register_PasswordTextBox" Text="{Binding Password}"
+                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="30,0">
@@ -92,7 +94,8 @@
                 <TextBlock Text="Confirm password" FontSize="16" Foreground="#EEEEEE"/>
                 <TextBlock x:Name="ConfirmPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Register_ConfirmPasswordTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox x:Name="Register_ConfirmPasswordTextBox" Text="{Binding ConfirmPassword}"
+                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="30,0">
@@ -100,22 +103,23 @@
                 <TextBlock Text="Nickname" FontSize="16" Foreground="#EEEEEE"/>
                 <TextBlock x:Name="NicknameMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Register_NicknameTextBox" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox x:Name="Register_NicknameTextBox" Text="{Binding Nickname}"
+                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="45,0,45,0" VerticalAlignment="Bottom">
-            <TextBlock x:Name="RegisterMessageTextBox" Text="Please, fill all fields marked with '*'."
+            <TextBlock x:Name="RegisterMessageTextBox" Text="{Binding RegisterFeedback}"
                        Margin="0,0,0,15"  FontSize="14" Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
         </StackPanel>
 
         
 
-        <Button x:Name="RegisterButton" Grid.Column="0" Grid.Row="6" FontSize="16" Margin="20,10,10,10" Content="Register"
-                Click="RegisterButton_Click" Style="{StaticResource RoundButtonStyle}"/>
+        <Button x:Name="RegisterButton" Grid.Column="0" Grid.Row="6" FontSize="16" Margin="30,10,15,10" Content="Register"
+                Command="{Binding RegisterCommand}" Style="{StaticResource RoundButtonStyle}"/>
 
-        <Button x:Name="BackButton" Grid.Column="1" Grid.Row="6" FontSize="16" Margin="10,10,20,10" Content="Back"
-                Click="BackButton_Click" Style="{StaticResource RoundButtonStyle}"/>
+        <Button x:Name="BackButton" Grid.Column="1" Grid.Row="6" FontSize="16" Margin="15,10,30,10" Content="Back"
+                Command="{Binding NavigateToLoginPageCommand}" Style="{StaticResource RoundButtonStyle}"/>
 
 
 
