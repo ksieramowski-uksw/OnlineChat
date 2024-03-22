@@ -22,7 +22,9 @@ namespace ChatClient.Commands {
                     !string.IsNullOrWhiteSpace(password) &&
                     !string.IsNullOrWhiteSpace(confirmPassword) &&
                     !string.IsNullOrWhiteSpace(nickname)) {
-                    App.Client.Register(email, password, confirmPassword, nickname);
+                    if (App.Current is App app) {
+                        app.Client.Register(email, password, confirmPassword, nickname);
+                    }
                 }
                 else {
                     string feedback = "Please, fill all fields marked with '*'.";

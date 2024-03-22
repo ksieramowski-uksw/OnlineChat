@@ -8,6 +8,7 @@ namespace ChatServer {
             Info = 1,
             Warning = 2,
             Error = 3,
+            Message = 4,
         }
 
         private static void SaveMessageToFile(string message, Severity severity) {
@@ -26,6 +27,9 @@ namespace ChatServer {
                 case Severity.Error: {
                     builder.Append("ERROR");
                 } break;
+                case Severity.Message: {
+                    builder.Append("MESSAGE");
+                } break;
             }
             builder.Append(']');
             builder.Append($"[{DateTime.Now}] {message}\n");
@@ -34,8 +38,7 @@ namespace ChatServer {
             File.AppendAllText(_logFilePath, builder.ToString());
         }
 
-        private static void PrintMessage(string message, Severity severity)
-        {
+        private static void PrintMessage(string message, Severity severity) {
             Console.Write($"[{DateTime.Now}][");
             switch (severity) {
                 case Severity.None: {
@@ -62,27 +65,36 @@ namespace ChatServer {
                     Console.ForegroundColor = ConsoleColor.Gray;
                     Console.Write("]  ");
                 } break;
+                case Severity.Message: {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.Write("MESSAGE");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Write("]");
+                } break;
             }
             Console.Write($" {message}\n");
         }
 
-        public static void Info(string message)
-        {
+        public static void Info(string message) {
             const Severity severity = Severity.Info;
             SaveMessageToFile(message, severity);
             PrintMessage(message, severity);
         }
 
-        public static void Warning(string message)
-        {
+        public static void Warning(string message) {
             const Severity severity = Severity.Warning;
             SaveMessageToFile(message, severity);
             PrintMessage(message, severity);
         }
 
-        public static void Error(string message)
-        {
+        public static void Error(string message) {
             const Severity severity = Severity.Error;
+            SaveMessageToFile(message, severity);
+            PrintMessage(message, severity);
+        }
+
+        public static void Message(string message) {
+            const Severity severity = Severity.Message;
             SaveMessageToFile(message, severity);
             PrintMessage(message, severity);
         }

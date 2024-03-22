@@ -51,7 +51,7 @@ namespace ChatServer.Network {
                 else {
                     string errorMsg = "We couldn't log you in with what you have entered.";
                     await _client.Send(OperationCode.LogInFail, errorMsg);
-                    Logger.Error($"Failed to log in with email \"{data.Email}\".");
+                    Logger.Warning($"Failed to log in with email \"{data.Email}\".");
                 }
             }
 
@@ -71,7 +71,7 @@ namespace ChatServer.Network {
                     Logger.Info($"Succesfully registered new user: {data.Nickname}.");
                 }
                 else {
-                    Logger.Error($"Failed to register user: {data.Nickname}.");
+                    Logger.Warning($"Failed to register user: {data.Nickname}.");
                 }
             }
 

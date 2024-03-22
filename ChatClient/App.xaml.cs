@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Controls;
 using ChatClient.MVVM.View;
 using ChatClient.MVVM.ViewModel;
@@ -12,45 +13,38 @@ namespace ChatClient
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application {
-        public static Client Client { get; private set; }
-        private readonly NavigationStore _navigationStore;
+        public readonly Client Client;
+        public readonly NavigationStore NavigationStore;
 
         App() {
             Client = new Client();
 
+            LoginWindow loginWindow = new();
+            LoginPage loginPage = new();
+            RegisterPage registerPage = new();
+            MainWindow mainWindow = new();
 
-            
+            NavigationStore = new() {
+                LoginWindow = loginWindow,
+                LoginPage = loginPage,
+                RegisterPage = registerPage,
+                MainWindow = mainWindow
+            };
 
-            //LoginPage loginPage = new();
-            //RegisterPage registerPage = new();
-            //
-            //Frame frame = new();
-            //LoginWindow loginWindow = new();
-            //loginWindow.DataContext = new LoginPageViewModel(loginWindow, loginPage, registerPage);
-            //
-            //MainWindow = loginWindow;
-            //loginWindow.MainFrame = frame;
-            //frame.Navigate(loginPage);
-            //loginWindow.Show();
+            LoginPageViewModel loginPageViewModel = new(NavigationStore);
+            loginPage.DataContext = loginPageViewModel;
+            RegisterPageViewModel registerPageViewModel = new(NavigationStore);
+            registerPage.DataContext = registerPageViewModel;
+            loginWindow.MainFrame.Content = loginPage;
+            MainWindow = loginWindow;
+
+            NavigationStore.LoginPageViewModel = loginPageViewModel;
+            NavigationStore.RegisterPageViewModel = registerPageViewModel;
         }
 
         protected override void OnStartup(StartupEventArgs e) {
             Client.Connect();
-
-
-            LoginWindow loginWindow = new();
-            LoginPage loginPage = new();
-            RegisterPage registerPage = new();
-            loginPage.DataContext = new LoginPageViewModel(loginWindow, registerPage);
-            registerPage.DataContext = new RegisterPageViewModel(loginWindow, loginPage);
-            //registerPage.DataContext = new RegisterPageViewM
-
-            loginWindow.MainFrame.Content = loginPage;
-            MainWindow = loginWindow;
             MainWindow.Show();
-
-
-
             base.OnStartup(e);
         }
 

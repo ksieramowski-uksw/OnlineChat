@@ -31,7 +31,6 @@ namespace ChatServer.Network {
 
             Database = new Database();
             Database.Connect();
-            Database.InitTables();
         }
 
         public void Start() {

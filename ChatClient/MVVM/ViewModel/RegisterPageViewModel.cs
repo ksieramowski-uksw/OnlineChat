@@ -1,5 +1,6 @@
 ﻿using ChatClient.Commands;
 using ChatClient.MVVM.View;
+using ChatClient.Stores;
 using System.Windows;
 using System.Windows.Input;
 
@@ -7,8 +8,7 @@ using System.Windows.Input;
 namespace ChatClient.MVVM.ViewModel {
     public class RegisterPageViewModel : ViewModelBase {
 
-        public readonly Window LoginWindow;
-        public readonly LoginPage LoginPage;
+        public readonly NavigationStore NavigationStore;
 
         private string? _email;
         public string? Email {
@@ -69,9 +69,8 @@ namespace ChatClient.MVVM.ViewModel {
         public ICommand NavigateToLoginPageCommand { get; }
 
 
-        public RegisterPageViewModel(Window loginWindow, LoginPage loginPage) {
-            LoginWindow = loginWindow;
-            LoginPage = loginPage;
+        public RegisterPageViewModel(NavigationStore navigationStore) {
+            NavigationStore = navigationStore;
 
             RegisterCommand = new RegisterCommand(this);
             NavigateToLoginPageCommand = new NavigateToLoginPageCommand(this);

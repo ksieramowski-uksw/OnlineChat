@@ -11,7 +11,9 @@ namespace ChatClient.Commands {
             string? email = _loginPageViewModel.Email;
             string? password = _loginPageViewModel.Password;
             if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password)) {
-                App.Client.LogIn(email, password);
+                if (App.Current is App app) {
+                    app.Client.LogIn(email, password);
+                }
             }
             else {
                 _loginPageViewModel.LoginFeedback = "Please, fill all fields marked with '*'.\"";

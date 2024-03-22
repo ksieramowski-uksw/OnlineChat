@@ -7,7 +7,9 @@ namespace ChatClient.Commands {
         private readonly RegisterPageViewModel _viewModel;
 
         public override void Execute(object? parameter) {
-            (_viewModel.LoginWindow as LoginWindow).MainFrame.Navigate(_viewModel.LoginPage);
+            if (_viewModel.NavigationStore.LoginWindow is LoginWindow loginWindow) {
+                loginWindow.MainFrame.Navigate(_viewModel.NavigationStore.LoginPage);
+            }
         }
 
         public NavigateToLoginPageCommand(RegisterPageViewModel viewModel) {

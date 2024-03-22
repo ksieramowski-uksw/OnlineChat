@@ -8,10 +8,20 @@ using System.Threading.Tasks;
 
 namespace ChatClient.Stores {
     public class NavigationStore {
-        public LoginWindow LoginWindow { get; }
+        public LoginWindow? LoginWindow { get; set; }
+
+        public LoginPage? LoginPage { get; set; }
+        public LoginPageViewModel? LoginPageViewModel { get; set; }
+
+        public RegisterPage? RegisterPage { get; set; }
+        public RegisterPageViewModel? RegisterPageViewModel { get; set; }
+
+        public MainWindow? MainWindow { get; set; }
 
 
-        NavigationStore() { }
+        public NavigationStore() {
+            
+        }
 
 
     }

@@ -19,49 +19,98 @@ namespace ChatServer {
 
         public void Connect() {
             _connection.Open();
+            InitTables();
         }
 
-        public void InitTables() {
+        public bool InitTables() {
+            Logger.Info("Database: Initialization started.");
+            int checkSum = 0;
+
+            const string userTableName = "Users";
             using var createUserTable = _connection.CreateCommand();
-            createUserTable.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Users (
-                    ID INTEGER AUTO_INCREMENT PRIMARY KEY NOT NULL,
+            createUserTable.CommandText = $@"
+                CREATE TABLE IF NOT EXISTS {userTableName} (
+                    ID INTEGER PRIMARY KEY,
                     Email TEXT NOT NULL,
                     Password TEXT NOT NULL,
                     ConfirmPassword TEXT NOT NULL,
                     Nickname TEXT NOT NULL
                 );";
-            createUserTable.ExecuteNonQuery();
+            try {
+                createUserTable.ExecuteNonQuery();
+                //if (!VerifyTableCreation(userTableName)) {
+                //    Logger.Error($"Failed to initialize table: \"{userTableName}\"");
+                //    checkSum += 1;
+                //}
+            }
+            catch (Exception ex) {
+                Logger.Error(ex.Message);
+                Logger.Error($"Failed to initialize table: \"{userTableName}\"");
+                checkSum += 1;
+            }
+
+            if (checkSum == 0) {
+                Logger.Info("Database: Initialization successful.");
+                return true;
+            }
+            return false;
         }
 
-        public bool CanRegisterNewUser(RegisterData registerData) {
+        //public bool VerifyTableCreation(string tableName) {
+        //    using var verifyCommand = _connection.CreateCommand();
+        //    verifyCommand.CommandText = $@"
+        //        SELECT name
+        //        FROM sqlite_master
+        //        WHERE type='table' AND name='{tableName}'
+        //        ";
+        //    try {
+        //        var reader = verifyCommand.ExecuteReader();
+        //        return reader.HasRows;
+        //    }
+        //    catch (Exception ex) {
+        //        Logger.Error(ex.Message);
+        //    }
+        //    return false;
+        //}
+
+        public bool CanRegisterNewUser(RegisterData data) {
             using var command = _connection.CreateCommand();
             command.CommandText = @$"
                 SELECT ID
                 FROM Users
-                WHERE Users.Email LIKE '{registerData.Email}'
-                    OR Users.Nickname LIKE '{registerData.Nickname}'
+                WHERE Users.Email LIKE '{data.Email}' OR Users.Nickname LIKE '{data.Nickname}'
                 ;";
-            var reader = command.ExecuteReader();
-            return !reader.HasRows;
+            try {
+                var reader = command.ExecuteReader();
+                if (reader.HasRows) {
+                    Logger.Warning($"Register: user with email \"{data.Email}\" already exists.");
+                }
+                return !reader.HasRows;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex.Message);
+            }
+            return false;
         }
 
         public bool TryRegisterNewUser(RegisterData data) {
-            bool canRegister = CanRegisterNewUser(data);
-            if (!canRegister) {
-                Logger.Error("REGSITER - CAN'T REGISTER");
-                return false;
-            }
+            if (!CanRegisterNewUser(data)) { return false; }
+            Logger.Info($"Registering new user with email \"{data.Email}\"...");
             using var command = _connection.CreateCommand();
             command.CommandText = @$"
-                INSERT INTO Users (
-                    Email, Password, ConfirmPassword, Nickname
-                )
+                INSERT INTO Users (Email, Password, ConfirmPassword, Nickname)
                 VALUES (
                     '{data.Email}', '{data.Password}',
                     '{data.ConfirmPassword}', '{data.Nickname}'
                 );";
-            command.ExecuteNonQuery();
+            try {
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex) {
+                Logger.Error(ex.Message);
+                return false;
+            }
+            Logger.Info($"Registered new user with email \"{data.Email}\".");
             return true;
         }
 
@@ -73,11 +122,21 @@ namespace ChatServer {
                 WHERE Users.Email LIKE '{data.Email}'
                     AND Users.Password LIKE '{data.Password}'
                 ;";
-            var reader = command.ExecuteReader();
-            if (!reader.HasRows) { return null; }
-
-            reader.Read();
-            return new ClientData(ulong.Parse(reader.GetString(0)), reader.GetString(1));
+            try {
+                var reader = command.ExecuteReader();
+                if (!reader.HasRows) {
+                    Logger.Warning($"No matching data found for loggin in with email \"{data.Email}\"");
+                    return null;
+                }
+                if (reader.Read()) {
+                    Logger.Info($"Found matching login data for email \"{data.Email}\"");
+                    return new ClientData(ulong.Parse(reader.GetString(0)), reader.GetString(1));
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex.Message);
+            }
+            return null;
         }
 
     }
