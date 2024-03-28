@@ -8,52 +8,6 @@
       d:DesignHeight="500" d:DesignWidth="240"
       Title="LoginPage">
 
-    <Page.Resources>
-        <Style x:Key="RoundButtonStyle" TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="#4060F0"/>
-            <Setter Property="Foreground" Value="#EEEEEE"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#3050C0"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="False">
-                    <Setter Property="Background" Value="#4060F0"/>
-                </Trigger>
-            </Style.Triggers>
-            <Style.Resources>
-                <Style TargetType="{x:Type Border}">
-                    <Setter Property="CornerRadius" Value="5"/>
-                    <Setter Property="BorderThickness" Value="0.5"/>
-                    <Setter Property="BorderBrush" Value="#000000"/>
-                </Style>
-            </Style.Resources>
-        </Style>
-
-
-        <Style x:Key="RoundTextBoxStyle" TargetType="{x:Type TextBox}">
-            <Setter Property="Background" Value="#282828"/>
-            <Setter Property="Foreground" Value="#EEEEEE"/>
-            <Style.Resources>
-                <Style TargetType="Border">
-                    <Setter Property="CornerRadius" Value="5"/>
-                    <Setter Property="BorderThickness" Value="0.5"/>
-                    <Setter Property="BorderBrush" Value="#000000"/>
-                </Style>
-            </Style.Resources>
-        </Style>
-        
-        
-    </Page.Resources>
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -70,8 +24,12 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <Image Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="20,20,0,20"
-               Source="https://cdn.discordapp.com/attachments/588464174883930132/1216906173370863736/942840997837168660.png?ex=66021730&amp;is=65efa230&amp;hm=22aace4fd1dcc46cfcbf7b3a85bca664ac07183c6b52a378c2c7550ae79708ed&amp;"/>
+
+
+        <Image Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,10"
+               Source="/Resources/Images/942840997837168660.png"/>
+
+        <!--Source="https://cdn.discordapp.com/attachments/588464174883930132/1216906173370863736/942840997837168660.png?ex=66021730&amp;is=65efa230&amp;hm=22aace4fd1dcc46cfcbf7b3a85bca664ac07183c6b52a378c2c7550ae79708ed&amp;"-->
                <!--="https://cdn.discordapp.com/attachments/588464174883930132/1216905782684028928/1192945423690768415.png?ex=660216d3&amp;is=65efa1d3&amp;hm=035c9e8d94a490b7de4aebca89945e5bc4c3eb1ee9e502e148ecfcf2abf93701&amp;"-->
         
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="30,0">
@@ -93,7 +51,7 @@
         </StackPanel>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="45,0,45,0" VerticalAlignment="Bottom">
-            <TextBlock x:Name="LoginMessageTextBox" Text="{Binding LoginFeedback}"
+            <TextBlock x:Name="LoginMessageTextBox" Text="{Binding Feedback}"
                        Margin="0,0,0,15"  FontSize="14" Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
         </StackPanel>
 
@@ -101,11 +59,11 @@
         <Button x:Name="LoginButton" Grid.Column="0" Grid.Row="5"
                 Command="{Binding LogInCommand}"
                 Style="{DynamicResource RoundButtonStyle}"
-                Margin="30,10,15,10" Content="Log in" FontSize="16" />
+                Margin="30,10,15,10" Content="Log in" FontSize="16"/>
 
         <Button x:Name="RegisterButton" Grid.Column="1" Grid.Row="5"
-                Command="{Binding NavigateToRegistrationCommand}"
+                Command="{Binding NavigateToRegisterPageCommand}"
                 Style="{DynamicResource RoundButtonStyle}"
-                Margin="15,10,30,10" Content="Register" FontSize="16" />
+                Margin="15,10,30,10" Content="Register" FontSize="16"/>
     </Grid>
 </Page>

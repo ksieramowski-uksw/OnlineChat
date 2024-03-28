@@ -1,6 +1,5 @@
 ﻿using ChatShared.DataModels;
 using Microsoft.Data.Sqlite;
-using System.Text;
 
 
 namespace ChatServer {
@@ -38,10 +37,6 @@ namespace ChatServer {
                 );";
             try {
                 createUserTable.ExecuteNonQuery();
-                //if (!VerifyTableCreation(userTableName)) {
-                //    Logger.Error($"Failed to initialize table: \"{userTableName}\"");
-                //    checkSum += 1;
-                //}
             }
             catch (Exception ex) {
                 Logger.Error(ex.Message);
@@ -55,23 +50,6 @@ namespace ChatServer {
             }
             return false;
         }
-
-        //public bool VerifyTableCreation(string tableName) {
-        //    using var verifyCommand = _connection.CreateCommand();
-        //    verifyCommand.CommandText = $@"
-        //        SELECT name
-        //        FROM sqlite_master
-        //        WHERE type='table' AND name='{tableName}'
-        //        ";
-        //    try {
-        //        var reader = verifyCommand.ExecuteReader();
-        //        return reader.HasRows;
-        //    }
-        //    catch (Exception ex) {
-        //        Logger.Error(ex.Message);
-        //    }
-        //    return false;
-        //}
 
         public bool CanRegisterNewUser(RegisterData data) {
             using var command = _connection.CreateCommand();
@@ -95,7 +73,6 @@ namespace ChatServer {
 
         public bool TryRegisterNewUser(RegisterData data) {
             if (!CanRegisterNewUser(data)) { return false; }
-            Logger.Info($"Registering new user with email \"{data.Email}\"...");
             using var command = _connection.CreateCommand();
             command.CommandText = @$"
                 INSERT INTO Users (Email, Password, ConfirmPassword, Nickname)
@@ -110,14 +87,13 @@ namespace ChatServer {
                 Logger.Error(ex.Message);
                 return false;
             }
-            Logger.Info($"Registered new user with email \"{data.Email}\".");
             return true;
         }
 
         public ClientData? TryLogIn(LoginData data) {
             using var command = _connection.CreateCommand();
             command.CommandText = @$"
-                SELECT Id, Nickname
+                SELECT Id, Nickname, Email
                 FROM Users
                 WHERE Users.Email LIKE '{data.Email}'
                     AND Users.Password LIKE '{data.Password}'
@@ -130,7 +106,7 @@ namespace ChatServer {
                 }
                 if (reader.Read()) {
                     Logger.Info($"Found matching login data for email \"{data.Email}\"");
-                    return new ClientData(ulong.Parse(reader.GetString(0)), reader.GetString(1));
+                    return new ClientData(ulong.Parse(reader.GetString(0)), reader.GetString(1), reader.GetString(2));
                 }
             }
             catch (Exception ex) {

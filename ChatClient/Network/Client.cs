@@ -1,4 +1,5 @@
-﻿using ChatShared.DataModels;
+﻿using ChatClient.MVVM.Model;
+using ChatShared.DataModels;
 using System.Text.Json;
 
 
@@ -7,6 +8,8 @@ namespace ChatClient.Network {
         public readonly Config.Config Config;
 
         public readonly ServerConnection ServerConnection;
+
+        public User? User { get; set; }
 
         public Client() {
             Config = new();

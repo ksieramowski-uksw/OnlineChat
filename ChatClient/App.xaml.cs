@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
+using System.Windows.Navigation;
 using ChatClient.MVVM.View;
 using ChatClient.MVVM.ViewModel;
 using ChatClient.Network;
 using ChatClient.Stores;
 
 
-namespace ChatClient
-{
+namespace ChatClient {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -16,35 +17,31 @@ namespace ChatClient
         public readonly Client Client;
         public readonly NavigationStore NavigationStore;
 
+        public static new App Current {
+            get {
+                if (Application.Current is App app) {
+                    return app;
+                }
+                else {
+                    throw new Exception("Current App in null.");
+                }
+            }
+        }
+
         App() {
             Client = new Client();
 
-            LoginWindow loginWindow = new();
-            LoginPage loginPage = new();
-            RegisterPage registerPage = new();
-            MainWindow mainWindow = new();
-
-            NavigationStore = new() {
-                LoginWindow = loginWindow,
-                LoginPage = loginPage,
-                RegisterPage = registerPage,
-                MainWindow = mainWindow
-            };
-
-            LoginPageViewModel loginPageViewModel = new(NavigationStore);
-            loginPage.DataContext = loginPageViewModel;
-            RegisterPageViewModel registerPageViewModel = new(NavigationStore);
-            registerPage.DataContext = registerPageViewModel;
-            loginWindow.MainFrame.Content = loginPage;
-            MainWindow = loginWindow;
-
-            NavigationStore.LoginPageViewModel = loginPageViewModel;
-            NavigationStore.RegisterPageViewModel = registerPageViewModel;
+            NavigationStore = new NavigationStore();
+            NavigationStore.LoginWindow = new LoginWindow(NavigationStore);
+            if (NavigationStore.LoginWindow != null) {
+                MainWindow = NavigationStore.LoginWindow;
+            }
         }
 
         protected override void OnStartup(StartupEventArgs e) {
             Client.Connect();
             MainWindow.Show();
+
             base.OnStartup(e);
         }
 

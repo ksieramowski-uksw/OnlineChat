@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewmodel="clr-namespace:ChatClient.MVVM.ViewModel"
+        xmlns:local="clr-namespace:ChatClient"
         mc:Ignorable="d"
         Title="LoginWindow" Height="480" Width="480" 
         Background="#343434" ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="False">
@@ -13,50 +14,7 @@
         <WindowChrome CaptionHeight="0" ResizeBorderThickness="0"/>
     </WindowChrome.WindowChrome>
 
-    <Window.Resources>
-        <Style x:Key="CloseButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#FF0000"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="False">
-                    <Setter Property="Background" Value="Transparent"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
 
-        <Style x:Key="MinimizeButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#444444"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="False">
-                    <Setter Property="Background" Value="Transparent"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-    </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -79,7 +37,7 @@
             </Grid.RowDefinitions>
 
             <Button x:Name="MinimizeButton" Grid.Column="1" Grid.Row="0" Click="MinimizeButton_Click"
-                    Style="{StaticResource MinimizeButtonStyle}">
+                    Style="{DynamicResource MinimizeButtonStyle}">
                 <Grid Width ="{Binding ActualWidth,  ElementName=MinimizeButton}" 
                       Height="{Binding ActualHeight, ElementName=MinimizeButton}">
 
@@ -88,7 +46,7 @@
             </Button>
 
             <Button x:Name="CloseButton" Grid.Column="2" Grid.Row="0" Click="CloseButton_Click"
-                    Style="{StaticResource CloseButtonStyle}">
+                    Style="{DynamicResource CloseButtonStyle}">
                 <Grid Width ="{Binding ActualWidth,  ElementName=CloseButton}" 
                       Height="{Binding ActualHeight, ElementName=CloseButton}">
 

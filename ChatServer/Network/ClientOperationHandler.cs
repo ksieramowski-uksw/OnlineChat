@@ -46,7 +46,7 @@ namespace ChatServer.Network {
                 if (clientData != null) {
                     string json = JsonSerializer.Serialize(clientData);
                     await _client.Send(OperationCode.LogInSuccess, json);
-                    Logger.Info($"Succesfully logged in with email \"{data.Email}\".");
+                    Logger.Info($"Succesfully logged user \"{clientData.Nickname}#{clientData.Id}\" with email \"{data.Email}\".");
                 }
                 else {
                     string errorMsg = "We couldn't log you in with what you have entered.";
@@ -68,7 +68,7 @@ namespace ChatServer.Network {
                 }
 
                 if (_database.TryRegisterNewUser(data)) {
-                    Logger.Info($"Succesfully registered new user: {data.Nickname}.");
+                    Logger.Info($"Succesfully registered new user: \"{data.Nickname}\" with email \"{data.Email}\".");
                 }
                 else {
                     Logger.Warning($"Failed to register user: {data.Nickname}.");

@@ -16,11 +16,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Images\942840997837168660.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChatShared\ChatShared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="MVVM\Model\" />
+    <Resource Include="Resources\Images\942840997837168660.png" />
   </ItemGroup>
 
 </Project>

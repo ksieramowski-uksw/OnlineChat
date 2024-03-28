@@ -31,7 +31,7 @@ namespace ChatServer.Network {
                 ClientOperationHandler handler = new(this);
                 foreach (string msg in messages) {
                     if (string.IsNullOrWhiteSpace(msg) || msg.Length < 3) { continue; }
-                    Logger.Message($"Received message: \"{msg}\".");
+                    Logger.Message($"{{{opCode}}} | {msg}");
                     handler.HandleOperation(opCode, msg);
                 }
             }

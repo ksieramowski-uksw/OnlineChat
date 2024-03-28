@@ -1,0 +1,108 @@
+﻿<Page x:Class="ChatClient.MVVM.View.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ChatClient.MVVM.View"
+      mc:Ignorable="d" 
+      d:DesignHeight="1200" d:DesignWidth="1200"
+      Title="MainPage">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="64"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="64"/>
+        </Grid.RowDefinitions>
+
+        <!-- GUILD LIST -->
+        <Grid Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Background="#222222" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="64"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="64"/>
+            </Grid.RowDefinitions>
+
+            <!-- FRIENDS BUTTON -->
+            <Button Grid.Column="0" Grid.Row="0"
+                    Command="{Binding FriendListCommand}"
+                    Style="{DynamicResource DefaultButtonStyle}">
+            </Button>
+
+            <!-- TOP SEPARATOR -->
+            <Grid Grid.Column="0" Grid.Row="1">
+                <Rectangle Fill="#EEEEEE" Width="36" Height="0.5"/>
+            </Grid>
+            
+            
+            <!-- TODO - LIST OF GUILDS HERE -->
+
+            
+            <!-- BOTTOM SEPARATOR -->
+            <Grid Grid.Column="0" Grid.Row="3">
+                <Rectangle Fill="#EEEEEE" Width="36" Height="0.5"/>
+            </Grid>
+
+            <!-- CREATE OR JOIN GUILD BUTTON -->
+            <Button Grid.Column="0" Grid.Row="4"
+                    Command="{Binding AddGuildCommand}"
+                    Style="{DynamicResource DefaultButtonStyle}">
+                <Canvas>
+                    <Ellipse Width="56" Height="56" Fill="#343434"
+                    Canvas.Left="-28" Canvas.Top="-28"/>
+                    <Rectangle Width="24" Height="2" Fill="#44AA44"
+                           Canvas.Left="-12" Canvas.Top="-1"/>
+                    <Rectangle Width="2" Height="24" Fill="#44AA44"
+                           Canvas.Left="-1" Canvas.Top="-12"/>
+                </Canvas>
+            </Button>
+        </Grid>
+
+        <!-- CHANNEL LIST -->
+        <Frame x:Name="ChannelListFrame" Grid.Column="1" Grid.Row="0"
+               NavigationUIVisibility="Hidden"/>
+
+        <!-- USER GRID -->
+        <Grid x:Name="UserGrid" Grid.Column="1" Grid.Row="1" Background="#282828">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="64"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="64"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Image x:Name="UserProfilePictureImage" Grid.Column="0" Grid.Row="0"
+                   Source="https://cdn.discordapp.com/attachments/588464174883930132/1216906173370863736/942840997837168660.png?ex=66021730&amp;is=65efa230&amp;hm=22aace4fd1dcc46cfcbf7b3a85bca664ac07183c6b52a378c2c7550ae79708ed&amp;"/>
+
+            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Margin="4">
+                <TextBlock Text="Nickname" Foreground="#EEEEEE" FontSize="22"/>
+                <TextBlock Text="Status" Foreground="#EEEEEE" FontSize="18"/>
+            </StackPanel>
+
+            <Button x:Name="UserSettingsButton" Grid.Column="2" Grid.Row="0"
+                    Style="{DynamicResource DefaultButtonStyle}"/>
+        </Grid>
+
+        <!-- CHANNEL FRAME -->
+        <Frame x:Name="ChannelFrame" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
+               NavigationUIVisibility="Hidden"/>
+
+        <!-- MASK + POPUP -->
+        <Grid x:Name="MainPageMaskGrid" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="2"
+              Background="#50000000" MouseUp="Grid_MouseUp" Visibility="Hidden">
+            <Frame x:Name="MainPagePopupFrame"/>
+        </Grid>
+
+    </Grid>
+</Page>

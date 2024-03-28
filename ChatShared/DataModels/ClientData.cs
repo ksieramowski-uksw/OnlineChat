@@ -4,10 +4,12 @@ namespace ChatShared.DataModels {
     public class ClientData {
         public ulong Id { get; set; }
         public string Nickname { get; set; }
+        public string Email { get; set; }
 
-        public ClientData(ulong id, string nickname) {
+        public ClientData(ulong id, string nickname, string email) {
             Id = id;
             Nickname = nickname;
+            Email = email;
         }
     }
 }
