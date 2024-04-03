@@ -25,34 +25,32 @@
         </Grid.RowDefinitions>
 
 
-
+        <!-- LOGO -->
         <Image Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,10"
                Source="/Resources/Images/942840997837168660.png"/>
 
-        <!--Source="https://cdn.discordapp.com/attachments/588464174883930132/1216906173370863736/942840997837168660.png?ex=66021730&amp;is=65efa230&amp;hm=22aace4fd1dcc46cfcbf7b3a85bca664ac07183c6b52a378c2c7550ae79708ed&amp;"-->
-               <!--="https://cdn.discordapp.com/attachments/588464174883930132/1216905782684028928/1192945423690768415.png?ex=660216d3&amp;is=65efa1d3&amp;hm=035c9e8d94a490b7de4aebca89945e5bc4c3eb1ee9e502e148ecfcf2abf93701&amp;"-->
-        
+        <!-- EMAIL INPUT FIELD -->
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="30,0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="E-mail" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="LoginEmailMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Login_EmailTextBox" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox Text="{Binding Email}" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
+        <!-- PASSWORD INPUT FIELD -->
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="30,0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="LoginPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox x:Name="Login_PasswordTextBox" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <TextBox Text="{Binding Password}" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
+        <!-- LOGIN FEEDBACK -->
         <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="45,0,45,0" VerticalAlignment="Bottom">
-            <TextBlock x:Name="LoginMessageTextBox" Text="{Binding Feedback}"
-                       Margin="0,0,0,15"  FontSize="14" Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
+            <TextBlock Text="{Binding Feedback}" Margin="0,0,0,15" FontSize="14"
+                       Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
         </StackPanel>
 
 

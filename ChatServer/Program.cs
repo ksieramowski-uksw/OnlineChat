@@ -3,6 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using ChatServer.Config;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
+using System.Collections.ObjectModel;
 
 
 namespace ChatServer {
@@ -10,7 +12,12 @@ namespace ChatServer {
         //static List<Client> users;
         //static Socket listener;
         //
+
+
+
         static void Main(string[] args) {
+
+
 
             Config.Config config = new();
 

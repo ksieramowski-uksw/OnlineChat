@@ -15,7 +15,8 @@ namespace ChatClient {
     /// </summary>
     public partial class App : Application {
         public readonly Client Client;
-        public readonly NavigationStore NavigationStore;
+        public NavigationStore NavigationStore { get; }
+        public List<byte[]> ResourceStorage { get; }
 
         public static new App Current {
             get {
@@ -30,6 +31,7 @@ namespace ChatClient {
 
         App() {
             Client = new Client();
+            ResourceStorage = new List<byte[]>();
 
             NavigationStore = new NavigationStore();
             NavigationStore.LoginWindow = new LoginWindow(NavigationStore);

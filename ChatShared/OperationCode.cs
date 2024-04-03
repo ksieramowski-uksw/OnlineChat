@@ -2,43 +2,91 @@
 
 namespace ChatClient {
     public enum OperationCode : byte {
-        InvalidOperation = 0,
+        InvalidOperation,
 
-        LogIn = 1,
-        LogInSuccess = 2,
-        LogInFail = 3,
+        LogIn,
+        LogInSuccess,
+        LogInFail,
 
-        LogOut = 4,
-        LogOutSuccess = 5,
-        LogOutFail = 6,
+        LogOut,
+        LogOutSuccess,
+        LogOutFail,
 
-        Register = 7,
-        RegisterSuccess = 8,
-        RegisterFail = 9,
+        Register,
+        RegisterSuccess,
+        RegisterFail,
 
-        CreateGuild = 10,
-        JoinGuild = 11,
-        DeleteGuild = 12,
-        UpdateGuild = 13,
+        CreateGuild,
+        CreateGuildSuccess,
+        CreateGuildFail,
 
-        CreateCategory = 15,
-        DeleteCategory = 16,
-        UpdateCategory = 17,
-        MoveCategory = 18,
+        JoinGuild,
+        JoinGuildSuccess,
+        JoinGuildFail,
 
-        CreateChannel = 20,
-        DeleteChannel = 21,
-        UpdateChannel = 22,
-        MoveChannel = 23,
+        DeleteGuild,
+        DeleteGuildSuccess,
+        DeleteGuildFail,
 
-        AddFriend = 25,
-        RemoveFriend = 26,
+        UpdateGuild,
+        UpdateGuildSuccess,
+        UpdateGuildFail,
 
-        SendMessage = 30,
+        CreateCategory,
+        CreateCategorySuccess,
+        CreateCategoryFail,
+
+        DeleteCategory,
+        DeleteCategorySuccess,
+        DeleteCategoryFail,
+
+        UpdateCategory,
+        UpdateCategorySuccess,
+        UpdateCategoryFail,
+
+        MoveCategory,
+        MoveCategorySuccess,
+        MoveCategoryFail,
+
+        CreateTextChannel,
+        CreateTextChannelSuccess,
+        CreateTextChannelFail,
+
+        DeleteTextChannel,
+        DeleteTextChannelSuccess,
+        DeleteTextChannelFail,
+
+        UpdateTextChannel,
+        UpdateTextChannelSuccess,
+        UpdateTextChannelFail,
+
+        MoveTextChannel, // change channel's category
+        MoveTextChannelSuccess,
+        MoveTextChannelFail,
+
+        CompleteGuildInfo,
+        CompleteGuildInfoSuccess,
+        CompleteGuildInfoFail,
+
+        AddFriend,
+        AddFriendSuccess,
+        AddFriendFail,
+
+        RemoveFriend,
+        RemoveFriendSuccess,
+        RemoveFriendFail,
+
+        GetFriendList,
+        GetFriendListSuccess,
+        GetFriendListFail,
+
+        SendMessage,
+        SendMessageSuccess,
+        SendMessageFail,
 
 
 
 
-        SimpleTextMessage = 255
+        SimpleTextMessage
     }
 }

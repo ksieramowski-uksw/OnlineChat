@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ChatClient.MVVM.View {
+namespace ChatClient.MVVM.View.Main {
     /// <summary>
     /// Interaction logic for CreateOrJoinGuildPage.xaml
     /// </summary>
@@ -28,7 +28,7 @@ namespace ChatClient.MVVM.View {
             DataContext = ViewModel;
         }
 
-        private void Border_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void HandleMouseEvent(object sender, MouseButtonEventArgs e) {
             e.Handled = true;
         }
     }

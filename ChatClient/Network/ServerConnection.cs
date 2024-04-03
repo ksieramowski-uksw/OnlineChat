@@ -37,25 +37,28 @@ namespace ChatClient.Network {
             
         }
 
-        public async Task HandleConnection() {
+        public void HandleConnection() {
             while (true) {
-                const ushort _maxMessageLength = 2048;
-                var buffer = new byte[_maxMessageLength];
-                var received = await _socket.ReceiveAsync(buffer, SocketFlags.None);
-                OperationCode opCode = (OperationCode)buffer[0];
-                string? message = Encoding.UTF8.GetString(buffer, 1, received);
-                if (string.IsNullOrWhiteSpace(message)) {
-                    Logger.Warning("Recieved empty message.");
+                const int maxLength = 10 * 1024 * 1024; // 10 MB
+                var buffer = new byte[maxLength];
+                var length = _socket.Receive(buffer, SocketFlags.None);
+                if (length >= maxLength) {
+                    MessageBox.Show("buffer exceeded");
+                }
+                string? content = Encoding.UTF8.GetString(buffer, 0, length);
+                if (string.IsNullOrWhiteSpace(content)) {
                     continue;
                 }
 
-                string[] messages = message.Split("<|EOM|>");
+                string[] messages = content.Split("<|EOM|>");
 
                 ServerOperationHandler operationHandler = new(this);
                 foreach (string msg in messages) {
-                    if (string.IsNullOrWhiteSpace(msg) || msg.Length < 3) { continue; }
-                    Logger.Info($"Received message: \"{msg}\".");
-                    operationHandler.HandleOperation(opCode, msg);
+                    if (string.IsNullOrWhiteSpace(msg)) { continue; }
+                    OperationCode opCode = (OperationCode)msg[0];
+                    string message = msg[1..];
+                    if (opCode == 0 || string.IsNullOrWhiteSpace(message) || message[0] == 0) { continue; }
+                    operationHandler.HandleOperation(opCode, message);
                 }
 
             }

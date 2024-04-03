@@ -6,30 +6,32 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ChatServer.Config;
+using ChatServer.Database;
 
 
-namespace ChatServer.Network {
+namespace ChatServer.Network
+{
     public class Server {
         public ServerConfig Config { get; private set; }
 
-        private readonly List<ClientConnection> _clients;
+        public List<ClientConnection> Clients { get; set; }
 
         private readonly Socket _listener;
         private readonly IPEndPoint _ip;
         private readonly IPAddress _address;
 
-        public Database Database { get; private set; }
+        public DatabaseConnection Database { get; private set; }
 
         public Server(ServerConfig config) {
             Config = config;
 
-            _clients = new List<ClientConnection>();
+            Clients = new List<ClientConnection>();
 
             _address = IPAddress.Parse(config.IPv4);
             _ip = new IPEndPoint(_address, Config.Port);
             _listener = new Socket(_ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            Database = new Database();
+            Database = new DatabaseConnection();
             Database.Connect();
         }
 
@@ -56,7 +58,7 @@ namespace ChatServer.Network {
 
         private void HandleClientConnection(Socket socket) {
             ClientConnection client = new(this, socket, Config.MaxMessageLength);
-            _clients.Add(client);
+            Clients.Add(client);
             Task.Run(client.HandleConnection);
         }
     }

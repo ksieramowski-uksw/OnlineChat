@@ -2,7 +2,7 @@
 using System.Windows.Input;
 
 
-namespace ChatClient.MVVM.View {
+namespace ChatClient.MVVM.View.Main {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
