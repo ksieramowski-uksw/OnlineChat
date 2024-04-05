@@ -31,9 +31,9 @@ namespace ChatClient.Network {
             ServerConnection.Send(OperationCode.LogIn, json);
         }
 
-        public void Register(string email, string password, string confirmPassword, string nickname) {
+        public void Register(string email, string password, string confirmPassword, string nickname, string pronoun) {
             var profilePicture = ResourceHelper.GetImagePixels($"{Directory.GetCurrentDirectory()}\\Resources\\Images\\942840997837168660.png");
-            var registerData = new RegisterData(email, password, confirmPassword, nickname, profilePicture);
+            var registerData = new RegisterData(email, password, confirmPassword, nickname, pronoun, profilePicture);
             string json = JsonSerializer.Serialize(registerData);
             ServerConnection.Send(OperationCode.Register, json);
         }

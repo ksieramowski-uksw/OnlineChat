@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ChatClient.MVVM.View"
-      d:DesignHeight="500" d:DesignWidth="240"
+      d:DesignHeight="560" d:DesignWidth="240"
       mc:Ignorable="d" 
       
       Title="RegisterPage">
@@ -15,64 +15,76 @@
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="2*"/>
             <RowDefinition Height="60"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="E-mail" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="EmailPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="30,0"
+                      VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden">
+            <StackPanel>
+                <StackPanel Height="60">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="E-mail" FontSize="16" Foreground="#EEEEEE"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding Email}" Padding="5" FontSize="16"
+                             Style="{DynamicResource RoundTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Height="60">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding Password}" Padding="5" FontSize="16"
+                             Style="{DynamicResource RoundTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Height="60">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Confirm password" FontSize="16" Foreground="#EEEEEE"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding ConfirmPassword}" Padding="5" FontSize="16"
+                             Style="{DynamicResource RoundTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Height="60">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Nickname" FontSize="16" Foreground="#EEEEEE"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding Nickname}" Padding="5" FontSize="16"
+                             Style="{DynamicResource RoundTextBoxStyle}" />
+                </StackPanel>
+
+                <StackPanel Height="60">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Pronoun" FontSize="16" Foreground="#EEEEEE"/>
+                    </StackPanel>
+                    <TextBox Text="{Binding Pronoun}" Padding="5" FontSize="16"
+                             Style="{DynamicResource RoundTextBoxStyle}" />
+                </StackPanel>
             </StackPanel>
-            <TextBox x:Name="Register_EmailTextBox" Text="{Binding Email}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
-        </StackPanel>
-
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="30,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="PasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
-            </StackPanel>
-            <TextBox x:Name="Register_PasswordTextBox" Text="{Binding Password}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
-        </StackPanel>
-
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Margin="30,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Confirm password" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="ConfirmPasswordMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
-            </StackPanel>
-            <TextBox x:Name="Register_ConfirmPasswordTextBox" Text="{Binding ConfirmPassword}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
-        </StackPanel>
-
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Margin="30,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Nickname" FontSize="16" Foreground="#EEEEEE"/>
-                <TextBlock x:Name="NicknameMarkTextBox" Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
-            </StackPanel>
-            <TextBox x:Name="Register_NicknameTextBox" Text="{Binding Nickname}"
-                     Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
-        </StackPanel>
+        </ScrollViewer>
+        
+        
 
 
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="45,0,45,0" VerticalAlignment="Bottom">
-            <TextBlock x:Name="RegisterMessageTextBox" Text="{Binding Feedback}"
-                       Margin="0,0,0,15"  FontSize="14" Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Margin="45,0" VerticalAlignment="Bottom">
+            <TextBlock Text="{Binding Feedback}" Margin="0,0,0,15" FontSize="14"
+                       Foreground="#F09000" TextWrapping="Wrap" TextAlignment="Center"/>
         </StackPanel>
 
         
 
-        <Button x:Name="RegisterButton" Grid.Column="0" Grid.Row="6" FontSize="16" Margin="30,10,15,10" Content="Register"
+        <Button Grid.Column="0" Grid.Row="3" FontSize="16" Margin="30,10,15,10" Content="Sign up"
                 Command="{Binding RegisterCommand}" Style="{DynamicResource RoundButtonStyle}"/>
 
-        <Button x:Name="BackButton" Grid.Column="1" Grid.Row="6" FontSize="16" Margin="15,10,30,10" Content="Back"
+        <Button  Grid.Column="1" Grid.Row="3" FontSize="16" Margin="15,10,30,10" Content="Back"
                 Command="{Binding NavigateToLoginPageCommand}" Style="{DynamicResource RoundButtonStyle}"/>
 
 

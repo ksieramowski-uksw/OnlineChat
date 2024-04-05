@@ -23,6 +23,9 @@ namespace ChatClient.MVVM.ViewModel {
         private string _nickname;
 
         [ObservableProperty]
+        private string _pronoun;
+
+        [ObservableProperty]
         private string _feedback;
 
         public RegisterPageViewModel(NavigationStore navigationStore) {
@@ -31,6 +34,7 @@ namespace ChatClient.MVVM.ViewModel {
             Email = string.Empty;
             Password = string.Empty;
             Nickname = string.Empty;
+            Pronoun = string.Empty;
             ConfirmPassword = string.Empty;
             Feedback = "Enter your account details.";
         }
@@ -45,7 +49,7 @@ namespace ChatClient.MVVM.ViewModel {
                 !string.IsNullOrWhiteSpace(Password) &&
                 !string.IsNullOrWhiteSpace(ConfirmPassword) &&
                 !string.IsNullOrWhiteSpace(Nickname)) {
-                App.Current.Client.Register(Email, Password, ConfirmPassword, Nickname);
+                App.Current.Client.Register(Email, Password, ConfirmPassword, Nickname, Pronoun);
             }
             else {
                 Feedback = "Please, fill all fields marked with '*'.";

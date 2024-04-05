@@ -46,6 +46,7 @@ namespace ChatServer.Database {
                     Email TEXT NOT NULL,
                     Password TEXT NOT NULL,
                     Nickname TEXT NOT NULL,
+                    Pronoun TEXT NOT NULL,
                     CreationTime TEXT NOT NULL,
                     ProfilePicture BLOB NOT NULL,
                     Status INTEGER NOT NULL

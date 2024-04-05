@@ -70,11 +70,12 @@ namespace ChatServer.Database {
 
             using var command = Connection.CreateCommand();
             command.CommandText = @$"
-                INSERT INTO Users (Email, Password, Nickname, CreationTime, ProfilePicture, Status)
+                INSERT INTO Users (Email, Password, Nickname, Pronoun, CreationTime, ProfilePicture, Status)
                     VALUES (
                         '{data.Email}',
                         '{data.Password}',
                         '{data.Nickname}',
+                        '{data.Pronoun}',
                         '{creationTime}',
                         @ProfilePicture,
                         '{UserStatus.Offline}'
@@ -94,7 +95,7 @@ namespace ChatServer.Database {
 
         public DatabaseCommandResult TryLogIn(LoginData data, out User? userData) {
             var reader = ExecuteReader(@$"
-                SELECT Users.Id, Users.Nickname, Users.Email, Users.CreationTime, Users.ProfilePicture, Users.Status
+                SELECT Users.Id, Users.Nickname, Users.Email, Users.Pronoun, Users.CreationTime, Users.ProfilePicture, Users.Status
                 FROM Users
                 WHERE Users.Email LIKE '{data.Email}' AND Users.Password LIKE '{data.Password}'
                 ;");
@@ -106,11 +107,12 @@ namespace ChatServer.Database {
                 ulong id = reader.GetFieldValue<ulong>(0);
                 string nickname = reader.GetFieldValue<string>(1);
                 string email = reader.GetFieldValue<string>(2);
-                DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(3));
-                byte[] profilePicture = reader.GetFieldValue<byte[]>(4);
-                UserStatus status = reader.GetFieldValue<UserStatus>(5);
+                string pronoun = reader.GetFieldValue<string>(3);
+                DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(4));
+                byte[] profilePicture = reader.GetFieldValue<byte[]>(5);
+                UserStatus status = reader.GetFieldValue<UserStatus>(6);
 
-                userData = new User(id, nickname, email, creationTime, profilePicture, status);
+                userData = new User(id, nickname, email, pronoun, creationTime, profilePicture, status);
                 return DatabaseCommandResult.Success;
             }
             userData = null;
@@ -120,7 +122,7 @@ namespace ChatServer.Database {
         public DatabaseCommandResult GetFriends(ulong userId, out List<User>? friends) {
             SqliteCommand command = Connection.CreateCommand();
             command.CommandText = $@"
-                SELECT Users.Id, Users.Nickname, Users.CreationTime, Users.ProfilePicture, Users.Status
+                SELECT Users.Id, Users.Nickname, User.Pronoun, Users.CreationTime, Users.ProfilePicture, Users.Status
                 FROM Users INNER JOIN Friends ON Friends.UserId = Users.Id
                 ";
             var reader = command.ExecuteReader();
@@ -132,10 +134,11 @@ namespace ChatServer.Database {
             while (reader.Read()) {
                 ulong id = reader.GetFieldValue<ulong>(0);
                 string nickname = reader.GetFieldValue<string>(1);
-                DateTime creationTime = reader.GetFieldValue<DateTime>(2);
-                byte[] profilePicture = reader.GetFieldValue<byte[]>(3);
-                UserStatus status = reader.GetFieldValue<UserStatus>(4);
-                User friend = new(id, nickname, string.Empty, creationTime, profilePicture, status);
+                string pronoun = reader.GetFieldValue<string>(2);
+                DateTime creationTime = reader.GetFieldValue<DateTime>(3);
+                byte[] profilePicture = reader.GetFieldValue<byte[]>(4);
+                UserStatus status = reader.GetFieldValue<UserStatus>(5);
+                User friend = new(id, nickname, string.Empty, pronoun, creationTime, profilePicture, status);
                 friends.Add(friend);
             }
             return DatabaseCommandResult.Success;
@@ -391,5 +394,9 @@ namespace ChatServer.Database {
             return DatabaseCommandResult.Success;
         }
 
+
+        public  DatabaseCommandResult CreateRole(RoleData data) {
+
+        }
     }
 }

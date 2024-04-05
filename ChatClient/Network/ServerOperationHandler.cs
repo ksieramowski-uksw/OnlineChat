@@ -1,4 +1,5 @@
-﻿using ChatClient.MVVM.View.Main;
+﻿using ChatClient.MVVM.View;
+using ChatClient.MVVM.View.Main;
 using ChatClient.Stores;
 using ChatShared.Models;
 using System.Collections.ObjectModel;
@@ -85,8 +86,13 @@ namespace ChatClient.Network {
         }
 
         private void RegisterSuccess(string message) {
-            if (App.Current.NavigationStore.RegisterPage != null) {
-                App.Current.NavigationStore.RegisterPage.ViewModel.Feedback = message;
+            if (App.Current.NavigationStore.LoginPage != null) {
+                App.Current.NavigationStore.LoginPage.ViewModel.Feedback = message;
+                if (App.Current.NavigationStore.LoginWindow is LoginWindow loginWindow) {
+                    App.Current.Dispatcher.Invoke(() => {
+                        loginWindow.MainFrame.Navigate(App.Current.NavigationStore.LoginPage);
+                    });
+                }
             }
         }
 

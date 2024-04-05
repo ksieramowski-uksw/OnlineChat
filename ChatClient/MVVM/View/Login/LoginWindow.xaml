@@ -6,7 +6,7 @@
         xmlns:viewmodel="clr-namespace:ChatClient.MVVM.ViewModel"
         xmlns:local="clr-namespace:ChatClient"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="480" Width="480" 
+        Title="LoginWindow" Height="560" Width="440" 
         Background="#343434" ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="False">
 
 
