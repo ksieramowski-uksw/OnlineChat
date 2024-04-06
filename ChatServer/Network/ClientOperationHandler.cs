@@ -4,6 +4,8 @@ using System.Text.Json;
 using ChatServer.Database;
 using System.Collections.ObjectModel;
 using ChatShared.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using ChatShared.Models.Privileges;
 
 
 namespace ChatServer.Network
@@ -11,12 +13,10 @@ namespace ChatServer.Network
     public partial class ClientConnection {
         private class ClientOperationHandler {
             private readonly ClientConnection _client;
-            //private readonly Server _server;
             private readonly DatabaseConnection _database;
 
             public ClientOperationHandler(ClientConnection client) {
                 _client = client;
-                //_server = client._server;
                 _database = client._server.Database;
             }
 
@@ -40,11 +40,35 @@ namespace ChatServer.Network
                     case OperationCode.CreateTextChannel: {
                         CreateTextChannel(message);
                     } break;
-                    case OperationCode.CompleteGuildInfo: {
-                        CompleteGuildsInfo(message);
+                    case OperationCode.GetGuildsForUser: {
+                        GetGuildsForUser(message);
+                    } break;
+                    case OperationCode.GetCategoriesInGuild: {
+                        GetCategoriesInGuild(message);
+                    } break;
+                    case OperationCode.GetTextChannelsInCategory: {
+                        GetTextChannelsInCategory(message);
                     } break;
                     case OperationCode.SendMessage: {
                         SendMessage(message);
+                    } break;
+                    case OperationCode.GetGuildPrivilegeForUser: {
+                        GetGuildPrivilegesForUser(message);
+                    } break;
+                    case OperationCode.GetCategoryPrivilegeForUser: {
+                        GetCategoryPrivilegesForUser(message);
+                    } break;
+                    case OperationCode.GetTextChannelPrivilegeForUser: {
+                        GetTextChannelPrivilegesForUser(message);
+                    } break;
+                    case OperationCode.GetFriendList: {
+                        GetFriendList(message);
+                    } break;
+                    case OperationCode.AddFriend: {
+                        AddFriend(message);
+                    } break;
+                    case OperationCode.RemoveFriend: {
+                        RemoveFriend(message);
                     } break;
                 }
             }
@@ -64,7 +88,7 @@ namespace ChatServer.Network
                     if (result == DatabaseCommandResult.Success && user != null) {
                         string json = JsonSerializer.Serialize(user);
                         _client.User = user;
-                        Logger.Info($"Succesfully logged user \"{user.Nickname}#{user.Id}\" with email \"{data.Email}\".");
+                        Logger.Info($"Succesfully logged user \"{user.Nickname}#{user.ID}\" with email \"{data.Email}\".");
                         _client.Send(OperationCode.LogInSuccess, json);
                     }
                     else if (result == DatabaseCommandResult.Fail) {
@@ -114,27 +138,7 @@ namespace ChatServer.Network
                 }
             }
 
-            private void GetFriends(string message) {
-                ulong userId = ulong.Parse(message);
 
-                DatabaseCommandResult result = _database.Commands.GetFriends(userId, out List<User>? friends);
-
-                if (result == DatabaseCommandResult.Success && friends != null) {
-                    Logger.Info($"Successfully fetched FriendList for user with Id \"{userId}\".");
-                    string json = JsonSerializer.Serialize(friends);
-                    _client.Send(OperationCode.GetFriendListSuccess, json);
-                }
-                else if (result == DatabaseCommandResult.DatabaseError) {
-                    const string error = "DATABASE_ERROR";
-                    Logger.Error($"Failed to get FriendList for user with id \"{userId}\", [{error}].");
-                    _client.Send(OperationCode.GetFriendListFail, error);
-                }
-                else {
-                    const string error = "UNKNONW_ERROR";
-                    Logger.Error($"Failed to get FriendList for user with id \"{userId}\", [{error}].");
-                    _client.Send(OperationCode.GetFriendListFail, error);
-                }
-            }
 
             private void CreateGuild(string message) {
                 CreateGuildData? data = JsonSerializer.Deserialize<CreateGuildData>(message);
@@ -162,6 +166,7 @@ namespace ChatServer.Network
                 }
             }
 
+
             private void CreateCategory(string message) {
                 CreateCategoryData? data = JsonSerializer.Deserialize<CreateCategoryData>(message);
                 if (data is null) {
@@ -174,13 +179,13 @@ namespace ChatServer.Network
                 if (result == DatabaseCommandResult.Success && category is not null) {
                     Logger.Info($"Successfully created new category \"{data.Name}\".");
                     List<ulong>? targetUsers;
-                    result = _database.Commands.GetUsersAccessingCategory(category, out targetUsers);
+                    result = _database.Commands.GetUsersInCategory(category, out targetUsers);
 
                     if (result == DatabaseCommandResult.Success && targetUsers is not null) {
                         string json = JsonSerializer.Serialize(category);
                         _client.MultiCast(OperationCode.CreateCategorySuccess, json, (x) => {
                             foreach (ulong id in targetUsers) {
-                                if (x.User is User user && user.Id == id) {
+                                if (x.User is User user && user.ID == id) {
                                     return true;
                                 }
                             }
@@ -188,13 +193,14 @@ namespace ChatServer.Network
                         });
                     }
                     else {
-                        Logger.Error($"Failed to multicast category creation \"{data.Name}\" in guild \"{data.GuildId}\"");
+                        Logger.Error($"Failed to multicast category creation \"{data.Name}\" in guild \"{data.GuildID}\"");
                     }
                 }
                 else if (result == DatabaseCommandResult.DatabaseError) {
                     Logger.Error($"Failed to create category \"{data.Name}\", [DATABASE_ERROR].");
                 }
             }
+
 
             private void CreateTextChannel(string message) {
                 CreateTextChannelData? data = JsonSerializer.Deserialize<CreateTextChannelData>(message);
@@ -203,37 +209,268 @@ namespace ChatServer.Network
                     return;
                 }
 
-                DatabaseCommandResult result = _database.Commands.CreateTextChannel(data);
+                DatabaseCommandResult result = _database.Commands.CreateTextChannel(data, out TextChannel? textChannel);
 
-                if (result == DatabaseCommandResult.Success) {
+                if (result == DatabaseCommandResult.Success && textChannel != null) {
                     Logger.Info($"Successfully created new text channel \"{data.Name}\".");
+                    string json = JsonSerializer.Serialize(textChannel);
+                    _client.Send(OperationCode.CreateTextChannelSuccess, json);
                 }
                 else if (result == DatabaseCommandResult.DatabaseError) {
-                    Logger.Error($"Failed to create text channel \"{data.Name}\", [DATABASE_ERROR].");
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to create text channel \"{data.Name}\", [{error}].");
+                    _client.Send(OperationCode.CreateTextChannelFail, error);
+                }
+                else {
+                    const string error = "UNKNOWN_ERROR";
+                    Logger.Error($"Failed to create text channel \"{data.Name}\", [{error}].");
+                    _client.Send(OperationCode.CreateTextChannelFail, error);
                 }
             }
 
 
+            private void GetGuildsForUser(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
 
-            private void CompleteGuildsInfo(string message) {
-                ulong userId = ulong.Parse(message);
-
-                DatabaseCommandResult result = _database.Commands.GetCompleteGuildsInfo(userId,
+                DatabaseCommandResult result = _database.Commands.GetGuildsForUser(userID,
                     out ObservableCollection<Guild>? guilds);
 
                 if (result == DatabaseCommandResult.Success && guilds != null) {
+                    Logger.Info($"Succesfully fetched {guilds.Count} Guilds for User \"{userID}\".");
                     foreach (Guild guild in guilds) {
                         string json = JsonSerializer.Serialize(guild);
-                        _client.Send(OperationCode.CompleteGuildInfoSuccess, json);
-                        //Thread.Sleep(100);
+                        _client.Send(OperationCode.GetGuildsForUserSuccess, json);
                     }
                 }
                 else if (result == DatabaseCommandResult.DatabaseError) {
-                    Logger.Error($"Failed to get complete guild info for user with id \"{userId}\"");
-                    _client.Send(OperationCode.CompleteGuildInfoFail, result.ToString());
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Guilds for User \"{userID}\", [{error}]");
+                    _client.Send(OperationCode.GetGuildsForUserFail, error);
+                }
+                else {
+                    const string error = "UNKNOWN_ERROR";
+                    Logger.Error($"Failed to fetch Guilds for User \"{userID}\", [{error}]");
+                    _client.Send(OperationCode.GetGuildsForUserFail, error);
                 }
             }
 
+
+            private void GetCategoriesInGuild(string message) {
+                ulong guildID;
+                try {
+                    guildID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetCategoriesInGuild(guildID,
+                    out ObservableCollection<Category>? categories);
+
+                if (result == DatabaseCommandResult.Success && categories != null) {
+                    Logger.Info($"Succesfully fetched {categories.Count} Categories in Guild \"{guildID}\".");
+                    foreach (Category category in categories) {
+                        string json = JsonSerializer.Serialize(category);
+                        _client.Send(OperationCode.GetCategoriesInGuildSuccess, json);
+                    }
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Categories in Guild \"{guildID}\", [{error}]");
+                    _client.Send(OperationCode.GetCategoriesInGuildFail, error);
+                }
+                else {
+                    const string error = "UNKNOWN_ERROR";
+                    Logger.Error($"Failed to fetch Categories in Guild \"{guildID}\", [{error}]");
+                    _client.Send(OperationCode.GetCategoriesInGuildFail, error);
+                }
+            }
+
+            private void GetTextChannelsInCategory(string message) {
+                ulong categoryID;
+                try {
+                    categoryID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetTextChannelsInCategory(categoryID,
+                    out ObservableCollection<TextChannel>? textChannels);
+
+                if (result == DatabaseCommandResult.Success && textChannels != null) {
+                    Logger.Info($"Succesfully fetched {textChannels.Count} Text Channels in Category \"{categoryID}\".");
+                    foreach (TextChannel textChannel in textChannels) {
+                        string json = JsonSerializer.Serialize(textChannel);
+                        _client.Send(OperationCode.GetTextChannelsInCategorySuccess, json);
+                    }
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Text Channels in Category \"{categoryID}\", [{error}]");
+                    _client.Send(OperationCode.GetTextChannelsInCategoryFail, error);
+                }
+                else {
+                    const string error = "UNKNOWN_ERROR";
+                    Logger.Error($"Failed to fetch Text Channels in Category \"{categoryID}\", [{error}]");
+                    _client.Send(OperationCode.GetTextChannelsInCategoryFail, error);
+                }
+            }
+
+
+            private void GetGuildPrivilegesForUser(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetGuildPrivilegeForUser(
+                    userID, out GuildPrivilege? privilege);
+
+                if (result == DatabaseCommandResult.Success && privilege != null) {
+                    Logger.Info($"Successfully fetched Guild Privileges for User \"{userID}\".");
+                    string json = JsonSerializer.Serialize(privilege);
+                    _client.Send(OperationCode.GetGuildPrivilegeForUserSuccess, json);
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Guild Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetGuildPrivilegeForUserFail, error);
+                }
+                else {
+                    const string error = "UNKNONW_ERROR";
+                    Logger.Error($"Failed to fetch Guild Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetGuildPrivilegeForUserFail, error);
+                }
+            }
+
+            private void GetCategoryPrivilegesForUser(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetCategoryPrivilegeForUser(
+                    userID, out CategoryPrivilege? privilege);
+
+                if (result == DatabaseCommandResult.Success && privilege != null) {
+                    Logger.Info($"Successfully fetched Category Privileges for User \"{userID}\".");
+                    string json = JsonSerializer.Serialize(privilege);
+                    _client.Send(OperationCode.GetCategoryPrivilegeForUserSuccess, json);
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Category Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetCategoryPrivilegeForUserFail, error);
+                }
+                else {
+                    const string error = "UNKNONW_ERROR";
+                    Logger.Error($"Failed to fetch Category Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetCategoryPrivilegeForUserFail, error);
+                }
+            }
+
+            private void GetTextChannelPrivilegesForUser(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetTextChannelPrivilegeForUser(
+                    userID, out TextChannelPrivilege? privileges);
+
+                if (result == DatabaseCommandResult.Success && privileges != null) {
+                    Logger.Info($"Successfully fetched Text Channel Privileges for User \"{userID}\".");
+                    string json = JsonSerializer.Serialize(privileges);
+                    _client.Send(OperationCode.GetTextChannelPrivilegeForUserSuccess, json);
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Text Channel Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetTextChannelPrivilegeForUserFail, error);
+                }
+                else {
+                    const string error = "UNKNONW_ERROR";
+                    Logger.Error($"Failed to fetch Text Channel Privileges for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetTextChannelPrivilegeForUserFail, error);
+                }
+            }
+
+            private void GetFriendList(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                DatabaseCommandResult result = _database.Commands.GetFriends(userID, out List<User>? friends);
+
+                if (result == DatabaseCommandResult.Success && friends != null) {
+                    Logger.Info($"Successfully fetched FriendList for User \"{userID}\".");
+                    string json = JsonSerializer.Serialize(friends);
+                    _client.Send(OperationCode.GetFriendListSuccess, json);
+                }
+                else if (result == DatabaseCommandResult.DatabaseError) {
+                    const string error = "DATABASE_ERROR";
+                    Logger.Error($"Failed to fetch Friend List for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetFriendListFail, error);
+                }
+                else {
+                    const string error = "UNKNONW_ERROR";
+                    Logger.Error($"Failed to fetch Friend List for User \"{userID}\", [{error}].");
+                    _client.Send(OperationCode.GetFriendListFail, error);
+                }
+            }
+
+            private void AddFriend(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                // TODO - finish this function
+            }
+
+            private void RemoveFriend(string message) {
+                ulong userID;
+                try {
+                    userID = ulong.Parse(message);
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex.Message);
+                    return;
+                }
+
+                // TODO - finish this function
+            }
 
             private void SendMessage(string message) {
 

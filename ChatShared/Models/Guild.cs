@@ -1,29 +1,33 @@
-﻿using System.Collections.ObjectModel;
+﻿using ChatShared.Models.Privileges;
+using System.Collections.ObjectModel;
 
 
 namespace ChatShared.Models {
     public class Guild {
-        public ulong Id { get; set; }
-        public string PublicId { get; set; }
+        public ulong ID { get; set; }
+        public string PublicID { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
-        public ulong OwnerId { get; set; }
+        public ulong OwnerID { get; set; }
         public DateTime CreationTime { get; set; }
         public byte[] Icon { get; set; }
 
         public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<User> Users { get; set; }
+        public ObservableCollection<GuildPrivilege> Privileges { get; set; }
 
-        public Guild(ulong id, string publicId, string name, string password, ulong ownerId, DateTime creationTime, byte[] icon) {
-            Id = id;
-            PublicId = publicId;
+        public Guild(ulong id, string publicID, string name, string password, ulong ownerID,
+                     DateTime creationTime, byte[] icon) {
+            ID = id;
+            PublicID = publicID;
             Name = name;
             Password = password;
-            OwnerId = ownerId;
+            OwnerID = ownerID;
             CreationTime = creationTime;
             Icon = icon;
             Categories = new ObservableCollection<Category>();
             Users = new ObservableCollection<User>();
+            Privileges = new ObservableCollection<GuildPrivilege>();
         }
     }
 }

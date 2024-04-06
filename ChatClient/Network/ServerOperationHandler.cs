@@ -36,11 +36,11 @@ namespace ChatClient.Network {
                 case OperationCode.CreateGuildFail: {
                     CreateGuildFail(message);
                 } break;
-                case OperationCode.CompleteGuildInfoSuccess: {
-                    CompleteGuildInfoSuccess(message);
+                case OperationCode.GetGuildsForUserSuccess: {
+                    GetGuildsForUserSuccess(message);
                 } break;
-                case OperationCode.CompleteGuildInfoFail: {
-                    CompleteGuildsInfoFail(message);
+                case OperationCode.GetGuildsForUserFail: {
+                    GetGuildsForUserFail(message);
                 } break;
             }
         }
@@ -129,13 +129,13 @@ namespace ChatClient.Network {
             }
         }
 
-        private void CompleteGuildInfoSuccess(string message) {
+        private void GetGuildsForUserSuccess(string message) {
             Guild? guild = JsonSerializer.Deserialize<Guild>(message);
             if (guild is null) { return; }
             if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
                 bool found = false;
                 foreach (Guild g in mainPage.ViewModel.Guilds) {
-                    if (guild.PublicId == g.PublicId) {
+                    if (guild.PublicID == g.PublicID) {
                         found = true;
                         break;
                     }
@@ -162,8 +162,8 @@ namespace ChatClient.Network {
             }
         }
 
-        private void CompleteGuildsInfoFail(string message) {
-            MessageBox.Show("Failed to fetch \"CompleteGuildInfo\".\n" + message);
+        private void GetGuildsForUserFail(string message) {
+            MessageBox.Show($"Failed to fetch \"CompleteGuildInfo\".\n[{message}]");
         }
     }
 }

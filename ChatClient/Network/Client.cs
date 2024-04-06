@@ -41,7 +41,7 @@ namespace ChatClient.Network {
         public void CreateGuild(string name, string password) {
             if (User != null) {
                 var icon = ResourceHelper.GetImagePixels($"{Directory.GetCurrentDirectory()}\\Resources\\Images\\942840997837168660.png");
-                CreateGuildData createData = new(User.Id, name, password, icon);
+                CreateGuildData createData = new(User.ID, name, password, icon);
                 string json = JsonSerializer.Serialize(createData);
                 ServerConnection.Send(OperationCode.CreateGuild, json);
             }

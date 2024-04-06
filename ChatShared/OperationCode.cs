@@ -64,9 +64,53 @@ namespace ChatClient {
         MoveTextChannelSuccess,
         MoveTextChannelFail,
 
-        CompleteGuildInfo,
-        CompleteGuildInfoSuccess,
-        CompleteGuildInfoFail,
+        GetGuildsForUser,
+        GetGuildsForUserSuccess,
+        GetGuildsForUserFail,
+
+        GetCategoriesInGuild,
+        GetCategoriesInGuildSuccess,
+        GetCategoriesInGuildFail,
+
+        CreateGuildPrivilege,
+        CreateGuildPrivilegeSuccess,
+        CreateGuildPrivilegeFail,
+
+        UpdateGuildPrivilege,
+        UpdateGuildPrivilegeSuccess,
+        UpdateGuildPrivilegeFail,
+
+        CreateCategoryPrivilege,
+        CreateCategoryPrivilegeSuccess,
+        CreateCategoryPrivilegeFail,
+
+        UpdateCategoryPrivilege,
+        UpdateCategoryPrivilegeSuccess,
+        UpdateCategoryPrivilegeFail,
+
+        CreateTextChannelPrivilege,
+        CreateTextChannelPrivilegeSuccess,
+        CreateTextChannelPrivilegeFail,
+
+        UpdateTextChannelPrivilege,
+        UpdateTextChannelPrivilegeSuccess,
+        UpdateTextChannelPrivilageFail,
+
+        GetTextChannelsInCategory,
+        GetTextChannelsInCategorySuccess,
+        GetTextChannelsInCategoryFail,
+
+        GetGuildPrivilegeForUser,
+        GetGuildPrivilegeForUserSuccess,
+        GetGuildPrivilegeForUserFail,
+
+        GetCategoryPrivilegeForUser,
+        GetCategoryPrivilegeForUserSuccess,
+        GetCategoryPrivilegeForUserFail,
+
+        GetTextChannelPrivilegeForUser,
+        GetTextChannelPrivilegeForUserSuccess,
+        GetTextChannelPrivilegeForUserFail,
 
         AddFriend,
         AddFriendSuccess,

@@ -13,7 +13,9 @@ namespace ChatServer {
         //static Socket listener;
         //
 
+        void Test(params object[] args) {
 
+        }
 
         static void Main(string[] args) {
 

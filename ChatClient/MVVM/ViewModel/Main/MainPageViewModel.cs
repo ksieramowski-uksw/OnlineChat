@@ -53,10 +53,10 @@ namespace ChatClient.MVVM.ViewModel {
                 _currentUserNickname = user.Nickname;
                 _currentUserStatus = user.Status.ToString();
 
-                App.Current.Client.ServerConnection.Send(OperationCode.CompleteGuildInfo, user.Id.ToString());
+                App.Current.Client.ServerConnection.Send(OperationCode.GetGuildsForUser, user.ID.ToString());
 
 
-                Guilds.Add(new Guild(123, "qwdasdasd", "DUPA", "dupa123", 1, DateTime.Now, user.ProfilePicture));
+                Guilds.Add(new Guild(123, "PUBLIC_ID_OF_DEFAUL_GUILD", "DUPA", "dupa123", 1, DateTime.Now, user.ProfilePicture));
             }
             else {
                 _currentUserProfilePicture = null;
@@ -85,8 +85,8 @@ namespace ChatClient.MVVM.ViewModel {
         }
 
         [RelayCommand]
-        private void SelectGuild(string publicId) {
-            MessageBox.Show(publicId);
+        private void SelectGuild(string publicID) {
+            MessageBox.Show(publicID);
             //if (SelectedGuild != null) {
             //    MessageBox.Show($"{SelectedGuild.Id}");
             //}

@@ -18,8 +18,11 @@ namespace ChatServer.Database {
             if (!InitializeGuildTable(connection)) { checkSum += 1; }
             if (!InitializeGuildAffiliationTable(connection)) { checkSum += 1; }
             if (!InitializeCategoriesTable(connection)) { checkSum += 1; }
-            if (!InitializeChannelTable(connection)) { checkSum += 1; }
+            if (!InitializeTextChannelTable(connection)) { checkSum += 1; }
             if (!InitializeMessageTable(connection)) { checkSum += 1; }
+            if (!InitializeTextChannelPrivilegeTable(connection)) { checkSum += 1; }
+            if (!InitializeCategoryPrivilegeTable(connection)) { checkSum += 1; }
+            if (!InitializeGuildPrivilegeTable(connection)) { checkSum += 1; }
 
             return checkSum;
         }
@@ -42,7 +45,7 @@ namespace ChatServer.Database {
             const string tableName = "Users";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
+                    ID INTEGER PRIMARY KEY,
                     Email TEXT NOT NULL,
                     Password TEXT NOT NULL,
                     Nickname TEXT NOT NULL,
@@ -58,9 +61,9 @@ namespace ChatServer.Database {
             const string tableName = "Friends";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    UserId INTEGER NOT NULL,
-                    FriendId INTEGER NOT NULL
+                    ID INTEGER PRIMARY KEY,
+                    UserID INTEGER NOT NULL,
+                    FriendID INTEGER NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
@@ -69,11 +72,11 @@ namespace ChatServer.Database {
             const string tableName = "Guilds";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    PublicId TEXT NOT NULL,
+                    ID INTEGER PRIMARY KEY,
+                    PublicID TEXT NOT NULL,
                     Name TEXT NOT NULL,
                     Password TEXT NOT NULL,
-                    OwnerId INTEGER NOT NULL,
+                    OwnerID INTEGER NOT NULL,
                     CreationTime TEXT NOT NULL,
                     Icon BLOB NOT NULL
                 );";
@@ -84,9 +87,9 @@ namespace ChatServer.Database {
             const string tableName = "GuildAffiliations";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    GuildId INTEGER NOT NULL,
-                    UserId INTEGER NOT NULL
+                    ID INTEGER PRIMARY KEY,
+                    GuildID INTEGER NOT NULL,
+                    UserID INTEGER NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
@@ -95,20 +98,20 @@ namespace ChatServer.Database {
             const string tableName = "Categories";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    GuildId INTEGER NOT NULL,
+                    ID INTEGER PRIMARY KEY,
+                    GuildID INTEGER NOT NULL,
                     Name TEXT NOT NULL,
                     CreationTime TEXT NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
 
-        public static bool InitializeChannelTable(SqliteConnection connection) {
+        public static bool InitializeTextChannelTable(SqliteConnection connection) {
             const string tableName = "TextChannels";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    CategoryId INTEGER NOT NULL,
+                    ID INTEGER PRIMARY KEY,
+                    CategoryID INTEGER NOT NULL,
                     Name TEXT NOT NULL,
                     CreationTime TEXT NOT NULL
                 );";
@@ -119,11 +122,67 @@ namespace ChatServer.Database {
             const string tableName = "Messages";
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
-                    Id INTEGER PRIMARY KEY,
-                    UserId INTEGER NOT NULL,
-                    TextChannelId INTEGER NOT NULL,
+                    ID INTEGER PRIMARY KEY,
+                    UserID INTEGER NOT NULL,
+                    TextChannelID INTEGER NOT NULL,
                     Text TEXT NOT NULL,
                     Time TEXT NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeTextChannelPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "TextChannelPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    UserID INTEGER NOT NULL,
+                    ChannelID INTEGER,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL,
+                    ViewChannel INTEGER NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeCategoryPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "CategoryPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    UserID INTEGER NOT NULL,
+                    CategoryID INTEGER,
+                    UpdateCategory INTEGER NOT NULL,
+                    DeleteCategory INTEGER NOT NULL,
+                    CreateChannel INTERER NOT NULL,
+                    ViewCategory INTEGER NOT NULL,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeGuildPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "GuildPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    UserID INTEGER NOT NULL,
+                    GuildID INTEGER,
+                    ManageGuild INTEGER NOT NULL,
+                    ManagePrivileges INTEGER NOT NULL,
+                    CreateCategory INTEGER NOT NULL,
+                    UpdateCategory INTEGER NOT NULL,
+                    DeleteCategory INTEGER NOT NULL,
+                    CreateChannel INTERER NOT NULL,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
