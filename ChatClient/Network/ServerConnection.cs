@@ -10,12 +10,15 @@ using System.Windows;
 
 namespace ChatClient.Network {
     public class ServerConnection {
+        public readonly Client Client;
         private readonly Socket _socket;
         private readonly IPEndPoint _ip;
 
-        public ServerConnection(Config.Config config) {
-            string address = config.ServerConfig.IPv4;
-            int port = config.ServerConfig.Port;
+
+        public ServerConnection(Client client) {
+            Client = client;
+            string address =  Client.Config.ServerConfig.IPv4;
+            int port = Client.Config.ServerConfig.Port;
             _ip = new(IPAddress.Parse(address), port);
             _socket = new(_ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
@@ -27,14 +30,11 @@ namespace ChatClient.Network {
         }
 
         public async void Send(OperationCode opCode, string message) {
-            if (App.Current is App app) {
-                MemoryStream content = new();
-                content.WriteByte((byte)opCode);
-                content.Write(Encoding.ASCII.GetBytes(message));
-                content.Write(Encoding.ASCII.GetBytes(app.Client.Config.ServerConfig.EOM));
-                _ = await _socket.SendAsync(content.ToArray());
-            }
-            
+            MemoryStream content = new();
+            content.WriteByte((byte)opCode);
+            content.Write(Encoding.ASCII.GetBytes(message));
+            content.Write(Encoding.ASCII.GetBytes(Client.Config.ServerConfig.EOM));
+            _ = await _socket.SendAsync(content.ToArray());
         }
 
         public void HandleConnection() {

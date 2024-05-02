@@ -14,34 +14,37 @@ namespace ChatClient {
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application {
-        public readonly Client Client;
-        public NavigationStore NavigationStore { get; }
+
+
+        public readonly ChatContext Context;
+        //public readonly Client Client;
+        public NavigationStore Navigation { get; }
         public List<byte[]> ResourceStorage { get; }
 
-        public static new App Current {
-            get {
-                if (Application.Current is App app) {
-                    return app;
-                }
-                else {
-                    throw new Exception("Current App in null.");
-                }
-            }
-        }
+        //public static new App Current {
+        //    get {
+        //        if (Application.Current is App app) {
+        //            return app;
+        //        }
+        //        else {
+        //            throw new Exception("Current App in null.");
+        //        }
+        //    }
+        //}
 
         App() {
-            Client = new Client();
+            Context = new(this);
             ResourceStorage = new List<byte[]>();
 
-            NavigationStore = new NavigationStore();
-            NavigationStore.LoginWindow = new LoginWindow(NavigationStore);
-            if (NavigationStore.LoginWindow != null) {
-                MainWindow = NavigationStore.LoginWindow;
+            Navigation = new NavigationStore();
+            Navigation.LoginWindow = new LoginWindow(Context);
+            if (Navigation.LoginWindow != null) {
+                MainWindow = Navigation.LoginWindow;
             }
         }
 
         protected override void OnStartup(StartupEventArgs e) {
-            Client.Connect();
+            Context.Client.Connect();
             MainWindow.Show();
 
             base.OnStartup(e);

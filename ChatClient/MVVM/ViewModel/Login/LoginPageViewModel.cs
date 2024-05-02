@@ -1,12 +1,11 @@
 ﻿using ChatClient.MVVM.View;
-using ChatClient.Stores;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 
 namespace ChatClient.MVVM.ViewModel {
     public partial class LoginPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private string _email;
@@ -18,8 +17,8 @@ namespace ChatClient.MVVM.ViewModel {
         private string _feedback;
 
 
-        public LoginPageViewModel(NavigationStore navigationStore) {
-            NavigationStore = navigationStore;
+        public LoginPageViewModel(ChatContext context) {
+            Context = context;
 
             Email = string.Empty;
             Password = string.Empty;
@@ -33,14 +32,14 @@ namespace ChatClient.MVVM.ViewModel {
                 Feedback = "Please, fill all fields marked with '*'.\"";
                 return;
             }
-            App.Current.Client.LogIn(Email, Password);
+            Context.Client.LogIn(Email, Password);
         }
 
         [RelayCommand]
         private void NavigateToRegisterPage() {
-            if (NavigationStore.LoginWindow is LoginWindow loginWindow) {
-                NavigationStore.RegisterPage ??= new RegisterPage(NavigationStore);
-                loginWindow.MainFrame.Navigate(NavigationStore.RegisterPage);
+            if (Context.App.Navigation.LoginWindow is LoginWindow loginWindow) {
+                Context.App.Navigation.RegisterPage ??= new RegisterPage(Context);
+                loginWindow.MainFrame.Navigate(Context.App.Navigation.RegisterPage);
             }
         }
 

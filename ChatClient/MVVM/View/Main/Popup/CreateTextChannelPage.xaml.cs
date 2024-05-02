@@ -14,9 +14,9 @@ namespace ChatClient.MVVM.View.Main.Popup
         public CreateTextChannelPageViewModel ViewModel { get; }
 
 
-        public CreateTextChannelPage(NavigationStore navigationStore, Category category) {
+        public CreateTextChannelPage(ChatContext context, Category category) {
             InitializeComponent();
-            ViewModel = new CreateTextChannelPageViewModel(navigationStore, category);
+            ViewModel = new CreateTextChannelPageViewModel(context, category);
             DataContext = ViewModel;
         }
 

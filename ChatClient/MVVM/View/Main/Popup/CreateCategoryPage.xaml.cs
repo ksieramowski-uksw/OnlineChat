@@ -1,5 +1,4 @@
 ﻿using ChatClient.MVVM.ViewModel.Main.Popup;
-using ChatClient.Stores;
 using ChatShared.Models;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,9 +11,9 @@ namespace ChatClient.MVVM.View.Main.Popup {
     public partial class CreateCategoryPage : Page {
         public CreateCategoryPageViewModel ViewModel { get; set; }
 
-        public CreateCategoryPage(NavigationStore navigationStore, Guild guild) {
+        public CreateCategoryPage(ChatContext context, Guild guild) {
             InitializeComponent();
-            ViewModel = new CreateCategoryPageViewModel(navigationStore, guild);
+            ViewModel = new CreateCategoryPageViewModel(context, guild);
             DataContext = ViewModel;
         }
 

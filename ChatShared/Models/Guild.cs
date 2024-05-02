@@ -15,6 +15,7 @@ namespace ChatShared.Models {
         public ObservableCollection<Category> Categories { get; set; }
         public ObservableCollection<User> Users { get; set; }
         public ObservableCollection<GuildPrivilege> Privileges { get; set; }
+        public GuildPrivilege? DefaultPrivilege { get; set; }
 
         public Guild(ulong id, string publicID, string name, string password, ulong ownerID,
                      DateTime creationTime, byte[] icon) {

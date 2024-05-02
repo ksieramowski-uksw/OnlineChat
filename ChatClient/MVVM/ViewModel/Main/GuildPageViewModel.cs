@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace ChatClient.MVVM.ViewModel.Main {
     public partial class GuildPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private Guild _guild;
@@ -18,8 +18,8 @@ namespace ChatClient.MVVM.ViewModel.Main {
         [ObservableProperty]
         private TextChannelPage? _textChannelContent;
 
-        public GuildPageViewModel(NavigationStore navigationStore, Guild guild) {
-            NavigationStore = navigationStore;
+        public GuildPageViewModel(ChatContext context, Guild guild) {
+            Context = context;
             _guild = guild;
         }
 
@@ -29,7 +29,7 @@ namespace ChatClient.MVVM.ViewModel.Main {
                 bool success = false;
                 foreach (TextChannel textChannel in category.TextChannels) {
                     if (textChannel.ID == id) {
-                        TextChannelContent = new TextChannelPage(NavigationStore, textChannel);
+                        TextChannelContent = new TextChannelPage(Context, textChannel);
                         success = true;
                         break;
                     }
@@ -40,18 +40,18 @@ namespace ChatClient.MVVM.ViewModel.Main {
 
         [RelayCommand]
         private void CreateCategory(Guild guild) {
-            if (NavigationStore.MainPage is MainPage mainPage) {
-                NavigationStore.CreateCategoryPage = new CreateCategoryPage(NavigationStore, guild);
-                mainPage.ViewModel.PopupContent = NavigationStore.CreateCategoryPage;
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
+                Context.App.Navigation.CreateCategoryPage = new CreateCategoryPage(Context, guild);
+                mainPage.ViewModel.PopupContent = Context.App.Navigation.CreateCategoryPage;
                 mainPage.ViewModel.MaskVisibility = Visibility.Visible;
             }
         }
 
         [RelayCommand]
         private void CreateTextChannel(Category category) {
-            if (NavigationStore.MainPage is MainPage mainPage) {
-                NavigationStore.CreateTextChannelPage = new CreateTextChannelPage(NavigationStore, category);
-                mainPage.ViewModel.PopupContent = NavigationStore.CreateTextChannelPage;
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
+                Context.App.Navigation.CreateTextChannelPage = new CreateTextChannelPage(Context, category);
+                mainPage.ViewModel.PopupContent = Context.App.Navigation.CreateTextChannelPage;
                 mainPage.ViewModel.MaskVisibility = Visibility.Visible;
             }
         }

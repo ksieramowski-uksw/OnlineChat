@@ -9,7 +9,9 @@ namespace ChatShared.Models {
         public string Name { get; set; }
         public DateTime CreationTime { get; set; }
         public ObservableCollection<Message> Messages { get; set; }
-        public ObservableCollection<TextChannelPrivilege> Privileges { get; set; } 
+        public ObservableCollection<TextChannelPrivilege> Privileges { get; set; }
+        public TextChannel? DefaultPrivilege { get; set; }
+        public ObservableCollection<User> Users { get; set; }
 
         public TextChannel(ulong id, ulong categoryID, string name, DateTime creationTime) {
             ID = id;
@@ -18,6 +20,7 @@ namespace ChatShared.Models {
             CreationTime = creationTime;
             Messages = new ObservableCollection<Message>();
             Privileges = new ObservableCollection<TextChannelPrivilege>();
+            Users = new ObservableCollection<User>();
         }
     }
 }

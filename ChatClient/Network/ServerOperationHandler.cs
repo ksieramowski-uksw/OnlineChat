@@ -3,8 +3,10 @@ using ChatClient.MVVM.View.Main;
 using ChatClient.MVVM.View.Main.Popup;
 using ChatClient.Stores;
 using ChatShared.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 
@@ -12,10 +14,12 @@ using System.Windows;
 namespace ChatClient.Network {
     public class ServerOperationHandler {
 
+        private readonly ChatContext Context;
         private readonly ServerConnection _serverConnection;
 
         public ServerOperationHandler(ServerConnection serverConnection) {
             _serverConnection = serverConnection;
+            Context = _serverConnection.Client.Context;
         }
 
         public void HandleOperation(OperationCode opCode, string message) {
@@ -75,93 +79,88 @@ namespace ChatClient.Network {
         }
 
         private void LoginSuccess(string message) {
-            var app = App.Current;
-            var client = app.Client;
-            var navigationStore = app.NavigationStore;
-
-            if (navigationStore.MainWindow == null) {
-                client.User = JsonSerializer.Deserialize<User>(message);
-                if (client.User == null) {
-                    if (navigationStore.LoginPage != null) {
+            if (Context.App.Navigation.MainWindow == null) {
+                Context.CurrentUser = JsonSerializer.Deserialize<User>(message);
+                if (Context.CurrentUser == null) {
+                    if (Context.App.Navigation.LoginPage != null) {
                         string errorMsg = "Something went wrong...";
-                        navigationStore.LoginPage.ViewModel.Feedback = errorMsg;
+                        Context.App.Navigation.LoginPage.ViewModel.Feedback = errorMsg;
                     }
                     return;
                 }
 
-                app.Dispatcher.Invoke(() => {
-                    Window previousWindow = app.MainWindow;
-                    navigationStore.MainWindow = new MainWindow();
-                    MainPage mainPage = new(navigationStore);
-                    navigationStore.MainPage = mainPage;
-                    navigationStore.MainWindow.MainFrame.Content = mainPage;
-                    app.MainWindow = navigationStore.MainWindow;
+                Context.App.Dispatcher.Invoke(() => {
+                    Window previousWindow = Context.App.MainWindow;
+                    Context.App.Navigation.MainWindow = new MainWindow();
+                    MainPage mainPage = new(Context);
+                    Context.App.Navigation.MainPage = mainPage;
+                    Context.App.Navigation.MainWindow.MainFrame.Content = mainPage;
+                    Context.App.MainWindow = Context.App.Navigation.MainWindow;
 
                     previousWindow.Close();
-                    navigationStore.LoginWindow = null;
-                    navigationStore.LoginPage = null;
-                    navigationStore.RegisterPage = null;
+                    Context.App.Navigation.LoginWindow = null;
+                    Context.App.Navigation.LoginPage = null;
+                    Context.App.Navigation.RegisterPage = null;
 
-                    app.MainWindow.Show();
+                    Context.App.MainWindow.Show();
                 });
-
             }
         }   
         
         private void LoginFail(string message) {
-            if (App.Current.NavigationStore.LoginPage != null) {
-                App.Current.NavigationStore.LoginPage.ViewModel.Feedback = message;
+            if (Context.App.Navigation.LoginPage != null) {
+                Context.App.Navigation.LoginPage.ViewModel.Feedback = message;
             }
         }
 
         private void RegisterSuccess(string message) {
-            if (App.Current.NavigationStore.LoginPage != null) {
-                App.Current.NavigationStore.LoginPage.ViewModel.Feedback = message;
-                if (App.Current.NavigationStore.LoginWindow is LoginWindow loginWindow) {
-                    App.Current.Dispatcher.Invoke(() => {
-                        loginWindow.MainFrame.Navigate(App.Current.NavigationStore.LoginPage);
+            if (Context.App.Navigation.LoginPage != null) {
+                Context.App.Navigation.LoginPage.ViewModel.Feedback = message;
+                if (Context.App.Navigation.LoginWindow is LoginWindow loginWindow) {
+                    Context.App.Dispatcher.Invoke(() => {
+                        loginWindow.MainFrame.Navigate(Context.App.Navigation.LoginPage);
                     });
                 }
             }
         }
 
         private void RegisterFail(string message) {
-            if (App.Current.NavigationStore.RegisterPage != null) {
-                App.Current.NavigationStore.RegisterPage.ViewModel.Feedback = message;
+            if (Context.App.Navigation.RegisterPage != null) {
+                Context.App.Navigation.RegisterPage.ViewModel.Feedback = message;
             }
         }
 
         private void CreateGuildSuccess(string message) {
-            if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 if (JsonSerializer.Deserialize<Guild>(message) is Guild guild) {
                     App.Current.Dispatcher.Invoke(() => {
                         bool resourceFound = false;
                         int index = 0;
-                        for (; index < App.Current.ResourceStorage.Count; index++) {
-                            if (App.Current.ResourceStorage[index] == guild.Icon) {
+                        for (; index < Context.App.ResourceStorage.Count; index++) {
+                            if (Context.App.ResourceStorage[index] == guild.Icon) {
                                 resourceFound = true;
                                 break;
                             }
                         }
                         if (resourceFound) {
-                            guild.Icon = App.Current.ResourceStorage[index];
+                            guild.Icon = Context.App.ResourceStorage[index];
                         }
                         else {
-                            App.Current.ResourceStorage.Add(guild.Icon);
+                            Context.App.ResourceStorage.Add(guild.Icon);
                         }
                         mainPage.ViewModel.Guilds.Add(guild);
                     });
                     mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
-                    if (App.Current.NavigationStore.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
+                    if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
                         createOrJoinGuildPage.ViewModel.NewGuildName = string.Empty;
                         createOrJoinGuildPage.ViewModel.NewGuildPassword = string.Empty;
                         createOrJoinGuildPage.ViewModel.NewGuildFeedback = string.Empty;
 
-                        App.Current.NavigationStore.CreateOrJoinGuildPage = null;
+                        Context.App.Navigation.CreateOrJoinGuildPage = null;
                     }
                 }
                 else {
-                    if (App.Current.NavigationStore.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
+                    if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
                         createOrJoinGuildPage.ViewModel.NewGuildFeedback = "Response is corrupted.";
                     }
                 }
@@ -169,7 +168,7 @@ namespace ChatClient.Network {
         }
 
         private void CreateGuildFail(string message) {
-            if (App.Current.NavigationStore.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
+            if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
                 createOrJoinGuildPage.ViewModel.NewGuildFeedback = message;
             }
         }
@@ -177,7 +176,7 @@ namespace ChatClient.Network {
 
         private void JoinGuildSuccess(string message) {
             if (JsonSerializer.Deserialize<Guild>(message) is Guild guild) {
-                if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
+                if (Context.App.Navigation.MainPage is MainPage mainPage) {
                     bool found = false;
                     foreach (Guild g in mainPage.ViewModel.Guilds) {
                         if (guild.PublicID == g.PublicID) {
@@ -189,17 +188,17 @@ namespace ChatClient.Network {
                         App.Current.Dispatcher.Invoke(() => {
                             bool resourceFound = false;
                             int index = 0;
-                            for (; index < App.Current.ResourceStorage.Count; index++) {
-                                if (App.Current.ResourceStorage[index] == guild.Icon) {
+                            for (; index < Context.App.ResourceStorage.Count; index++) {
+                                if (Context.App.ResourceStorage[index] == guild.Icon) {
                                     resourceFound = true;
                                     break;
                                 }
                             }
                             if (resourceFound) {
-                                guild.Icon = App.Current.ResourceStorage[index];
+                                guild.Icon = Context.App.ResourceStorage[index];
                             }
                             else {
-                                App.Current.ResourceStorage.Add(guild.Icon);
+                                Context.App.ResourceStorage.Add(guild.Icon);
                             }
                             mainPage.ViewModel.Guilds.Add(guild);
                         });
@@ -213,22 +212,22 @@ namespace ChatClient.Network {
         }
 
         private void CreateCategorySuccess(string message) {
-            if (App.Current.NavigationStore.MainPage is MainPage mainPage &&
-                App.Current.NavigationStore.GuildPage is GuildPage guildPage) {
+            if (Context.App.Navigation.MainPage is MainPage mainPage &&
+                Context.App.Navigation.GuildPage is GuildPage guildPage) {
                 if (JsonSerializer.Deserialize<Category>(message) is Category category) {
                     App.Current.Dispatcher.Invoke(() => {
                         guildPage.ViewModel.Guild.Categories.Add(category);
                     });
                     mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
-                    if (App.Current.NavigationStore.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
+                    if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
                         createCategoryPage.ViewModel.NewCategoryName = string.Empty;
                         createCategoryPage.ViewModel.Feedback = string.Empty;
 
-                        App.Current.NavigationStore.CreateCategoryPage = null;
+                        Context.App.Navigation.CreateCategoryPage = null;
                     }
                 }
                 else {
-                    if (App.Current.NavigationStore.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
+                    if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
                         createCategoryPage.ViewModel.Feedback = "Response is corrupted.";
                     }
                 }
@@ -236,13 +235,13 @@ namespace ChatClient.Network {
         }
 
         private void CreateCategoryFail(string message) {
-            if (App.Current.NavigationStore.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
+            if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
                 createCategoryPage.ViewModel.Feedback = message;
             }
         }
         private void CreateTextChannelSuccess(string message) {
-            if (App.Current.NavigationStore.MainPage is MainPage mainPage &&
-                App.Current.NavigationStore.GuildPage is GuildPage guildPage) {
+            if (Context.App.Navigation.MainPage is MainPage mainPage &&
+                Context.App.Navigation.GuildPage is GuildPage guildPage) {
                 if (JsonSerializer.Deserialize<TextChannel>(message) is TextChannel textChannel) {
                     App.Current.Dispatcher.Invoke(() => {
                         foreach (Category category in guildPage.ViewModel.Guild.Categories) {
@@ -253,15 +252,15 @@ namespace ChatClient.Network {
                         }
                     });
                     mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
-                    if (App.Current.NavigationStore.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
+                    if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
                         createTextChannelPage.ViewModel.NewTextChannelName = string.Empty;
                         createTextChannelPage.ViewModel.Feedback = string.Empty;
 
-                        App.Current.NavigationStore.CreateTextChannelPage = null;
+                        Context.App.Navigation.CreateTextChannelPage = null;
                     }
                 }
                 else {
-                    if (App.Current.NavigationStore.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
+                    if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
                         createTextChannelPage.ViewModel.Feedback = "Response is corrupted.";
                     }
                 }
@@ -269,7 +268,7 @@ namespace ChatClient.Network {
         }
 
         private void CreateTextChannelFail(string message) {
-            if (App.Current.NavigationStore.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
+            if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
                 createTextChannelPage.ViewModel.Feedback = message;
             }
         }
@@ -277,7 +276,8 @@ namespace ChatClient.Network {
         private void GetGuildsForUserSuccess(string message) {
             Guild? guild = JsonSerializer.Deserialize<Guild>(message);
             if (guild is null) { return; }
-            if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
+            
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 bool found = false;
                 foreach (Guild g in mainPage.ViewModel.Guilds) {
                     if (guild.PublicID == g.PublicID) {
@@ -287,20 +287,62 @@ namespace ChatClient.Network {
                 }
                 if (!found) {
                     App.Current.Dispatcher.Invoke(() => {
-                        bool resourceFound = false;
-                        int index = 0;
-                        for (;index < App.Current.ResourceStorage.Count; index++) {
-                            if (App.Current.ResourceStorage[index] == guild.Icon) {
-                                resourceFound = true;
-                                break;
+                        {
+                            bool resourceFound = false;
+                            int index = 0;
+                            for (; index < Context.App.ResourceStorage.Count; index++) {
+                                if (Context.App.ResourceStorage[index] == guild.Icon) {
+                                    resourceFound = true;
+                                    break;
+                                }
+                            }
+                            if (resourceFound) {
+                                guild.Icon = Context.App.ResourceStorage[index];
+                            }
+                            else {
+                                Context.App.ResourceStorage.Add(guild.Icon);
                             }
                         }
-                        if (resourceFound) {
-                            guild.Icon = App.Current.ResourceStorage[index];
+                        {
+                            
+                            foreach (var user in guild.Users) {
+                                bool resourceFound = false;
+                                int index = 0;
+                                for (; index < Context.App.ResourceStorage.Count; index++) {
+                                    if (Context.App.ResourceStorage[index] == user.ProfilePicture) {
+                                        resourceFound = true;
+                                        break;
+                                    }
+                                }
+                                if (resourceFound) {
+                                    user.ProfilePicture = Context.App.ResourceStorage[index];
+                                }
+                                else {
+                                    Context.App.ResourceStorage.Add(user.ProfilePicture);
+                                }
+                            }
+                            //bool resourceFound = false;
+                            //int resourceIndex = 0;
+                            //int userIndex = 0;
+                            //for (; resourceIndex < Context.App.ResourceStorage.Count; resourceIndex++) {
+                            //    for (; userIndex < guild.Users.Count; userIndex++) {
+                            //        byte[] resource = guild.Users[userIndex].ProfilePicture;
+                            //        if (Context.App.ResourceStorage[resourceIndex] == resource) {
+                            //            resourceFound = true;
+                            //            break;
+                            //        }
+                            //    }
+                            //}
+                            //if (resourceFound) {
+                            //    //guild.Icon = Context.App.ResourceStorage[resourceIndex];
+                            //}
+                            //else {
+                            //    Context.App.ResourceStorage.Add(guild.Users[userIndex].ProfilePicture);
+                            //}
                         }
-                        else {
-                            App.Current.ResourceStorage.Add(guild.Icon);
-                        }
+
+
+
                         mainPage.ViewModel.Guilds.Add(guild);
                     });
                 }
@@ -314,7 +356,7 @@ namespace ChatClient.Network {
         private void SendMessage(string message) {
             Message? msg = JsonSerializer.Deserialize<Message>(message);
             if (msg == null) { return; }
-            if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 foreach (var guild in mainPage.ViewModel.Guilds) {
                     foreach (var category in guild.Categories) {
                         foreach (TextChannel textChannel in category.TextChannels) {
@@ -336,7 +378,7 @@ namespace ChatClient.Network {
                 is ObservableCollection<Message> messages) {
                 if (messages.Count == 0) { return; }
 
-                if (App.Current.NavigationStore.MainPage is MainPage mainPage) {
+                if (Context.App.Navigation.MainPage is MainPage mainPage) {
                     foreach (var guild in mainPage.ViewModel.Guilds) {
                         foreach (var category in guild.Categories) {
                             foreach (var textChannel in category.TextChannels) {

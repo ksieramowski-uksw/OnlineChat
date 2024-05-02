@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace ChatClient.MVVM.ViewModel {
     public partial class CreateOrJoinGuildPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private string _newGuildName;
@@ -30,8 +30,8 @@ namespace ChatClient.MVVM.ViewModel {
         private string _existingGuildFeedback;
 
 
-        public CreateOrJoinGuildPageViewModel(NavigationStore navigationStore) {
-            NavigationStore = navigationStore;
+        public CreateOrJoinGuildPageViewModel(ChatContext context) {
+            Context = context;
 
             NewGuildName = string.Empty;
             NewGuildPassword = string.Empty;
@@ -45,8 +45,9 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         void CreateGuild() {
-            if (!string.IsNullOrWhiteSpace(NewGuildName) && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
-                App.Current.Client.CreateGuild(NewGuildName, NewGuildPassword);
+            if (!string.IsNullOrWhiteSpace(NewGuildName) 
+                && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
+                Context.Client.CreateGuild(NewGuildName, NewGuildPassword);
             }
             else {
                 NewGuildFeedback = "Please, fill required fields.";
@@ -55,8 +56,9 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         private void JoinGuild() {
-            if (!string.IsNullOrWhiteSpace(ExistingGuildId) && !string.IsNullOrWhiteSpace(ExistingGuildPassword)) {
-                App.Current.Client.JoinGuild(ExistingGuildId, ExistingGuildPassword);
+            if (!string.IsNullOrWhiteSpace(ExistingGuildId)
+                && !string.IsNullOrWhiteSpace(ExistingGuildPassword)) {
+                Context.Client.JoinGuild(ExistingGuildId, ExistingGuildPassword);
             }
             else {
                 ExistingGuildFeedback = "Please, fill required fields.";

@@ -11,10 +11,10 @@ namespace ChatClient.MVVM.View {
     /// </summary>
     public partial class LoginWindow : Window {
 
-        public LoginWindow(NavigationStore navigationStore) {
+        public LoginWindow(ChatContext context) {
             InitializeComponent();
-            navigationStore.LoginPage = new(navigationStore);
-            MainFrame.Content = navigationStore.LoginPage;
+            context.App.Navigation.LoginPage = new LoginPage(context);
+            MainFrame.Content = context.App.Navigation.LoginPage;
         }
 
         private void LoginWindow_MouseDown(object sender, MouseButtonEventArgs e) {

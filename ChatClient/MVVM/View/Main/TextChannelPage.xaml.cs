@@ -1,19 +1,6 @@
-﻿using ChatClient.Stores;
-using ChatShared.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using ChatShared.Models;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace ChatClient.MVVM.ViewModel.Main {
     /// <summary>
@@ -22,10 +9,10 @@ namespace ChatClient.MVVM.ViewModel.Main {
     public partial class TextChannelPage : Page {
         public TextChannelPageViewModel ViewModel { get; }
 
-        public TextChannelPage(NavigationStore navigationStore, TextChannel textChannel) {
+        public TextChannelPage(ChatContext context, TextChannel textChannel) {
             InitializeComponent();
 
-            ViewModel = new TextChannelPageViewModel(navigationStore, textChannel);
+            ViewModel = new TextChannelPageViewModel(context, textChannel);
             DataContext = ViewModel;
         }
 

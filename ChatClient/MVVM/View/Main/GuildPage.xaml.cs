@@ -23,10 +23,10 @@ namespace ChatClient.MVVM.View.Main {
     public partial class GuildPage : Page {
         public GuildPageViewModel ViewModel { get; }
 
-        public GuildPage(NavigationStore navigationStore, Guild guild) {
+        public GuildPage(ChatContext context, Guild guild) {
             InitializeComponent();
 
-            ViewModel = new GuildPageViewModel(navigationStore, guild);
+            ViewModel = new GuildPageViewModel(context, guild);
             DataContext = ViewModel;
         }
     }

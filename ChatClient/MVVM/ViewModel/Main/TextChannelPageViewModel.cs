@@ -3,13 +3,14 @@ using ChatShared.DataModels;
 using ChatShared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows;
 
 
 namespace ChatClient.MVVM.ViewModel.Main {
     public partial class TextChannelPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private TextChannel _textChannel;
@@ -17,24 +18,27 @@ namespace ChatClient.MVVM.ViewModel.Main {
         [ObservableProperty]
         private string _messageContent;
 
+        [ObservableProperty]
+        private ObservableCollection<User> _users;
 
 
-        public TextChannelPageViewModel(NavigationStore navigationStore, TextChannel textChannel) {
-            NavigationStore = navigationStore;
+        public TextChannelPageViewModel(ChatContext context, TextChannel textChannel) {
+            Context = context;
 
             TextChannel = textChannel;
             MessageContent = string.Empty;
+            Users = new ObservableCollection<User>();
 
             
-            App.Current.Client.GetMessageRange(TextChannel.ID, ulong.MaxValue, 20);
+            Context.Client.GetMessageRange(TextChannel.ID, ulong.MaxValue, 20);
         }
 
         [RelayCommand]
         void SendMessage() {
-            if (MessageContent != string.Empty && App.Current.Client.User is User user) {
+            if (MessageContent != string.Empty && Context.CurrentUser is User user) {
                 MessageData data = new(user.ID, TextChannel.ID, MessageContent);
                 string json = JsonSerializer.Serialize(data);
-                App.Current.Client.ServerConnection.Send(OperationCode.SendMessage, json);
+                Context.Client.ServerConnection.Send(OperationCode.SendMessage, json);
                 MessageContent = string.Empty;
             }
         }

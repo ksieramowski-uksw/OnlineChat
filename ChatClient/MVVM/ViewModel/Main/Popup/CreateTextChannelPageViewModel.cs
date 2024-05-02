@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace ChatClient.MVVM.ViewModel.Main.Popup {
     public partial class CreateTextChannelPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private string _title;
@@ -22,8 +22,8 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
         private Category _category;
 
-        public CreateTextChannelPageViewModel(NavigationStore navigationStore, Category category) {
-            NavigationStore = navigationStore;
+        public CreateTextChannelPageViewModel(ChatContext context, Category category) {
+            Context = context;
 
             Title = $"Create new text channel in category {category.Name}";
             NewTextChannelName = string.Empty;
@@ -35,7 +35,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
         private void CreateTextChannel() {
             CreateTextChannelData data = new(_category.ID, NewTextChannelName);
             string json = JsonSerializer.Serialize(data);
-            App.Current.Client.ServerConnection.Send(OperationCode.CreateTextChannel, json);
+            Context.Client.ServerConnection.Send(OperationCode.CreateTextChannel, json);
         }
     }
 }

@@ -11,9 +11,9 @@ namespace ChatClient.MVVM.View {
     public partial class LoginPage : Page {
         public LoginPageViewModel ViewModel { get; }
 
-        public LoginPage(NavigationStore navigationStore) {
+        public LoginPage(ChatContext context) {
             InitializeComponent();
-            ViewModel = new(navigationStore);
+            ViewModel = new(context);
             DataContext = ViewModel;
         }
     }

@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace ChatClient.MVVM.ViewModel {
     public partial class RegisterPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private string _email;
@@ -28,8 +28,8 @@ namespace ChatClient.MVVM.ViewModel {
         [ObservableProperty]
         private string _feedback;
 
-        public RegisterPageViewModel(NavigationStore navigationStore) {
-            NavigationStore = navigationStore;
+        public RegisterPageViewModel(ChatContext context) {
+            Context = context;
 
             Email = string.Empty;
             Password = string.Empty;
@@ -49,7 +49,7 @@ namespace ChatClient.MVVM.ViewModel {
                 !string.IsNullOrWhiteSpace(Password) &&
                 !string.IsNullOrWhiteSpace(ConfirmPassword) &&
                 !string.IsNullOrWhiteSpace(Nickname)) {
-                App.Current.Client.Register(Email, Password, ConfirmPassword, Nickname, Pronoun);
+                Context.Client.Register(Email, Password, ConfirmPassword, Nickname, Pronoun);
             }
             else {
                 Feedback = "Please, fill all fields marked with '*'.";
@@ -58,9 +58,9 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         private void NavigateToLoginPage() {
-            if (NavigationStore.LoginWindow is LoginWindow loginWindow) {
-                NavigationStore.LoginPage ??= new LoginPage(NavigationStore);
-                loginWindow.MainFrame.Navigate(NavigationStore.LoginPage);
+            if (Context.App.Navigation.LoginWindow is LoginWindow loginWindow) {
+                Context.App.Navigation.LoginPage ??= new LoginPage(Context);
+                loginWindow.MainFrame.Navigate(Context.App.Navigation.LoginPage);
             }
         }
 

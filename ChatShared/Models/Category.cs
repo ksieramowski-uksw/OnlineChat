@@ -10,6 +10,7 @@ namespace ChatShared.Models {
         public DateTime CreationTime { get; set; }
         public ObservableCollection<TextChannel> TextChannels { get; set; }
         public ObservableCollection<CategoryPrivilege> Privileges { get; set; }
+        public CategoryPrivilege? DefaultPrivilege { get; set; }
         public bool Expanded { get; set; }
 
         public Category(ulong id, ulong guildID, string name, DateTime creationTime) {

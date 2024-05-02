@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 
 namespace ChatClient.MVVM.ViewModel {
     public partial class MainPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context{ get; }
 
         [ObservableProperty]
         private Visibility _maskVisibility;
@@ -43,8 +43,8 @@ namespace ChatClient.MVVM.ViewModel {
 
         private Dictionary<string, GuildPage> _guildPageCache { get; }
 
-        public MainPageViewModel(NavigationStore navigationStore) {
-            NavigationStore = navigationStore;
+        public MainPageViewModel(ChatContext context) {
+            Context = context;
 
             Guilds = new ObservableCollection<Guild>();
             _guildPageCache = new Dictionary<string, GuildPage>();
@@ -52,12 +52,12 @@ namespace ChatClient.MVVM.ViewModel {
             MaskVisibility = Visibility.Hidden;
             
 
-            if (App.Current.Client.User is User user) {
+            if (Context.CurrentUser is User user) {
                 _currentUserProfilePicture = ResourceHelper.ByteArrayToBitmapImage(user.ProfilePicture);
                 _currentUserNickname = user.Nickname;
                 _currentUserStatus = user.Status.ToString();
 
-                App.Current.Client.ServerConnection.Send(OperationCode.GetGuildsForUser, user.ID.ToString());
+                Context.Client.ServerConnection.Send(OperationCode.GetGuildsForUser, user.ID.ToString());
 
 
                 //Guilds.Add(new Guild(ulong.MaxValue, "PUBLIC_ID_OF_DEFAUL_GUILD", "DUPA", "dupa123", 1, DateTime.Now, user.ProfilePicture));
@@ -76,8 +76,8 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         private void AddGuild() {
-            NavigationStore.CreateOrJoinGuildPage = new CreateOrJoinGuildPage(NavigationStore);
-            PopupContent = NavigationStore.CreateOrJoinGuildPage;
+            Context.App.Navigation.CreateOrJoinGuildPage = new CreateOrJoinGuildPage(Context);
+            PopupContent = Context.App.Navigation.CreateOrJoinGuildPage;
             MaskVisibility = Visibility.Visible;
         }
 
@@ -92,8 +92,8 @@ namespace ChatClient.MVVM.ViewModel {
         private void SelectGuild(ulong id) {
             foreach (Guild guild in Guilds) {
                 if (guild.ID == id) {
-                    NavigationStore.GuildPage = new GuildPage(NavigationStore, guild);
-                    GuildContent = NavigationStore.GuildPage;
+                    Context.App.Navigation.GuildPage = new GuildPage(Context, guild);
+                    GuildContent = Context.App.Navigation.GuildPage;
                     break;
                 }
             }

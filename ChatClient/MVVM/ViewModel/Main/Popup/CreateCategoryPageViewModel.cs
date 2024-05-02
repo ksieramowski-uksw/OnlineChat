@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace ChatClient.MVVM.ViewModel.Main.Popup {
     public partial class CreateCategoryPageViewModel : ObservableObject {
-        public NavigationStore NavigationStore { get; }
+        public ChatContext Context { get; }
 
         [ObservableProperty]
         private string _newCategoryName;
@@ -18,8 +18,8 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
         private Guild _guild;
 
-        public CreateCategoryPageViewModel(NavigationStore navigationStore, Guild guild) {
-            NavigationStore = navigationStore;
+        public CreateCategoryPageViewModel(ChatContext context, Guild guild) {
+            Context = context;
 
             NewCategoryName = string.Empty;
             Feedback = string.Empty;
@@ -29,9 +29,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
         [RelayCommand]
         private void CreateCategory() {
-            CreateCategoryData data = new(_guild.ID, NewCategoryName);
-            string json = JsonSerializer.Serialize(data);
-            App.Current.Client.ServerConnection.Send(OperationCode.CreateCategory, json);
+            Context.Client.CreateCategory(_guild.ID, NewCategoryName);
         }
     }
 }

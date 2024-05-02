@@ -12,9 +12,9 @@ namespace ChatClient.MVVM.View.Main.Popup {
     public partial class CreateOrJoinGuildPage : Page {
         public CreateOrJoinGuildPageViewModel ViewModel { get; }
 
-        public CreateOrJoinGuildPage(NavigationStore navigationStore) {
+        public CreateOrJoinGuildPage(ChatContext context) {
             InitializeComponent();
-            ViewModel = new CreateOrJoinGuildPageViewModel(navigationStore);
+            ViewModel = new CreateOrJoinGuildPageViewModel(context);
             DataContext = ViewModel;
         }
 
