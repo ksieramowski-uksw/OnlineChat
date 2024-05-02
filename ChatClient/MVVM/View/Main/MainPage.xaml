@@ -11,12 +11,10 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="64"/>
-            <ColumnDefinition Width="256"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="64"/>
         </Grid.RowDefinitions>
 
         <!-- GUILD LIST -->
@@ -58,25 +56,12 @@
             <ScrollViewer x:Name="GuildsScroll" Grid.Column="0" Grid.Row="2"
                           VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Hidden">
                 <ListView ItemsSource="{Binding Guilds}" Background="Transparent" MouseWheel="ScrollViewer_MouseWheel"
-                      Style="{DynamicResource BetterListView}" SelectedItem="{Binding SelectedGuild}" Margin="2"
-                      SelectionChanged="ListView_SelectionChanged">
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListViewItem">
-                                        <ContentPresenter />
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="Margin" Value="0"/>
-                        </Style>
-                    </ListView.ItemContainerStyle>
+                          Style="{DynamicResource BetterListView}" Margin="2">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Button Grid.Column="0" Grid.Row="0" Width="60" Height="60" MouseWheel="ScrollViewer_MouseWheel"
-                                Command="{Binding DataContext.SelectGuildCommand, RelativeSource={RelativeSource AncestorType={x:Type ListView}}}"
-                                CommandParameter="{Binding PublicID}"
+                                Command="{Binding DataContext.SelectGuildCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                                CommandParameter="{Binding ID}"
                                 Style="{DynamicResource RoundButton8Style}">
                                 <Canvas>
                                     <Ellipse Width="56" Height="56" Fill="#343434" Canvas.Left="-28" Canvas.Top="-28"/>
@@ -121,9 +106,22 @@
                NavigationUIVisibility="Hidden"/>
 
 
-        <Grid Grid.Column="1" Grid.Row="1" Background="#282828">
-            <Button Command="{Binding UserSettingsCommand}" Style="{DynamicResource RoundButton8Style}"
-                    Margin="4" HorizontalAlignment="Left">
+        <!-- USER PANEL -->
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" Background="#282828"
+              Width="256" Height="64" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="64,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Background="#222222"/>
+
+            <Button Grid.Column="0" Grid.Row="1" Margin="4" HorizontalAlignment="Left"
+                    Command="{Binding UserSettingsCommand}" Style="{DynamicResource RoundButton8Style}">
+                
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="41"/>
@@ -158,11 +156,11 @@
 
 
         <!-- CHANNEL FRAME -->
-        <Frame x:Name="ChannelFrame" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
-               NavigationUIVisibility="Hidden"/>
+        <Frame Grid.Column="2" Grid.Row="1" NavigationUIVisibility="Hidden"
+               Content="{Binding GuildContent}" />
 
         <!-- MASK + POPUP -->
-        <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="2"
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
               Background="#50000000" Visibility="{Binding MaskVisibility}">
             <Button Command="{Binding HideMaskCommand}" Style="{DynamicResource TransparentButtonStyle}">
                 <Frame Content="{Binding PopupContent}"/>

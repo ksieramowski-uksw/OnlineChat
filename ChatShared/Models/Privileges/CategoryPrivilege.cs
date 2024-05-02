@@ -1,5 +1,7 @@
 ﻿
 
+using System.Threading.Channels;
+
 namespace ChatShared.Models.Privileges {
     public class CategoryPrivilege {
         public ulong ID { get; set; }
@@ -23,7 +25,7 @@ namespace ChatShared.Models.Privileges {
             CategoryID = categoryID;
 
             UpdateCategory = PrivilegeValue.Neutral;
-            DeleteChannel = PrivilegeValue.Neutral;
+            DeleteCategory = PrivilegeValue.Neutral;
 
             CreateChannel = PrivilegeValue.Neutral;
             UpdateChannel = PrivilegeValue.Neutral;
@@ -32,6 +34,29 @@ namespace ChatShared.Models.Privileges {
 
             Read = PrivilegeValue.Neutral;
             Write = PrivilegeValue.Neutral;
+        }
+
+        public CategoryPrivilege Merge(GuildPrivilege guildPrivilege) {
+            CategoryPrivilege privilege = new(ID, UserID, CategoryID);
+
+            privilege.CreateChannel = (CreateChannel == PrivilegeValue.Neutral)
+                ? guildPrivilege.CreateChannel : CreateChannel;
+
+            privilege.UpdateChannel = (UpdateChannel == PrivilegeValue.Neutral)
+                ? guildPrivilege.UpdateChannel : UpdateChannel;
+
+            privilege.DeleteChannel = (DeleteChannel == PrivilegeValue.Neutral)
+                ? guildPrivilege.DeleteChannel : DeleteChannel;
+
+            privilege.Read = (Read == PrivilegeValue.Neutral)
+                ? guildPrivilege.Read : Read;
+
+            privilege.Write = (Write == PrivilegeValue.Neutral)
+                ? guildPrivilege.Write : Write;
+
+            privilege.ViewCategory = ViewCategory;
+
+            return privilege;
         }
     }
 }

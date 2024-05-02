@@ -1,5 +1,6 @@
 ﻿using ChatClient.MVVM.View;
 using ChatClient.MVVM.View.Main;
+using ChatClient.MVVM.View.Main.Popup;
 
 
 namespace ChatClient.Stores {
@@ -11,9 +12,16 @@ namespace ChatClient.Stores {
 
         public MainWindow? MainWindow { get; set; }
         public MainPage? MainPage { get; set; }
+        public GuildPage? GuildPage { get; set; }
+        
+
+
+
         public CreateOrJoinGuildPage? CreateOrJoinGuildPage { get; set; }
 
+        public CreateCategoryPage? CreateCategoryPage { get; set; }
 
+        public CreateTextChannelPage? CreateTextChannelPage { get; set; }
 
 
 

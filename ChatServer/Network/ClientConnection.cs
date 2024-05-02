@@ -39,7 +39,7 @@ namespace ChatServer.Network {
                         OperationCode opCode = (OperationCode)msg[0];
                         string message = msg[1..];
                         if (opCode == 0 || string.IsNullOrWhiteSpace(message) || message[0] == 0) { continue; }
-                        Logger.Message($"{{{opCode}}} | {message}");
+                        //Logger.Message($"{{{opCode}}} | {message}");
                         handler.HandleOperation(opCode, message);
                     }
                 }
@@ -49,7 +49,7 @@ namespace ChatServer.Network {
                         Logger.Warning($"Client {ip.Address}:{ip.Port} just disconnected.");
                     }
                     if (User != null) {
-                        Logger.Info($"User with email \"{User.Email}\" just disconnected.");
+                        Logger.Info($"User with email \"{User.ID}\" just disconnected.");
                     }
                     break;
                 }
@@ -71,7 +71,7 @@ namespace ChatServer.Network {
         public void MultiCast(OperationCode opCode, string message, Func<ClientConnection, bool> isTarget) {
             foreach (ClientConnection client in _server.Clients) {
                 if (isTarget(client)) {
-                    Send(opCode, message);
+                    client.Send(opCode, message);
                 }
             }
         }

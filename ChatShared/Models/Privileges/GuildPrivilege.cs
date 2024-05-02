@@ -7,7 +7,7 @@ namespace ChatShared.Models.Privileges {
         public ulong GuildID { get; set; }
 
         public PrivilegeValue ManageGuild { get; set; }
-        public PrivilegeValue ManagePrivilages { get; set; }
+        public PrivilegeValue ManagePrivileges { get; set; }
 
         public PrivilegeValue CreateCategory { get; set; }
         public PrivilegeValue UpdateCategory { get; set; }
@@ -27,7 +27,7 @@ namespace ChatShared.Models.Privileges {
             GuildID = guildID;
 
             ManageGuild = PrivilegeValue.Negative;
-            ManagePrivilages = PrivilegeValue.Negative;
+            ManagePrivileges = PrivilegeValue.Negative;
 
             CreateCategory = PrivilegeValue.Negative;
             UpdateCategory = PrivilegeValue.Negative;
@@ -37,8 +37,8 @@ namespace ChatShared.Models.Privileges {
             UpdateChannel = PrivilegeValue.Negative;
             DeleteChannel = PrivilegeValue.Negative;
 
-            Read = PrivilegeValue.Negative;
-            Write = PrivilegeValue.Negative;
+            Read = PrivilegeValue.Positive;
+            Write = PrivilegeValue.Positive;
         }
 
     }

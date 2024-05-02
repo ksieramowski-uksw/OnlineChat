@@ -6,6 +6,7 @@ using System.Windows;
 using System.IO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using ChatShared.Models;
+using ChatShared.Models.Privileges;
 
 
 namespace ChatClient.Network {
@@ -49,13 +50,19 @@ namespace ChatClient.Network {
 
         public void JoinGuild(string publicId, string password) {
             if (User != null) {
-                JoinGuildData createData = new(publicId, password);
+                JoinGuildData createData = new(publicId, password, User.ID);
                 string json = JsonSerializer.Serialize(createData);
                 ServerConnection.Send(OperationCode.JoinGuild, json);
             }
         }
 
-
+        public void GetMessageRange(ulong channelID, ulong first, byte limit) {
+            if (User != null) {
+                MessageRangeData data = new(channelID, first, limit, User.ID);
+                string json = JsonSerializer.Serialize(data);
+                ServerConnection.Send(OperationCode.GetMessageRange, json);
+            }
+        }
 
 
 

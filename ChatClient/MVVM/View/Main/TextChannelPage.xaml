@@ -1,0 +1,127 @@
+﻿<Page x:Class="ChatClient.MVVM.ViewModel.Main.TextChannelPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ChatClient.MVVM.ViewModel.Main"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="TextChannelPage">
+
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="72"/>
+            <ColumnDefinition Width="256"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- MESSAGES -->
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto" x:Name="MessageScrollViewer">
+            <ListView ItemsSource="{Binding TextChannel.Messages}" Style="{DynamicResource BetterListView}"
+                      Margin="0,0,0,16" MaxWidth="{Binding ActualWidth, ElementName=MessageScrollViewer}">
+                <ListView.ItemTemplate>
+
+                    <DataTemplate>
+                        <Grid Margin="8,0,24,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="48"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
+                                   Source="{Binding Author.ProfilePicture}" VerticalAlignment="Top"/>
+
+                            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Author.Nickname}"
+                                       FontWeight="DemiBold" FontSize="16" Foreground="#EEE"  Margin="4,0,0,0"
+                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                            <TextBlock Grid.Column="2" Grid.Row="0" Text="{Binding Time}"
+                                       VerticalAlignment="Center" Foreground="#A8A8A8" Margin="6,0,0,0"/>
+
+                            <TextBox Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2"
+                                       Text="{Binding Content}" Foreground="#EEE" Margin="4,0,0,0" FontSize="16"
+                                       VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True"
+                                       Style="{DynamicResource TransparentTextBoxStyle}"
+                                     
+                                       TextWrapping="Wrap"
+                                        />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+
+
+        <!-- USERS -->
+        <ScrollViewer Grid.Column="2" Grid.Row="0" Grid.RowSpan="4">
+            <ListView>
+
+            </ListView>
+        </ScrollViewer>
+
+
+        <!-- ATTACHMENTS -->
+        <!--<ScrollViewer Grid.Column="0" Grid.Row="1" Margin="8,0,8,0">
+            <ListView>
+
+            </ListView>
+        </ScrollViewer>-->
+
+        <!-- INPUT BOX -->
+        <Border Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="8" Background="#282828" CornerRadius="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="42"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Column="0" Grid.Row="0" Width="36" Height="36" Cursor="Hand"
+                        Style="{DynamicResource TransparentButtonStyle}" Margin="6,0,0,0">
+                    <Canvas>
+                        <Ellipse Fill="#AAA" Width="24" Height="24" Canvas.Left="-12" Canvas.Top="-12"/>
+                        <Rectangle Fill="#282828" Width="2" Height="12" Canvas.Left="-1" Canvas.Top="-6"/>
+                        <Rectangle Fill="#282828" Width="12" Height="2" Canvas.Left="-6" Canvas.Top="-1"/>
+                    </Canvas>
+                </Button>
+
+
+                <TextBox Grid.Column="1" Grid.Row="0"
+                     Padding="3,11,8,0" TextWrapping="Wrap"
+                     Text="{Binding MessageContent}"
+                     Style="{DynamicResource RoundedTextBoxStyle}"
+                     VerticalScrollBarVisibility="Auto"
+                     AcceptsReturn="True" TextChanged="TextBox_TextChanged"
+                     Height="46" MaxHeight="128"/>
+            </Grid>
+        </Border>
+
+        
+
+
+        <!-- SEND BUTTON -->
+        <Button Grid.Column="1" Grid.Row="3" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,8,8,8"
+                VerticalAlignment="Bottom" Padding="8" Height="46" Width="64"
+                Style="{DynamicResource RoundButtonStyle}" Command="{Binding SendMessageCommand}"/>
+        
+
+
+
+
+    </Grid>
+</Page>

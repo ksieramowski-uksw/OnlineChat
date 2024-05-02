@@ -128,7 +128,9 @@ namespace ChatClient {
         SendMessageSuccess,
         SendMessageFail,
 
-
+        GetMessageRange,
+        GetMessageRangeSuccess,
+        GetMessageRangeFail,
 
 
         SimpleTextMessage

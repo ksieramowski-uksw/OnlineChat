@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChatServer.Database {
+namespace ChatServer.Database.Enums
+{
 
-    public enum DatabaseCommandResult {
+    public enum DatabaseCommandResult
+    {
         Success,
         Fail,
         UnknownError,

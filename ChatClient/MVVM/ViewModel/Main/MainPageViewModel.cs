@@ -1,5 +1,6 @@
 ﻿using ChatClient.MVVM.View;
 using ChatClient.MVVM.View.Main;
+using ChatClient.MVVM.View.Main.Popup;
 using ChatClient.Stores;
 using ChatShared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,17 +34,20 @@ namespace ChatClient.MVVM.ViewModel {
         [ObservableProperty]
         private object? _popupContent;
 
+        [ObservableProperty]
+        private object? _guildContent;
 
         [ObservableProperty]
         private Guild? _selectedGuild;
         public ObservableCollection<Guild> Guilds { get; set; }
 
-
+        private Dictionary<string, GuildPage> _guildPageCache { get; }
 
         public MainPageViewModel(NavigationStore navigationStore) {
             NavigationStore = navigationStore;
 
             Guilds = new ObservableCollection<Guild>();
+            _guildPageCache = new Dictionary<string, GuildPage>();
 
             MaskVisibility = Visibility.Hidden;
             
@@ -56,7 +60,7 @@ namespace ChatClient.MVVM.ViewModel {
                 App.Current.Client.ServerConnection.Send(OperationCode.GetGuildsForUser, user.ID.ToString());
 
 
-                Guilds.Add(new Guild(123, "PUBLIC_ID_OF_DEFAUL_GUILD", "DUPA", "dupa123", 1, DateTime.Now, user.ProfilePicture));
+                //Guilds.Add(new Guild(ulong.MaxValue, "PUBLIC_ID_OF_DEFAUL_GUILD", "DUPA", "dupa123", 1, DateTime.Now, user.ProfilePicture));
             }
             else {
                 _currentUserProfilePicture = null;
@@ -72,7 +76,7 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         private void AddGuild() {
-            NavigationStore.CreateOrJoinGuildPage ??= new CreateOrJoinGuildPage(NavigationStore);
+            NavigationStore.CreateOrJoinGuildPage = new CreateOrJoinGuildPage(NavigationStore);
             PopupContent = NavigationStore.CreateOrJoinGuildPage;
             MaskVisibility = Visibility.Visible;
         }
@@ -85,11 +89,14 @@ namespace ChatClient.MVVM.ViewModel {
         }
 
         [RelayCommand]
-        private void SelectGuild(string publicID) {
-            MessageBox.Show(publicID);
-            //if (SelectedGuild != null) {
-            //    MessageBox.Show($"{SelectedGuild.Id}");
-            //}
+        private void SelectGuild(ulong id) {
+            foreach (Guild guild in Guilds) {
+                if (guild.ID == id) {
+                    NavigationStore.GuildPage = new GuildPage(NavigationStore, guild);
+                    GuildContent = NavigationStore.GuildPage;
+                    break;
+                }
+            }
         }
     }
 }

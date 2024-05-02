@@ -1,10 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ChatServer.Database {
     public static class Tables {
@@ -20,9 +15,13 @@ namespace ChatServer.Database {
             if (!InitializeCategoriesTable(connection)) { checkSum += 1; }
             if (!InitializeTextChannelTable(connection)) { checkSum += 1; }
             if (!InitializeMessageTable(connection)) { checkSum += 1; }
+            if (!InitializeMessageAttachmentTable(connection)) { checkSum += 1; }
             if (!InitializeTextChannelPrivilegeTable(connection)) { checkSum += 1; }
             if (!InitializeCategoryPrivilegeTable(connection)) { checkSum += 1; }
             if (!InitializeGuildPrivilegeTable(connection)) { checkSum += 1; }
+            if (!InitializeDefaultTextChannelPrivilegeTable(connection)) { checkSum += 1; }
+            if (!InitializeDefaultCategoryPrivilegeTable(connection)) { checkSum += 1; }
+            if (!InitializeDefaultGuildPrivilegeTable(connection)) { checkSum += 1; }
 
             return checkSum;
         }
@@ -46,6 +45,7 @@ namespace ChatServer.Database {
             const string query = $@"
                 CREATE TABLE IF NOT EXISTS {tableName} (
                     ID INTEGER PRIMARY KEY,
+                    PublicID TEXT NOT NULL,
                     Email TEXT NOT NULL,
                     Password TEXT NOT NULL,
                     Nickname TEXT NOT NULL,
@@ -125,8 +125,19 @@ namespace ChatServer.Database {
                     ID INTEGER PRIMARY KEY,
                     UserID INTEGER NOT NULL,
                     TextChannelID INTEGER NOT NULL,
-                    Text TEXT NOT NULL,
-                    Time TEXT NOT NULL
+                    Content TEXT NOT NULL,
+                    CreationTime TEXT NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeMessageAttachmentTable(SqliteConnection connection) {
+            const string tableName = "MessageAttachments";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    MessageID INTEGER NOT NULL,
+                    Content BLOB NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
@@ -140,9 +151,9 @@ namespace ChatServer.Database {
                     ChannelID INTEGER,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,
+                    ViewChannel INTEGER NOT NULL,
                     Read INTEGER NOT NULL,
-                    Write INTEGER NOT NULL,
-                    ViewChannel INTEGER NOT NULL
+                    Write INTEGER NOT NULL
                 );";
             return InitializeTable(connection, tableName, query);
         }
@@ -156,8 +167,8 @@ namespace ChatServer.Database {
                     CategoryID INTEGER,
                     UpdateCategory INTEGER NOT NULL,
                     DeleteCategory INTEGER NOT NULL,
-                    CreateChannel INTERER NOT NULL,
                     ViewCategory INTEGER NOT NULL,
+                    CreateChannel INTERER NOT NULL,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,
                     Read INTEGER NOT NULL,
@@ -186,5 +197,60 @@ namespace ChatServer.Database {
                 );";
             return InitializeTable(connection, tableName, query);
         }
+
+
+        public static bool InitializeDefaultTextChannelPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "DefaultTextChannelPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    ChannelID INTEGER,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    ViewChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeDefaultCategoryPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "DefaultCategoryPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    CategoryID INTEGER,
+                    UpdateCategory INTEGER NOT NULL,
+                    DeleteCategory INTEGER NOT NULL,
+                    ViewCategory INTEGER NOT NULL,
+                    CreateChannel INTERER NOT NULL,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
+        public static bool InitializeDefaultGuildPrivilegeTable(SqliteConnection connection) {
+            const string tableName = "DefaultGuildPrivileges";
+            const string query = $@"
+                CREATE TABLE IF NOT EXISTS {tableName} (
+                    ID INTEGER PRIMARY KEY,
+                    GuildID INTEGER,
+                    ManageGuild INTEGER NOT NULL,
+                    ManagePrivileges INTEGER NOT NULL,
+                    CreateCategory INTEGER NOT NULL,
+                    UpdateCategory INTEGER NOT NULL,
+                    DeleteCategory INTEGER NOT NULL,
+                    CreateChannel INTERER NOT NULL,
+                    UpdateChannel INTEGER NOT NULL,
+                    DeleteChannel INTEGER NOT NULL,
+                    Read INTEGER NOT NULL,
+                    Write INTEGER NOT NULL
+                );";
+            return InitializeTable(connection, tableName, query);
+        }
+
     }
 }

@@ -4,8 +4,8 @@ using System.Text.Json;
 using ChatServer.Database;
 using System.Collections.ObjectModel;
 using ChatShared.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using ChatShared.Models.Privileges;
+using ChatServer.Database.Enums;
 
 
 namespace ChatServer.Network
@@ -33,6 +33,9 @@ namespace ChatServer.Network
                     } break;
                     case OperationCode.CreateGuild: {
                         CreateGuild(message);
+                    } break;
+                    case OperationCode.JoinGuild: {
+                        JoinGuild(message);
                     } break;
                     case OperationCode.CreateCategory: {
                         CreateCategory(message);
@@ -70,6 +73,9 @@ namespace ChatServer.Network
                     case OperationCode.RemoveFriend: {
                         RemoveFriend(message);
                     } break;
+                    case OperationCode.GetMessageRange: {
+                        GetMessageRange(message);
+                    } break;
                 }
             }
 
@@ -88,7 +94,7 @@ namespace ChatServer.Network
                     if (result == DatabaseCommandResult.Success && user != null) {
                         string json = JsonSerializer.Serialize(user);
                         _client.User = user;
-                        Logger.Info($"Succesfully logged user \"{user.Nickname}#{user.ID}\" with email \"{data.Email}\".");
+                        Logger.Info($"Successfully logged user \"{user.Nickname}#{user.ID}\" with email \"{data.Email}\".");
                         _client.Send(OperationCode.LogInSuccess, json);
                     }
                     else if (result == DatabaseCommandResult.Fail) {
@@ -120,10 +126,10 @@ namespace ChatServer.Network
                     return;
                 }
 
-                DatabaseCommandResult result = _database.Commands.TryRegisterUser(data);
+                DatabaseCommandResult result = _database.Commands.RegisterUser(data);
 
                 if (result == DatabaseCommandResult.Success) {
-                    Logger.Info($"Succesfully registered user with email \"{data.Email}\".");
+                    Logger.Info($"Successfully registered user with email \"{data.Email}\".");
                     _client.Send(OperationCode.RegisterSuccess, "Successfuly registered user.");
                 }
                 else if (result == DatabaseCommandResult.UserExists) {
@@ -243,7 +249,7 @@ namespace ChatServer.Network
                     out ObservableCollection<Guild>? guilds);
 
                 if (result == DatabaseCommandResult.Success && guilds != null) {
-                    Logger.Info($"Succesfully fetched {guilds.Count} Guilds for User \"{userID}\".");
+                    Logger.Info($"Successfully fetched {guilds.Count} Guilds for User \"{userID}\".");
                     foreach (Guild guild in guilds) {
                         string json = JsonSerializer.Serialize(guild);
                         _client.Send(OperationCode.GetGuildsForUserSuccess, json);
@@ -276,7 +282,7 @@ namespace ChatServer.Network
                     out ObservableCollection<Category>? categories);
 
                 if (result == DatabaseCommandResult.Success && categories != null) {
-                    Logger.Info($"Succesfully fetched {categories.Count} Categories in Guild \"{guildID}\".");
+                    Logger.Info($"Successfully fetched {categories.Count} Categories in Guild \"{guildID}\".");
                     foreach (Category category in categories) {
                         string json = JsonSerializer.Serialize(category);
                         _client.Send(OperationCode.GetCategoriesInGuildSuccess, json);
@@ -308,7 +314,7 @@ namespace ChatServer.Network
                     out ObservableCollection<TextChannel>? textChannels);
 
                 if (result == DatabaseCommandResult.Success && textChannels != null) {
-                    Logger.Info($"Succesfully fetched {textChannels.Count} Text Channels in Category \"{categoryID}\".");
+                    Logger.Info($"Successfully fetched {textChannels.Count} Text Channels in Category \"{categoryID}\".");
                     foreach (TextChannel textChannel in textChannels) {
                         string json = JsonSerializer.Serialize(textChannel);
                         _client.Send(OperationCode.GetTextChannelsInCategorySuccess, json);
@@ -473,9 +479,79 @@ namespace ChatServer.Network
             }
 
             private void SendMessage(string message) {
-
+                MessageData? data = JsonSerializer.Deserialize<MessageData>(message);
+                if (data == null) {
+                    Logger.Error("Message data was null.");
+                    _client.Send(OperationCode.SendMessageFail, "");
+                    return;
+                }
+                _database.Commands.SendMessage(data, out Message? msg);
+                if (msg == null) {
+                    Logger.Error("Message was null.");
+                    _client.Send(OperationCode.SendMessageFail, "");
+                    return;
+                }
+                string json = JsonSerializer.Serialize(msg);
+                _client.MultiCast(OperationCode.SendMessage, json, (x) => {
+                    TextChannelPrivilege privilege = new(0, 0, msg.ChannelID) {
+                        ViewChannel = ChatShared.PrivilegeValue.Neutral,
+                        Read = ChatShared.PrivilegeValue.Neutral
+                    };
+                    var result = _database.Commands.GetUserIDsInTextChannel(msg.ChannelID,
+                        out List<ulong>? userIDs, privilege);
+                    if (result != DatabaseCommandResult.Success || userIDs == null) {
+                        Logger.Error($"Failed to fetch liast of user with access to channel {msg.ChannelID}");
+                        return false;
+                    }
+                    Logger.Warning(userIDs.Count.ToString());
+                    foreach (ulong userID in userIDs) {
+                        if (x.User != null && userID == x.User.ID) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
             }
 
+            private void JoinGuild(string message) {
+                JoinGuildData? data = JsonSerializer.Deserialize<JoinGuildData>(message);
+                if (data == null) {
+                    Logger.Error("Join data is null.");
+                    _client.Send(OperationCode.JoinGuildFail, "");
+                    return;
+                }
+                var result = _database.Commands.JoinGuild(data, out Guild? guild);
+                if (result == DatabaseCommandResult.Success) {
+                    Logger.Info($"User '{data.UserID}' joined guild with public id '{data.PublicID}'.");
+                    string json = JsonSerializer.Serialize(guild);
+                    _client.Send(OperationCode.JoinGuildSuccess, json);
+                }
+                else {
+                    Logger.Error($"Failed to add user '{data.UserID}' to guild '{data.PublicID}'");
+                }
+            }
+
+            private void GetMessageRange(string message) {
+                MessageRangeData? data = JsonSerializer.Deserialize<MessageRangeData>(message);
+                if (data == null) {
+                    Logger.Error("MessageRange data was null.");
+                    _client.Send(OperationCode.GetMessageRangeFail, "MessageRange data was null.");
+                    return;
+                }
+                var result = _database.Commands.GetMessageRange(data.ChannelID, data.First, data.Limit,
+                    out ObservableCollection<Message>? messages);
+                if (result == DatabaseCommandResult.Success && messages != null) {
+                    string json = JsonSerializer.Serialize(messages);
+                    _client.Send(OperationCode.GetMessageRangeSuccess, json);
+                    Logger.Info($"Range of {messages.Count} ({data.First}, {data.Limit}) messages sent to user '{data.UserID}'");
+                }
+                else {
+                    string errorMessage = $"Failed to get MessageRange ({data.First}, {data.Limit}) from user '{data.UserID}', {result}";
+                    Logger.Error(errorMessage);
+                    _client.Send(OperationCode.GetMessageRangeFail, errorMessage);
+                }
+
+            }
         }
     }
 }

@@ -1,19 +1,26 @@
 ﻿
 
+using System.Collections.ObjectModel;
+
 namespace ChatShared.Models {
     public class Message {
         public ulong ID { get; set; }
         public ulong ChannelID { get; set; }
-        public User Author { get; set; }
+        public ulong AuthorID { get; set; }
+        public User? Author { get; set; }
         public string Content { get; set; }
-        public DateTime TimeStamp { get; set; }
+        public DateTime Time { get; set; }
+        public ObservableCollection<MessageAttachment> Attachments { get; set; }
 
-        public Message(ulong id, ulong channelID, User author, string content, DateTime dateTime) {
+
+        public Message(ulong id, ulong channelID, ulong authorID, string content, DateTime time) {
             ID = id;
             ChannelID = channelID;
-            Author = author;
+            AuthorID = authorID;
             Content = content;
-            TimeStamp = dateTime;
+            Time = time;
+
+            Attachments = new ObservableCollection<MessageAttachment>();
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using ChatClient.MVVM.ViewModel;
+﻿using ChatClient.MVVM.ViewModel.Main;
 using ChatClient.Stores;
+using ChatShared.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,19 +18,16 @@ using System.Windows.Shapes;
 
 namespace ChatClient.MVVM.View.Main {
     /// <summary>
-    /// Interaction logic for CreateOrJoinGuildPage.xaml
+    /// Interaction logic for GuildPage.xaml
     /// </summary>
-    public partial class CreateOrJoinGuildPage : Page {
-        public CreateOrJoinGuildPageViewModel ViewModel { get; }
+    public partial class GuildPage : Page {
+        public GuildPageViewModel ViewModel { get; }
 
-        public CreateOrJoinGuildPage(NavigationStore navigationStore) {
+        public GuildPage(NavigationStore navigationStore, Guild guild) {
             InitializeComponent();
-            ViewModel = new CreateOrJoinGuildPageViewModel(navigationStore);
-            DataContext = ViewModel;
-        }
 
-        private void HandleMouseEvent(object sender, MouseButtonEventArgs e) {
-            e.Handled = true;
+            ViewModel = new GuildPageViewModel(navigationStore, guild);
+            DataContext = ViewModel;
         }
     }
 }
