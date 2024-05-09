@@ -1,7 +1,7 @@
 ﻿
 
 namespace ChatShared.Models.Privileges {
-    public class GuildPrivilege {
+    public class GuildPrivilege : IPrivilege {
         public ulong ID { get; set; }
         public ulong UserID { get; set; }
         public ulong GuildID { get; set; }
@@ -20,6 +20,26 @@ namespace ChatShared.Models.Privileges {
         public PrivilegeValue Read { get; set; }
         public PrivilegeValue Write { get; set; }
 
+
+        public GuildPrivilege() {
+            ID = 0;
+            UserID = 0;
+            GuildID = 0;
+
+            ManageGuild = PrivilegeValue.Negative;
+            ManagePrivileges = PrivilegeValue.Negative;
+
+            CreateCategory = PrivilegeValue.Negative;
+            UpdateCategory = PrivilegeValue.Negative;
+            DeleteCategory = PrivilegeValue.Negative;
+
+            CreateChannel = PrivilegeValue.Negative;
+            UpdateChannel = PrivilegeValue.Negative;
+            DeleteChannel = PrivilegeValue.Negative;
+
+            Read = PrivilegeValue.Positive;
+            Write = PrivilegeValue.Positive;
+        }
 
         public GuildPrivilege(ulong id, ulong userID, ulong guildID) {
             ID = id;
@@ -40,6 +60,7 @@ namespace ChatShared.Models.Privileges {
             Read = PrivilegeValue.Positive;
             Write = PrivilegeValue.Positive;
         }
+
 
     }
 }

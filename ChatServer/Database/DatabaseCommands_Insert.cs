@@ -100,6 +100,7 @@ namespace ChatServer.Database {
         }
 
         public ulong InsertTextChannelPrivilege(TextChannelPrivilege privilege) {
+            Logger.Warning("WRITE: " + privilege.Write.ToString());
             return Insert("TextChannelPrivileges",
                 new Entry("UserID", privilege.UserID),
                 new Entry("ChannelID", privilege.ChannelID),

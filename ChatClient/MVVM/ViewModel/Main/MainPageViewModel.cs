@@ -1,16 +1,9 @@
-﻿using ChatClient.MVVM.View;
-using ChatClient.MVVM.View.Main;
+﻿using ChatClient.MVVM.View.Main;
 using ChatClient.MVVM.View.Main.Popup;
-using ChatClient.Stores;
 using ChatShared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -41,13 +34,10 @@ namespace ChatClient.MVVM.ViewModel {
         private Guild? _selectedGuild;
         public ObservableCollection<Guild> Guilds { get; set; }
 
-        private Dictionary<string, GuildPage> _guildPageCache { get; }
-
         public MainPageViewModel(ChatContext context) {
             Context = context;
 
             Guilds = new ObservableCollection<Guild>();
-            _guildPageCache = new Dictionary<string, GuildPage>();
 
             MaskVisibility = Visibility.Hidden;
             
@@ -91,7 +81,13 @@ namespace ChatClient.MVVM.ViewModel {
         [RelayCommand]
         private void SelectGuild(ulong id) {
             foreach (Guild guild in Guilds) {
-                if (guild.ID == id) {
+                if (guild.ID == id && Context.CurrentUser is User currentUser) {
+                    foreach (var category in guild.Categories) {
+                        category.UpdateVisibility(currentUser.ID);
+                        foreach (var textChannel in category.TextChannels) {
+                            textChannel.UpdateVisibility(currentUser.ID);
+                        }
+                    }
                     Context.App.Navigation.GuildPage = new GuildPage(Context, guild);
                     GuildContent = Context.App.Navigation.GuildPage;
                     break;

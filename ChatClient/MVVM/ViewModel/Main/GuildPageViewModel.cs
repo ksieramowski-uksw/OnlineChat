@@ -21,7 +21,18 @@ namespace ChatClient.MVVM.ViewModel.Main {
         public GuildPageViewModel(ChatContext context, Guild guild) {
             Context = context;
             _guild = guild;
+
+            if (Context.CurrentUser != null) {
+                foreach (var category in guild.Categories) {
+                    category.UpdateVisibility(Context.CurrentUser.ID);
+                    foreach (var textChannel in category.TextChannels) {
+                        textChannel.UpdateVisibility(Context.CurrentUser.ID);
+                    }
+                }
+            }
+
         }
+
 
         [RelayCommand]
         private void SelectTextChannel(ulong id) {

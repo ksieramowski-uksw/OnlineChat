@@ -1,9 +1,9 @@
 ﻿
 
 namespace ChatShared {
-    public enum PrivilegeValue : byte {
-        Positive,
-        Neutral,
-        Negative
+    public enum PrivilegeValue : int {
+        Positive = 1,
+        Neutral = 0,
+        Negative = -1
     }
 }

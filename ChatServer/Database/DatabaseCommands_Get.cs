@@ -2,13 +2,33 @@
 using ChatShared.Models;
 using ChatShared.Models.Privileges;
 using Microsoft.Data.Sqlite;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 
 namespace ChatServer.Database {
     public partial class DatabaseCommands {
 
-
+        public User? GetUserByID(ulong userID) {
+            var reader = ExecuteReader($@"
+                SELECT
+                    Users.ID,
+                    Users.PublicID,
+                    Users.Nickname,
+                    Users.Pronoun,
+                    Users.CreationTime,
+                    Users.ProfilePicture,
+                    Users.Status
+                FROM Users
+                WHERE Users.ID = {userID}");
+            if (reader == null) {
+                return null;
+            }
+            if (reader.Read()) {
+                return GetUser(reader);
+            }
+            return null;
+        }
         public User GetUser(SqliteDataReader reader) {
             byte field = 0;
             ulong id = reader.GetFieldValue<ulong>(field++);
@@ -21,6 +41,97 @@ namespace ChatServer.Database {
 
             return new User(id, publicID, nickname, pronoun, creationTime, profilePicture, status);
         }
+
+
+        public Guild? GetGuildByID(ulong guildID) {
+            var reader = ExecuteReader($@"
+                SELECT
+                    Guilds.ID,
+                    Guilds.PublicID,
+                    Guilds.Name,
+                    Guilds.Password,
+                    Guilds.OwnerID,
+                    Guilds.CreationTime,
+                    Guilds.Icon
+                FROM Guilds
+                WHERE Guilds.ID = '{guildID}'");
+            if (reader == null) {
+                return null;
+            }
+            if (reader.Read()) {
+                return GetGuild(reader);
+            }
+            return null;
+        }
+        public Guild GetGuild(SqliteDataReader reader) {
+            byte field = 0;
+            ulong guildID = reader.GetFieldValue<ulong>(field++);
+            string publicID = reader.GetFieldValue<string>(field++);
+            string name = reader.GetFieldValue<string>(field++);
+            string password = reader.GetFieldValue<string>(field++);
+            ulong ownerID = reader.GetFieldValue<ulong>(field++);
+            DateTime CreationTime = reader.GetFieldValue<DateTime>(field++);
+            byte[] icon = reader.GetFieldValue<byte[]>(field++);
+
+            return new Guild(guildID, publicID, name, password, ownerID, CreationTime, icon);
+        }
+
+        public Category? GetCategoryByID(ulong categoryID) {
+            var reader = ExecuteReader($@"
+                SELECT
+                    Categories.ID,
+                    Categories.GuildID,
+                    Categories.Name,
+                    Categories.CreationTime
+                FROM Categories
+                WHERE Categories.ID = '{categoryID}'");
+            if (reader == null) {
+                return null;
+            }
+            if (reader.Read()) {
+                return GetCategory(reader);
+            }
+            return null;
+        }
+        public Category GetCategory(SqliteDataReader reader) {
+            byte field = 0;
+            ulong id = reader.GetFieldValue<ulong>(field++);
+            ulong guildID = reader.GetFieldValue<ulong>(field++);
+            string name = reader.GetFieldValue<string>(field++);
+            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+            return new Category(id, guildID, name, creationTime);
+        }
+
+
+        public TextChannel? GetTextChannelByID(ulong textChannelID) {
+            var reader = ExecuteReader($@"
+                SELECT
+                    TextChannels.ID,
+                    TextChannels.CategoryID,
+                    TextChannels.Name,
+                    TextChannels.CreationTime
+                FROM TextChannels
+                WHERE TextChannels.ID = '{textChannelID}'");
+            if (reader == null) {
+                return null;
+            }
+            if (reader.Read()) {
+                return GetTextChannel(reader);
+            }
+            return null;
+        }
+        public TextChannel GetTextChannel(SqliteDataReader reader) {
+            byte field = 0;
+            ulong textChannelID = reader.GetFieldValue<ulong>(field++);
+            ulong categoryID = reader.GetFieldValue<ulong>(field++);
+            string name = reader.GetFieldValue<string>(field++);
+            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+            return new TextChannel(textChannelID, categoryID, name, creationTime);
+        }
+
+
 
         #region Privileges
 
@@ -300,5 +411,83 @@ namespace ChatServer.Database {
         }
 
         #endregion Default Privileges
+
+
+        public GuildPrivilege? GetFinalGuildPrivilege(ulong userID, ulong guildID) {
+            return GetGuildPrivilege(userID, guildID);
+        }
+
+        public CategoryPrivilege? GetFinalCategoryPrivilege(ulong userID, ulong categoryID) {
+            var reader = ExecuteReader($@"
+                SELECT Categories.GuildID
+                FROM Categories
+                WHERE Categories.ID = '{categoryID}'
+            ;");
+            if (reader == null) {
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - reader is null");
+                return null;
+            }
+            if (reader.Read()) {
+                ulong guildID = reader.GetFieldValue<ulong>(0);
+
+                GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
+                if (guildPrivilege == null) {
+                    Logger.Error($"{MethodBase.GetCurrentMethod()} - guild privilege is null");
+                    return null;
+                }
+
+                CategoryPrivilege? categoryPrivilege = GetCategoryPrivilege(userID, categoryID);
+                if (categoryPrivilege == null) {
+                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - category privilege is null");
+                    return null;
+                }
+
+                CategoryPrivilege finalPrivilege = categoryPrivilege.Merge(guildPrivilege);
+                return finalPrivilege;
+            }
+            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
+            return null;
+        }
+
+        public TextChannelPrivilege? GetFinalTextChannelPrivilege(ulong userID, ulong textChannelID) {
+            var reader = ExecuteReader($@"
+                SELECT Categories.ID, Categories.GuildID
+                FROM TextChannels INNER JOIN Categories ON TextChannels.CategoryID = Categories.ID
+                WHERE TextChannels.ID = '{textChannelID}'
+            ;");
+            if (reader == null) {
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - reader is null");
+                return null;
+            }
+            if (reader.Read()) {
+                ulong categoryID = reader.GetFieldValue<ulong>(0);
+                ulong guildID = reader.GetFieldValue<ulong>(1);
+
+                GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
+                if (guildPrivilege == null) {
+                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - guild privilege is null");
+                    return null;
+                }
+
+                CategoryPrivilege? categoryPrivilege = GetCategoryPrivilege(userID, categoryID);
+                if (categoryPrivilege == null) {
+                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - category privilege is null");
+                    return null;
+                }
+
+                TextChannelPrivilege? textChannelPrivilege = GetTextChannelPrivilege(userID, textChannelID);
+                if (textChannelPrivilege == null) {
+                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - text channel privilege is null");
+                    return null;
+                }
+
+                CategoryPrivilege mergedPrivilege = categoryPrivilege.Merge(guildPrivilege);
+                TextChannelPrivilege finalPrivilege = textChannelPrivilege.Merge(mergedPrivilege);
+                return finalPrivilege;
+            }
+            Logger.Error($"[{MethodBase.GetCurrentMethod()}] - nothing to read");
+            return null;
+        }
+
     }
 }

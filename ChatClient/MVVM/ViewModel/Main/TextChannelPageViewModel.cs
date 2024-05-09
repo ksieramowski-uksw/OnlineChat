@@ -1,6 +1,7 @@
 ﻿using ChatClient.Stores;
 using ChatShared.DataModels;
 using ChatShared.Models;
+using ChatShared.Models.Privileges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
@@ -18,23 +19,60 @@ namespace ChatClient.MVVM.ViewModel.Main {
         [ObservableProperty]
         private string _messageContent;
 
-        [ObservableProperty]
-        private ObservableCollection<User> _users;
-
 
         public TextChannelPageViewModel(ChatContext context, TextChannel textChannel) {
             Context = context;
 
             TextChannel = textChannel;
             MessageContent = string.Empty;
-            Users = new ObservableCollection<User>();
+
+            Context.Client.GetMessageRange(TextChannel.ID, ulong.MaxValue, 20);
 
             
-            Context.Client.GetMessageRange(TextChannel.ID, ulong.MaxValue, 20);
         }
 
+        //public void UpdateVisibility() {
+        //    GuildPrivilege ? g = null;
+        //    foreach (var guild in Context.Guilds) {
+        //        foreach (var user in guild.Users) {
+        //            if (user.User.ID == )
+        //        }
+
+
+        //        foreach (var category in guild.Categories) {
+        //            foreach (var channel in category.TextChannels) {
+        //                if (channel.ID == TextChannel.ID) {
+
+        //                }
+        //            }
+        //        }
+        //    }
+        //    foreach (var user in TextChannel.Users) {
+        //        user.User.
+        //    }
+        //}
+
+
         [RelayCommand]
-        void SendMessage() {
+        private void SendMessage() {
+            if (Context.CurrentUser == null) { return; }
+            bool canWrite = false;
+            foreach (var u in TextChannel.Users) {
+                if (u.User.ID == Context.CurrentUser.ID) {
+                    if (u.FinalPrivilege.Write == ChatShared.PrivilegeValue.Positive) {
+                        canWrite = true;
+                        break;
+                    }
+                }
+            }
+            if (canWrite == false) {
+                MessageBox.Show("You don't have privilege to write on this channel");
+                return;
+            }
+            else {
+                MessageBox.Show("can write");
+            }
+            
             if (MessageContent != string.Empty && Context.CurrentUser is User user) {
                 MessageData data = new(user.ID, TextChannel.ID, MessageContent);
                 string json = JsonSerializer.Serialize(data);

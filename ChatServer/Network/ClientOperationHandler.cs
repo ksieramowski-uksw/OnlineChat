@@ -153,7 +153,8 @@ namespace ChatServer.Network
                     return;
                 }
 
-                DatabaseCommandResult result = _database.Commands.CreateGuild(data, out Guild? guild);
+                DatabaseCommandResult result = _database.Commands.CreateGuild(data.OwnerID, data.Name, data.Password,
+                    data.Icon, data.DefaultPrivilege, out Guild? guild);
 
                 if (result == DatabaseCommandResult.Success && guild != null) {
                     Logger.Info($"Successfully created new guild \"{data.Name}\".");
@@ -180,12 +181,12 @@ namespace ChatServer.Network
                     return;
                 }
 
-                DatabaseCommandResult result = _database.Commands.CreateCategory(data, out Category? category);
+                DatabaseCommandResult result = _database.Commands.CreateCategory(data.GuildID, data.Name,
+                    data.DefaultPrivilege, out Category? category);
 
                 if (result == DatabaseCommandResult.Success && category is not null) {
                     Logger.Info($"Successfully created new category \"{data.Name}\".");
-                    List<ulong>? targetUsers;
-                    result = _database.Commands.GetUsersInCategory(category, out targetUsers);
+                    result = _database.Commands.GetUsersInCategory(category.ID, out List<ulong>? targetUsers);
 
                     if (result == DatabaseCommandResult.Success && targetUsers is not null) {
                         string json = JsonSerializer.Serialize(category);
@@ -215,12 +216,25 @@ namespace ChatServer.Network
                     return;
                 }
 
-                DatabaseCommandResult result = _database.Commands.CreateTextChannel(data, out TextChannel? textChannel);
+                DatabaseCommandResult result = _database.Commands.CreateTextChannel(data.CategoryID, data.Name,
+                    data.DefaultPrivilege, out TextChannel? textChannel);
+
+                Logger.Warning(data.DefaultPrivilege.Write.ToString());
 
                 if (result == DatabaseCommandResult.Success && textChannel != null) {
                     Logger.Info($"Successfully created new text channel \"{data.Name}\".");
-                    string json = JsonSerializer.Serialize(textChannel);
-                    _client.Send(OperationCode.CreateTextChannelSuccess, json);
+                    var r1 = _database.Commands.GetUsersInTextChannel(textChannel.ID, out List<ulong>? targetUsers);
+                    if (r1 == DatabaseCommandResult.Success && targetUsers != null) {
+                        string json = JsonSerializer.Serialize(textChannel);
+                        _client.MultiCast(OperationCode.CreateTextChannelSuccess, json, (x) => {
+                            foreach (ulong id in targetUsers) {
+                                if (x.User is User user && user.ID == id) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
+                    }
                 }
                 else if (result == DatabaseCommandResult.DatabaseError) {
                     const string error = "DATABASE_ERROR";
@@ -497,8 +511,8 @@ namespace ChatServer.Network
                         ViewChannel = ChatShared.PrivilegeValue.Neutral,
                         Read = ChatShared.PrivilegeValue.Neutral
                     };
-                    var result = _database.Commands.GetUserIDsInTextChannel(msg.ChannelID,
-                        out List<ulong>? userIDs, privilege);
+                    var result = _database.Commands.GetUsersInTextChannel(msg.ChannelID,
+                        out List<ulong>? userIDs);
                     if (result != DatabaseCommandResult.Success || userIDs == null) {
                         Logger.Error($"Failed to fetch liast of user with access to channel {msg.ChannelID}");
                         return false;

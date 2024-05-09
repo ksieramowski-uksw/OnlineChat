@@ -1,6 +1,8 @@
 ﻿using ChatShared.DataModels;
 using System.Text.Json;
 using System.IO;
+using ChatShared.Models.Privileges;
+using ChatShared.Models;
 
 
 namespace ChatClient.Network {
@@ -36,15 +38,6 @@ namespace ChatClient.Network {
             ServerConnection.Send(OperationCode.Register, json);
         }
 
-        public void CreateGuild(string name, string password) {
-            if (Context.CurrentUser != null) {
-                var icon = ResourceHelper.GetImagePixels($"{Directory.GetCurrentDirectory()}\\Resources\\Images\\942840997837168660.png");
-                CreateGuildData createData = new(Context.CurrentUser.ID, name, password, icon);
-                string json = JsonSerializer.Serialize(createData);
-                ServerConnection.Send(OperationCode.CreateGuild, json);
-            }
-        }
-
         public void JoinGuild(string publicId, string password) {
             if (Context.CurrentUser != null) {
                 JoinGuildData createData = new(publicId, password, Context.CurrentUser.ID);
@@ -53,10 +46,25 @@ namespace ChatClient.Network {
             }
         }
 
-        public void CreateCategory(ulong guildID, string categoryName) {
-            CreateCategoryData data = new(guildID, categoryName);
+        public void CreateGuild(string name, string password, GuildPrivilege defaultPrivilege) {
+            if (Context.CurrentUser != null) {
+                var icon = ResourceHelper.GetImagePixels($"{Directory.GetCurrentDirectory()}\\Resources\\Images\\942840997837168660.png");
+                CreateGuildData createData = new(Context.CurrentUser.ID, name, password, icon, defaultPrivilege);
+                string json = JsonSerializer.Serialize(createData);
+                ServerConnection.Send(OperationCode.CreateGuild, json);
+            }
+        }
+
+        public void CreateCategory(ulong guildID, string categoryName, CategoryPrivilege defaultPrivilege) {
+            CreateCategoryData data = new(guildID, categoryName, defaultPrivilege);
             string json = JsonSerializer.Serialize(data);
             ServerConnection.Send(OperationCode.CreateCategory, json);
+        }
+
+        public void CreateTextChannel(ulong categoryID, string textChannelName, TextChannelPrivilege privilege) {
+            CreateTextChannelData data = new(categoryID, textChannelName, privilege);
+            string json = JsonSerializer.Serialize(data);
+            Context.Client.ServerConnection.Send(OperationCode.CreateTextChannel, json);
         }
 
         public void GetMessageRange(ulong channelID, ulong first, byte limit) {

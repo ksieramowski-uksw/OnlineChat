@@ -3,10 +3,15 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:ChatClient.MVVM.ViewModel.Main"
+      xmlns:converters="clr-namespace:ChatClient.Converters"
+      xmlns:sharedns="clr-namespace:ChatShared;assembly=ChatShared"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="TextChannelPage">
+
+    <Page.Resources>
+        <converters:UserStatusConverter x:Key="UserStatusConverter"/>
+    </Page.Resources>
 
     <Grid HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
@@ -15,14 +20,32 @@
             <ColumnDefinition Width="256"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>
+            <RowDefinition Height="2"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
+        <!-- TEXT CHANNEL NAME -->
+        <StackPanel Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Orientation="Horizontal">
+            <TextBlock FontSize="18" Foreground="#A8A8A8" FontWeight="Bold" Margin="16,0,0,0"
+                       Text="#"/>
+            <TextBlock FontSize="18" Foreground="#A8A8A8" FontWeight="Bold" Margin="4,0"
+                       Text="{Binding TextChannel.Name}"/>
+        </StackPanel>
+        
+        <!-- MENU ABOVE USER LIST -->
+        <Grid Grid.Column="2" Grid.Row="0" Background="#282828">
+            
+        </Grid>
+
+        <!-- HORIZONTAL LINE -->
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="#222222"/>
+
         <!-- MESSAGES -->
-        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0"
-                      HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
+                      HorizontalScrollBarVisibility="Hidden"
                       VerticalScrollBarVisibility="Auto" x:Name="MessageScrollViewer">
             <ListView ItemsSource="{Binding TextChannel.Messages}" Style="{DynamicResource BetterListView}"
                       Margin="0,0,0,16" MaxWidth="{Binding ActualWidth, ElementName=MessageScrollViewer}">
@@ -54,10 +77,7 @@
                             <TextBox Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2"
                                        Text="{Binding Content}" Foreground="#EEE" Margin="4,0,0,0" FontSize="16"
                                        VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True"
-                                       Style="{DynamicResource TransparentTextBoxStyle}"
-                                     
-                                       TextWrapping="Wrap"
-                                        />
+                                       Style="{DynamicResource TransparentTextBoxStyle}" TextWrapping="Wrap" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -66,22 +86,61 @@
 
 
         <!-- USERS -->
-        <ScrollViewer Grid.Column="2" Grid.Row="0" Grid.RowSpan="4">
-            <ListView>
+        <ScrollViewer Grid.Column="2" Grid.Row="2" Grid.RowSpan="4" Background="#282828"
+                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <ListView ItemsSource="{Binding TextChannel.Users}" Style="{DynamicResource BetterListView}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="8,0,0,0" x:Name="TextChannelUserGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="41"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="41"/>
+                                <RowDefinition Height="15"/>
+                            </Grid.RowDefinitions>
 
+                            <!-- USER PROFILE IMAGE -->
+                            <Image Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" Grid.RowSpan="2" Margin="2"
+                                   Source="{Binding User.ProfilePicture}"/>
+
+                            <!-- USER STATUS -->
+                            <Border Grid.Column="1" Grid.Row="1" BorderThickness="2"
+                                    BorderBrush="#222222" CornerRadius="6"
+                                    Background="{Binding User.Status,
+                                    Converter={StaticResource UserStatusConverter}}"/>
+
+                            <!-- NICKNAME -->
+                            <TextBlock Grid.Column="3" Grid.Row="0" Grid.RowSpan="2"
+                                       Text="{Binding User.Nickname}"
+                                       Foreground="#A8A8A8" FontSize="18" Margin="4,8,0,0" Padding="8,8,16,8"/>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <!-- Conditionally show the item based on its status -->
+                            <DataTrigger Binding="{Binding FinalPrivilege.ViewChannel}" Value="{x:Static sharedns:PrivilegeValue.Positive}">
+                                <Setter TargetName="TextChannelUserGrid" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding FinalPrivilege.ViewChannel}" Value="{x:Static sharedns:PrivilegeValue.Negative}">
+                                <Setter TargetName="TextChannelUserGrid" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
             </ListView>
         </ScrollViewer>
 
 
         <!-- ATTACHMENTS -->
-        <ScrollViewer Grid.Column="0" Grid.Row="1" Margin="8,0,8,0">
+        <!--<ScrollViewer Grid.Column="0" Grid.Row="1" Margin="8,0,8,0">
             <ListView>
 
             </ListView>
-        </ScrollViewer>
+        </ScrollViewer>-->
 
         <!-- INPUT BOX -->
-        <Border Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="8" Background="#282828" CornerRadius="10">
+        <Border Grid.Column="0" Grid.Row="4" Grid.RowSpan="2" Margin="8" Background="#282828" CornerRadius="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="42"/>
@@ -115,7 +174,7 @@
 
 
         <!-- SEND BUTTON -->
-        <Button Grid.Column="1" Grid.Row="3" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,8,8,8"
+        <Button Grid.Column="1" Grid.Row="5" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,8,8,8"
                 VerticalAlignment="Bottom" Padding="8" Height="46" Width="64"
                 Style="{DynamicResource RoundButtonStyle}" Command="{Binding SendMessageCommand}"/>
         

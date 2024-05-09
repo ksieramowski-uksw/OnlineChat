@@ -8,7 +8,7 @@ namespace ChatClient {
         public App App { get; }
         public Client Client { get; }
         public User? CurrentUser { get; set; }
-        public ObservableCollection<Guild> Guilds { get; }
+        public ObservableCollection<Guild> Guilds { get; set; }
 
         public ChatContext(App app) {
             App = app;

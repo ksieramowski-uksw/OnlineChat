@@ -13,8 +13,8 @@ namespace ChatShared.Models {
         public byte[] Icon { get; set; }
 
         public ObservableCollection<Category> Categories { get; set; }
-        public ObservableCollection<User> Users { get; set; }
-        public ObservableCollection<GuildPrivilege> Privileges { get; set; }
+        public ObservableCollection<PrivilegedUser<GuildPrivilege>> Users { get; set; }
+        //public ObservableCollection<GuildPrivilege> Privileges { get; set; }
         public GuildPrivilege? DefaultPrivilege { get; set; }
 
         public Guild(ulong id, string publicID, string name, string password, ulong ownerID,
@@ -27,8 +27,8 @@ namespace ChatShared.Models {
             CreationTime = creationTime;
             Icon = icon;
             Categories = new ObservableCollection<Category>();
-            Users = new ObservableCollection<User>();
-            Privileges = new ObservableCollection<GuildPrivilege>();
+            Users = new ObservableCollection<PrivilegedUser<GuildPrivilege>>();
+            //Privileges = new ObservableCollection<GuildPrivilege>();
         }
     }
 }

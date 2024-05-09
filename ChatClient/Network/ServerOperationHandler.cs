@@ -133,7 +133,7 @@ namespace ChatClient.Network {
         private void CreateGuildSuccess(string message) {
             if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 if (JsonSerializer.Deserialize<Guild>(message) is Guild guild) {
-                    App.Current.Dispatcher.Invoke(() => {
+                    Context.App.Dispatcher.Invoke(() => {
                         bool resourceFound = false;
                         int index = 0;
                         for (; index < Context.App.ResourceStorage.Count; index++) {
@@ -185,7 +185,7 @@ namespace ChatClient.Network {
                         }
                     }
                     if (!found) {
-                        App.Current.Dispatcher.Invoke(() => {
+                        Context.App.Dispatcher.Invoke(() => {
                             bool resourceFound = false;
                             int index = 0;
                             for (; index < Context.App.ResourceStorage.Count; index++) {
@@ -212,12 +212,21 @@ namespace ChatClient.Network {
         }
 
         private void CreateCategorySuccess(string message) {
-            if (Context.App.Navigation.MainPage is MainPage mainPage &&
-                Context.App.Navigation.GuildPage is GuildPage guildPage) {
-                if (JsonSerializer.Deserialize<Category>(message) is Category category) {
-                    App.Current.Dispatcher.Invoke(() => {
-                        guildPage.ViewModel.Guild.Categories.Add(category);
-                    });
+            bool success = false;
+            if (JsonSerializer.Deserialize<Category>(message) is Category category) {
+                foreach (var guild in Context.Guilds) {
+                    if (guild.ID == category.GuildID) {
+                        if (Context.CurrentUser is User currentUser) {
+                            category.UpdateVisibility(currentUser.ID);
+                        }
+                        Context.App.Dispatcher.Invoke(() => {
+                            guild.Categories.Add(category);
+                        });
+                        success = true;
+                        break;
+                    }
+                }
+                if (success == true && Context.App.Navigation.MainPage is MainPage mainPage) {
                     mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
                     if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
                         createCategoryPage.ViewModel.NewCategoryName = string.Empty;
@@ -226,10 +235,10 @@ namespace ChatClient.Network {
                         Context.App.Navigation.CreateCategoryPage = null;
                     }
                 }
-                else {
-                    if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
-                        createCategoryPage.ViewModel.Feedback = "Response is corrupted.";
-                    }
+            }
+            if (success == false) {
+                if (Context.App.Navigation.CreateCategoryPage is CreateCategoryPage createCategoryPage) {
+                    createCategoryPage.ViewModel.Feedback = "Response is corrupted.";
                 }
             }
         }
@@ -240,29 +249,35 @@ namespace ChatClient.Network {
             }
         }
         private void CreateTextChannelSuccess(string message) {
-            if (Context.App.Navigation.MainPage is MainPage mainPage &&
-                Context.App.Navigation.GuildPage is GuildPage guildPage) {
-                if (JsonSerializer.Deserialize<TextChannel>(message) is TextChannel textChannel) {
-                    App.Current.Dispatcher.Invoke(() => {
-                        foreach (Category category in guildPage.ViewModel.Guild.Categories) {
-                            if (textChannel.CategoryID == category.ID) {
-                                category.TextChannels.Add(textChannel);
-                                break;
+            bool success = false;
+            if (JsonSerializer.Deserialize<TextChannel>(message) is TextChannel textChannel) {
+                foreach (var guild in Context.Guilds) {
+                    foreach (var category in guild.Categories) {
+                        if (category.ID == textChannel.CategoryID) {
+                            if (Context.CurrentUser is User currentUser) {
+                                textChannel.UpdateVisibility(currentUser.ID);
                             }
+                            Context.App.Dispatcher.Invoke(() => {
+                                category.TextChannels.Add(textChannel);
+                            });
+                            success = true;
+                            break;
                         }
-                    });
+                    }
+                    if (success == true) { break; }
+                }
+                if (success == true && Context.App.Navigation.MainPage is MainPage mainPage) {
                     mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
                     if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
                         createTextChannelPage.ViewModel.NewTextChannelName = string.Empty;
                         createTextChannelPage.ViewModel.Feedback = string.Empty;
-
                         Context.App.Navigation.CreateTextChannelPage = null;
                     }
                 }
-                else {
-                    if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
-                        createTextChannelPage.ViewModel.Feedback = "Response is corrupted.";
-                    }
+            }
+            if (success == false) {
+                if (Context.App.Navigation.CreateTextChannelPage is CreateTextChannelPage createTextChannelPage) {
+                    createTextChannelPage.ViewModel.Feedback = "Response is corrupted.";
                 }
             }
         }
@@ -286,7 +301,7 @@ namespace ChatClient.Network {
                     }
                 }
                 if (!found) {
-                    App.Current.Dispatcher.Invoke(() => {
+                    Context.App.Dispatcher.Invoke(() => {
                         {
                             bool resourceFound = false;
                             int index = 0;
@@ -304,45 +319,24 @@ namespace ChatClient.Network {
                             }
                         }
                         {
-                            
                             foreach (var user in guild.Users) {
                                 bool resourceFound = false;
                                 int index = 0;
                                 for (; index < Context.App.ResourceStorage.Count; index++) {
-                                    if (Context.App.ResourceStorage[index] == user.ProfilePicture) {
+                                    if (Context.App.ResourceStorage[index] == user.User.ProfilePicture) {
                                         resourceFound = true;
                                         break;
                                     }
                                 }
                                 if (resourceFound) {
-                                    user.ProfilePicture = Context.App.ResourceStorage[index];
+                                    user.User.ProfilePicture = Context.App.ResourceStorage[index];
                                 }
                                 else {
-                                    Context.App.ResourceStorage.Add(user.ProfilePicture);
+                                    Context.App.ResourceStorage.Add(user.User.ProfilePicture);
                                 }
                             }
-                            //bool resourceFound = false;
-                            //int resourceIndex = 0;
-                            //int userIndex = 0;
-                            //for (; resourceIndex < Context.App.ResourceStorage.Count; resourceIndex++) {
-                            //    for (; userIndex < guild.Users.Count; userIndex++) {
-                            //        byte[] resource = guild.Users[userIndex].ProfilePicture;
-                            //        if (Context.App.ResourceStorage[resourceIndex] == resource) {
-                            //            resourceFound = true;
-                            //            break;
-                            //        }
-                            //    }
-                            //}
-                            //if (resourceFound) {
-                            //    //guild.Icon = Context.App.ResourceStorage[resourceIndex];
-                            //}
-                            //else {
-                            //    Context.App.ResourceStorage.Add(guild.Users[userIndex].ProfilePicture);
-                            //}
                         }
-
-
-
+                        Context.Guilds = mainPage.ViewModel.Guilds;
                         mainPage.ViewModel.Guilds.Add(guild);
                     });
                 }
@@ -361,7 +355,7 @@ namespace ChatClient.Network {
                     foreach (var category in guild.Categories) {
                         foreach (TextChannel textChannel in category.TextChannels) {
                             if (msg.ChannelID == textChannel.ID) {
-                                App.Current.Dispatcher.Invoke(() => {
+                                Context.App.Dispatcher.Invoke(() => {
                                     textChannel.Messages.Add(msg);
                                 });
                                 return;
@@ -383,7 +377,7 @@ namespace ChatClient.Network {
                         foreach (var category in guild.Categories) {
                             foreach (var textChannel in category.TextChannels) {
                                 if (textChannel.ID == messages[0].ChannelID) {
-                                    App.Current.Dispatcher.Invoke(() => {
+                                    Context.App.Dispatcher.Invoke(() => {
                                         ObservableCollection<Message> combined = new(messages
                                         .Concat(textChannel.Messages)
                                         .GroupBy(x => x.ID)

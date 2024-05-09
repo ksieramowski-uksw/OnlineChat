@@ -149,9 +149,9 @@ namespace ChatServer.Database {
                     ID INTEGER PRIMARY KEY,
                     UserID INTEGER NOT NULL,
                     ChannelID INTEGER,
+                    ViewChannel INTEGER NOT NULL,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,
-                    ViewChannel INTEGER NOT NULL,
                     Read INTEGER NOT NULL,
                     Write INTEGER NOT NULL
                 );";
@@ -165,9 +165,9 @@ namespace ChatServer.Database {
                     ID INTEGER PRIMARY KEY,
                     UserID INTEGER NOT NULL,
                     CategoryID INTEGER,
+                    ViewCategory INTEGER NOT NULL,
                     UpdateCategory INTEGER NOT NULL,
                     DeleteCategory INTEGER NOT NULL,
-                    ViewCategory INTEGER NOT NULL,
                     CreateChannel INTERER NOT NULL,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,
@@ -205,9 +205,9 @@ namespace ChatServer.Database {
                 CREATE TABLE IF NOT EXISTS {tableName} (
                     ID INTEGER PRIMARY KEY,
                     ChannelID INTEGER,
+                    ViewChannel INTEGER NOT NULL,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,
-                    ViewChannel INTEGER NOT NULL,
                     Read INTEGER NOT NULL,
                     Write INTEGER NOT NULL
                 );";
@@ -220,9 +220,9 @@ namespace ChatServer.Database {
                 CREATE TABLE IF NOT EXISTS {tableName} (
                     ID INTEGER PRIMARY KEY,
                     CategoryID INTEGER,
+                    ViewCategory INTEGER NOT NULL,
                     UpdateCategory INTEGER NOT NULL,
                     DeleteCategory INTEGER NOT NULL,
-                    ViewCategory INTEGER NOT NULL,
                     CreateChannel INTERER NOT NULL,
                     UpdateChannel INTEGER NOT NULL,
                     DeleteChannel INTEGER NOT NULL,

@@ -140,13 +140,12 @@ namespace ChatServer.Database
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult CreateDefaultGuildPrivilege(ulong guildID) {
-            GuildPrivilege privilege = new(0, 0, guildID);
-            if (InsertDefaultGuildPrivilege(privilege) == 0) {
-                return DatabaseCommandResult.DatabaseError;
-            }
-            return DatabaseCommandResult.Success;
-        }
+        //public DatabaseCommandResult CreateDefaultGuildPrivilege(GuildPrivilege privilege) {
+        //    if (InsertDefaultGuildPrivilege(privilege) == 0) {
+        //        return DatabaseCommandResult.DatabaseError;
+        //    }
+        //    return DatabaseCommandResult.Success;
+        //}
 
         //public DatabaseCommandResult CreateDefaultCategoryForGuild(ulong guildID,
         //    string categoryName, DateTime creationTime, out ulong defaultCategoryID) {
@@ -184,8 +183,8 @@ namespace ChatServer.Database
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult CreateCategoryPrivilegeForOwner(ulong userID, ulong guildID) {
-            CategoryPrivilege privilege = new(0, userID, guildID) {
+        public CategoryPrivilege GetCategoryPrivilegeForOwner(ulong userID, ulong categoryID) {
+            return new CategoryPrivilege(0, userID, categoryID) {
                 UpdateCategory = PrivilegeValue.Positive,
                 DeleteCategory = PrivilegeValue.Positive,
 
@@ -197,15 +196,17 @@ namespace ChatServer.Database
                 Read = PrivilegeValue.Positive,
                 Write = PrivilegeValue.Positive
             };
+        }
 
-            if (InsertCategoryPrivilege(privilege) == 0) {
+        public DatabaseCommandResult CreateCategoryPrivilegeForOwner(ulong userID, ulong categoryID) {
+            if (InsertCategoryPrivilege(GetCategoryPrivilegeForOwner(userID, categoryID)) == 0) {
                 return DatabaseCommandResult.DatabaseError;
             }
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult CreateTextChannelPrivilegeForOwner(ulong userID, ulong guildID) {
-            TextChannelPrivilege privilege = new(0, userID, guildID) {
+        public TextChannelPrivilege GetTextChannelPrivilegeForOwner(ulong userID, ulong textChannelID) {
+            return new TextChannelPrivilege(0, userID, textChannelID) {
                 UpdateChannel = PrivilegeValue.Positive,
                 DeleteChannel = PrivilegeValue.Positive,
 
@@ -213,25 +214,30 @@ namespace ChatServer.Database
                 Write = PrivilegeValue.Positive,
                 ViewChannel = PrivilegeValue.Positive
             };
+        }
 
+        public DatabaseCommandResult CreateTextChannelPrivilegeForOwner(ulong userID, ulong textChannelID) {
+            TextChannelPrivilege privilege = GetTextChannelPrivilegeForOwner(userID, textChannelID);
             if (InsertTextChannelPrivilege(privilege) == 0) {
                 return DatabaseCommandResult.DatabaseError;
             }
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult CreateGuild(CreateGuildData data, out Guild? guild) {
+        public DatabaseCommandResult CreateGuild(ulong ownerID, string name, string password, byte[] icon,
+            GuildPrivilege defaultPrivilege, out Guild? guild) {
             guild = null;
             DateTime creationTime = DateTime.Now;
             string publicID = Guid.NewGuid().ToString();
 
             ulong guildID = Insert("Guilds",
-                new Entry("Name", data.Name),
+                new Entry("Name", name),
                 new Entry("PublicID", publicID),
-                new Entry("Password", data.Password),
-                new Entry("OwnerID", data.OwnerID),
+                new Entry("Password", password),
+                new Entry("OwnerID", ownerID),
                 new Entry("CreationTime", creationTime),
-                new Entry("Icon", data.Icon));
+                new Entry("Icon", icon));
+            defaultPrivilege.GuildID = guildID;
 
             if (guildID == 0) {
                 return DatabaseCommandResult.DatabaseError;
@@ -240,49 +246,55 @@ namespace ChatServer.Database
             // add owner of guild to the guild
             ulong affiliationID = Insert("GuildAffiliations",
                 new Entry("GuildID", guildID),
-                new Entry("UserID", data.OwnerID));
+                new Entry("UserID", ownerID));
 
             if (affiliationID == 0) {
                 return DatabaseCommandResult.DatabaseError;
             }
 
+            var r3 = CreateGuildPrivilegeForOwner(ownerID, guildID);
+            if (r3 != DatabaseCommandResult.Success) {
+                return r3;
+            }
+
+            if (InsertDefaultGuildPrivilege(defaultPrivilege) == 0) {
+                Logger.Error($"Failed to insert default privilege for guild '{guildID}'");
+                return DatabaseCommandResult.UnknownError;
+            }
+
+
             // create default category
-            //const string defaultCategoryName = "GENERAL";
-            CreateCategoryData createCategoryData = new(guildID, "GENERAL");
-            var r1 = CreateCategory(createCategoryData, out Category? defaultCategory, false);
+            var r1 = CreateCategory(guildID, "GENERAL", new CategoryPrivilege(), 
+                out Category? defaultCategory);
             if (r1 != DatabaseCommandResult.Success || defaultCategory == null) {
                 return r1;
             }
 
             // create default text channel
-            CreateTextChannelData defaultTextChannelData = new(defaultCategory.ID, "general");
-            var r2 = CreateTextChannel(defaultTextChannelData, out TextChannel? defaultTextChannel, false);
-
-            if (defaultTextChannel == null) {
-                return DatabaseCommandResult.DatabaseError;
+            var r2 = CreateTextChannel(defaultCategory.ID, "general", new TextChannelPrivilege(),
+                out TextChannel? defaultTextChannel);
+            if (r2 != DatabaseCommandResult.Success || defaultTextChannel == null) {
+                return r2;
             }
 
-            var r3 = CreateDefaultGuildPrivilege(guildID);
-            if (r3 != DatabaseCommandResult.Success) {
-                return r3;
-            }
+            //var r3 = CreateDefaultGuildPrivilege(defaultPrivilege);
+            //if (r3 != DatabaseCommandResult.Success) {
+            //    return r3;
+            //}
 
-            var r4 = CreateGuildPrivilegeForOwner(data.OwnerID, guildID);
-            if (r4 != DatabaseCommandResult.Success) {
-                return r4;
-            }
 
-            var r5 = CreateCategoryPrivilegeForOwner(data.OwnerID, guildID);
-            if (r5 != DatabaseCommandResult.Success) {
-                return r5;
-            }
 
-            var r6 = CreateTextChannelPrivilegeForOwner(data.OwnerID, guildID);
-            if (r6 != DatabaseCommandResult.Success) {
-                return r6;
-            }
+            //var r5 = CreateCategoryPrivilegeForOwner(data.OwnerID, guildID);
+            //if (r5 != DatabaseCommandResult.Success) {
+            //    return r5;
+            //}
 
-            guild = new(guildID, publicID, data.Name, data.Password, data.OwnerID, creationTime, data.Icon);
+            //var r6 = CreateTextChannelPrivilegeForOwner(data.OwnerID, guildID);
+            //if (r6 != DatabaseCommandResult.Success) {
+            //    return r6;
+            //}
+
+            guild = new Guild(guildID, publicID, name, password, ownerID, creationTime, icon);
             //Category defaultCategory = new(defaultCategory.ID, guildID, defaultCategoryName, creationTime);
             //TextChannel defaultTextChannel = new(defaultTextChannelID, defaultCategoryID, defaultTextChannelName, creationTime);
             defaultCategory.TextChannels.Add(defaultTextChannel);
@@ -291,77 +303,141 @@ namespace ChatServer.Database
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult CreateDefaultCategoryPrivilege(ulong categoryID) {
-            CategoryPrivilege privilege = new(0, 0, categoryID);
-            if (InsertDefaultCategoryPrivilege(privilege) == 0) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - insertion failed.");
-                return DatabaseCommandResult.DatabaseError;
-            }
-            Logger.Info($"Created default privilage for category '{categoryID}'.");
-            return DatabaseCommandResult.Success;
-        }
+        //public DatabaseCommandResult CreateDefaultCategoryPrivilege(ulong categoryID) {
+        //    CategoryPrivilege privilege = new(0, 0, categoryID);
+        //    if (InsertDefaultCategoryPrivilege(privilege) == 0) {
+        //        Logger.Error($"{MethodBase.GetCurrentMethod()} - insertion failed.");
+        //        return DatabaseCommandResult.DatabaseError;
+        //    }
+        //    Logger.Info($"Created default privilage for category '{categoryID}'.");
+        //    return DatabaseCommandResult.Success;
+        //}
 
-        public DatabaseCommandResult CreateCategory(CreateCategoryData data, out Category? category, bool createPrivilege = true) {
+
+        public DatabaseCommandResult CreateCategory(ulong guildID, string categoryName,
+            CategoryPrivilege defaultPrivilege, out Category? category, bool createPrivilege = true) {
             category = null;
-            DateTime creationTime = DateTime.Now;
 
-            ulong categoryID = Insert("Categories",
-                new Entry("GuildID", data.GuildID),
-                new Entry("Name", data.Name),
-                new Entry("CreationTime", creationTime));
+            try {
+                ulong guildOwnerID = 0;
+                if (createPrivilege) {
+                    var reader = ExecuteReader($@"
+                        SELECT Guilds.OwnerID
+                        FROM Guilds
+                        WHERE Guilds.ID = '{guildID}'");
+                    if (reader == null) {
+                        return DatabaseCommandResult.DatabaseError;
+                    }
+                    if (reader.Read()) {
+                        guildOwnerID = reader.GetFieldValue<ulong>(0);
+                    }
 
-            if (categoryID == 0) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - insertion failed.");
-                return DatabaseCommandResult.DatabaseError;
-            }
-
-            if (createPrivilege) {
-                string query = $@"
-                    SELECT GuildAffiliations.UserID
-                    FROM GuildAffiliations
-                        INNER JOIN Guilds ON Guilds.ID = GuildAffiliations.ID
-                        INNER JOIN Categories ON Categories.GuildID = Guilds.ID
-                    WHERE Categories.ID = {categoryID}";
-                var reader = ExecuteReader(query);
-                if (reader == null) {
-                    return DatabaseCommandResult.DatabaseError;
-                }
-                while (reader.Read()) {
-                    ulong userID = reader.GetFieldValue<ulong>(0);
-
-                    CategoryPrivilege privilege = new(0, userID, categoryID) {
-                        UpdateCategory = PrivilegeValue.Neutral,
-                        DeleteCategory = PrivilegeValue.Neutral,
-                        ViewCategory = PrivilegeValue.Positive,
-                        CreateChannel = PrivilegeValue.Neutral,
-                        UpdateChannel = PrivilegeValue.Neutral,
-                        DeleteChannel = PrivilegeValue.Neutral,
-                        Read = PrivilegeValue.Neutral,
-                        Write = PrivilegeValue.Neutral
-                    };
-                    if (InsertCategoryPrivilege(privilege) == 0) {
-                        Logger.Error("Failed to insert CategoryPrivilege");
+                    if (guildOwnerID == 0) {
+                        Logger.Error("Failed to get GuildOwner while creating text channel.");
+                        return DatabaseCommandResult.UnknownError;
                     }
                 }
-            }
+                DateTime creationTime = DateTime.Now;
 
-            var r1 = CreateDefaultCategoryPrivilege(categoryID);
-            if (r1 != DatabaseCommandResult.Success) {
-                return r1;
-            }
+                ulong categoryID = Insert("Categories",
+                    new Entry("GuildID", guildID),
+                    new Entry("Name", categoryName),
+                    new Entry("CreationTime", creationTime));
+                defaultPrivilege.CategoryID = categoryID;
 
-            category = new Category(categoryID, data.GuildID, data.Name, creationTime);
-            return DatabaseCommandResult.Success;
+                category = new Category(categoryID, guildID, categoryName, creationTime);
+
+                if (categoryID == 0) {
+                    Logger.Error($"{MethodBase.GetCurrentMethod()} - insertion failed.");
+                    return DatabaseCommandResult.DatabaseError;
+                }
+
+                if (createPrivilege) {
+                    string query = $@"
+                        SELECT GuildAffiliations.UserID
+                        FROM GuildAffiliations
+                        WHERE GuildAffiliations.GuildID = {guildID}";
+                    var reader = ExecuteReader(query);
+                    if (reader == null) {
+                        return DatabaseCommandResult.DatabaseError;
+                    }
+                    while (reader.Read()) {
+                        ulong userID = reader.GetFieldValue<ulong>(0);
+                        Logger.Warning($"Creating privilege for user '{userID}' in category '{categoryID}'");
+                        if (userID == guildOwnerID) {
+                            var r1 = CreateCategoryPrivilegeForOwner(userID, categoryID);
+                            if (r1 != DatabaseCommandResult.Success) {
+                                Logger.Error("Failed to create Category Privilege for guild owner.");
+                                return r1;
+                            }
+                            User? user = GetUserByID(userID);
+                            if (user == null) { throw new Exception("User is null"); }
+
+                            GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
+                            if (guildPrivilege == null) { throw new Exception("GuildPrivilege is null"); }
+                            CategoryPrivilege finalPrivilege = defaultPrivilege.Merge(guildPrivilege);
+
+                            category.Users.Add(new PrivilegedUser<CategoryPrivilege>(
+                                user, GetCategoryPrivilegeForOwner(userID, categoryID), finalPrivilege));
+                        }
+                        else {
+                            ulong cid = InsertCategoryPrivilege(new CategoryPrivilege(defaultPrivilege) {
+                                UserID = userID,
+                                CategoryID = categoryID
+                            });
+                            if (cid == 0) {
+                                Logger.Error($"Failed to insert regular privielge for category '{categoryID}'");
+                                return DatabaseCommandResult.UnknownError;
+                            }
+                            User? user = GetUserByID(userID);
+                            if (user == null) { throw new Exception("User is null"); }
+
+                            GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
+                            if (guildPrivilege == null) { throw new Exception("GuildPrivilege is null"); }
+                            CategoryPrivilege finalPrivilege = defaultPrivilege.Merge(guildPrivilege);
+
+                            category.Users.Add(new PrivilegedUser<CategoryPrivilege>(
+                                user, new CategoryPrivilege(defaultPrivilege) { UserID = userID }, finalPrivilege));
+                        }
+                    }
+                }
+
+                if (InsertDefaultCategoryPrivilege(defaultPrivilege) == 0) {
+                    Logger.Error($"Failed to create default privielge for category '{categoryID}'");
+                    return DatabaseCommandResult.UnknownError;
+                }
+
+                //var r2 = CreateDefaultCategoryPrivilege(categoryID);
+                //if (r2 != DatabaseCommandResult.Success) {
+                //    return r2;
+                //}
+
+               
+                return DatabaseCommandResult.Success;
+
+            }
+            catch (Exception ex) {
+                var method = MethodBase.GetCurrentMethod();
+                if (method != null) {
+                    const string indent = "\n\t\t\t       ";
+                    string message = ex.Message.Replace("\n", indent);
+                    Logger.Error($"{ex.GetType().Name} thrown in [{method.Name}]:{indent}{message}");
+                }
+                else {
+                    Logger.Error(ex.Message);
+                }
+                return DatabaseCommandResult.UnknownError;
+            }
         }
 
 
-        public DatabaseCommandResult GetUsersInCategory(Category category, out List<ulong>? users) {
+        public DatabaseCommandResult GetUsersInCategory(ulong categoryID, out List<ulong>? users) {
             var reader = ExecuteReader($@"
                 SELECT GuildAffiliations.UserID
                 FROM GuildAffiliations
                     INNER JOIN Guilds on GuildAffiliations.GuildID = Guilds.ID
                     INNER JOIN Categories on Guilds.ID = Categories.GuildID
-                WHERE Categories.ID = {category.ID}
+                WHERE Categories.ID = {categoryID}
                 ;");
             if (reader is null) {
                 users = null;
@@ -374,20 +450,51 @@ namespace ChatServer.Database
             return DatabaseCommandResult.Success;
         }
 
-        public DatabaseCommandResult GetUsersInGuild(ulong guildID, out ObservableCollection<User>? users) {
-            users = null;
+        public DatabaseCommandResult GetUsersInTextChannel(ulong textChannelID, out List<ulong>? users) {
             var reader = ExecuteReader($@"
-                SELECT Users.ID, Users.PublicID, Users.Nickname, Users.Pronoun, Users.CreationTime, Users.ProfilePicture, Users.Status
+                SELECT GuildAffiliations.UserID
                 FROM GuildAffiliations
-                    INNER JOIN Users on GuildAffiliations.UserID = Users.ID
-                WHERE GuildAffiliations.GuildID = {guildID}
+                    INNER JOIN Guilds ON GuildAffiliations.GuildID = Guilds.ID
+                    INNER JOIN Categories ON Guilds.ID = Categories.GuildID
+                    INNER JOIN TextChannels ON TextChannels.CategoryID = Categories.ID
+                WHERE TextChannels.ID = {textChannelID}
                 ;");
             if (reader is null) {
+                users = null;
                 return DatabaseCommandResult.DatabaseError;
             }
-            users = new ObservableCollection<User>();
+            users = new List<ulong>();
+            while (reader.Read()) {
+                users.Add(reader.GetFieldValue<ulong>(0));
+            }
+            return DatabaseCommandResult.Success;
+        }
+
+
+        public DatabaseCommandResult GetPrivilegedUsersInGuild(ulong guildID,
+            out ObservableCollection<PrivilegedUser<GuildPrivilege>>? users) {
+            users = null;
+            var reader = ExecuteReader($@"
+                SELECT 
+                    Users.ID, Users.PublicID, Users.Nickname, Users.Pronoun,
+                    Users.CreationTime, Users.ProfilePicture, Users.Status,
+	
+                    GuildPrivileges.ID, GuildPrivileges.ManageGuild, GuildPrivileges.ManagePrivileges,
+                    GuildPrivileges.CreateCategory, GuildPrivileges.UpdateCategory, GuildPrivileges.DeleteCategory,
+                    GuildPrivileges.CreateChannel, GuildPrivileges.UpdateChannel, GuildPrivileges.DeleteChannel,
+                    GuildPrivileges.Read, GuildPrivileges.Write
+                FROM GuildPrivileges
+                    INNER JOIN Users ON GuildPrivileges.UserID = Users.ID
+                WHERE GuildPrivileges.GuildID = {guildID}
+                ;");
+            if (reader is null) {
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get privileged users in guild '{guildID}'");
+                return DatabaseCommandResult.DatabaseError;
+            }
+            users = new ObservableCollection<PrivilegedUser<GuildPrivilege>>();
             while (reader.Read()) {
                 byte field = 0;
+
                 ulong userID = reader.GetFieldValue<ulong>(field++);
                 string publicID = reader.GetFieldValue<string>(field++);
                 string nickname = reader.GetFieldValue<string>(field++);
@@ -397,10 +504,177 @@ namespace ChatServer.Database
                 UserStatus status = reader.GetFieldValue<UserStatus>(field++);
 
                 User user = new(userID, publicID, nickname, pronoun, creationTime, profilePicture, status);
-                users.Add(user);
+
+                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
+                PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                GuildPrivilege privilege = new(privilegeID, userID, guildID) {
+                    ManageGuild = manageGuild,
+                    ManagePrivileges = managePrivileges,
+                    CreateCategory = createCategory,
+                    UpdateCategory = updateCategory,
+                    DeleteCategory = deleteCategory,
+                    CreateChannel = createChannel,
+                    UpdateChannel = updateChannel,
+                    DeleteChannel = deleteChannel,
+                    Read = read,
+                    Write = write,
+                };
+
+                PrivilegedUser<GuildPrivilege> privilegedUser = new(user, privilege, privilege);
+
+                users.Add(privilegedUser);
             }
             return DatabaseCommandResult.Success;
         }
+
+        public DatabaseCommandResult GetPrivilegedUsersInCategory(ulong categoryID,
+            out ObservableCollection<PrivilegedUser<CategoryPrivilege>>? users) {
+            users = null;
+            var reader = ExecuteReader($@"
+                SELECT 
+	                Users.ID, Users.PublicID, Users.Nickname, Users.Pronoun,
+	                Users.CreationTime, Users.ProfilePicture, Users.Status,
+
+	                CategoryPrivileges.ID, CategoryPrivileges.ViewCategory,
+                    CategoryPrivileges.UpdateCategory, CategoryPrivileges.DeleteCategory,
+	                CategoryPrivileges.CreateChannel, CategoryPrivileges.UpdateChannel, CategoryPrivileges.DeleteChannel,
+	                CategoryPrivileges.Read, CategoryPrivileges.Write
+
+                FROM CategoryPrivileges
+                    INNER JOIN Users ON Users.ID = CategoryPrivileges.UserID
+
+                WHERE CategoryPrivileges.CategoryID = {categoryID}
+                ;");
+            if (reader is null) {
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get privileged users in category '{categoryID}'");
+                return DatabaseCommandResult.DatabaseError;
+            }
+            users = new ObservableCollection<PrivilegedUser<CategoryPrivilege>>();
+            while (reader.Read()) {
+                byte field = 0;
+
+                ulong userID = reader.GetFieldValue<ulong>(field++);
+                string publicID = reader.GetFieldValue<string>(field++);
+                string nickname = reader.GetFieldValue<string>(field++);
+                string pronoun = reader.GetFieldValue<string>(field++);
+                DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+                byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                User user = new(userID, publicID, nickname, pronoun, creationTime, profilePicture, status);
+
+                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
+                PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                CategoryPrivilege privilege = new(privilegeID, userID, categoryID) {
+                    ViewCategory = viewCategory,
+                    UpdateCategory = updateCategory,
+                    DeleteCategory = deleteCategory,
+                    CreateChannel = createChannel,
+                    UpdateChannel = updateChannel,
+                    DeleteChannel = deleteChannel,
+                    Read = read,
+                    Write = write,
+                };
+
+                Category? category = GetCategoryByID(categoryID);
+                if (category == null) {
+                    throw new Exception("Category is null");
+                }
+
+                GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, category.GuildID);
+                if (guildPrivilege == null) {
+                    throw new Exception("GuildPrivilege is null");
+                }
+
+                CategoryPrivilege finalPrivilege = privilege.Merge(guildPrivilege);
+                PrivilegedUser<CategoryPrivilege> privilegedUser = new(user, privilege, finalPrivilege);
+
+                users.Add(privilegedUser);
+            }
+            return DatabaseCommandResult.Success;
+        }
+
+
+        public DatabaseCommandResult GetPrivilegedUsersInTextChannel(ulong textChannelID,
+            out ObservableCollection<PrivilegedUser<TextChannelPrivilege>>? users) {
+            users = null;
+            var reader = ExecuteReader($@"
+                SELECT 
+	                Users.ID, Users.PublicID, Users.Nickname, Users.Pronoun,
+	                Users.CreationTime, Users.ProfilePicture, Users.Status,
+
+	                TextChannelPrivileges.ID, TextChannelPrivileges.ViewChannel,
+                    TextChannelPrivileges.UpdateChannel, TextChannelPrivileges.DeleteChannel,
+	                TextChannelPrivileges.Read, TextChannelPrivileges.Write
+
+                FROM TextChannelPrivileges
+                    INNER JOIN Users ON Users.ID = TextChannelPrivileges.UserID
+
+                WHERE TextChannelPrivileges.ChannelID = {textChannelID}
+                ;");
+            if (reader is null) {
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get privileged users in text channel '{textChannelID}'");
+                return DatabaseCommandResult.DatabaseError;
+            }
+            users = new ObservableCollection<PrivilegedUser<TextChannelPrivilege>>();
+            while (reader.Read()) {
+                byte field = 0;
+
+                ulong userID = reader.GetFieldValue<ulong>(field++);
+                string publicID = reader.GetFieldValue<string>(field++);
+                string nickname = reader.GetFieldValue<string>(field++);
+                string pronoun = reader.GetFieldValue<string>(field++);
+                DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+                byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                User user = new(userID, publicID, nickname, pronoun, creationTime, profilePicture, status);
+
+                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
+                PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                TextChannelPrivilege privilege = new(privilegeID, userID, textChannelID) {
+                    ViewChannel = viewChannel,
+                    UpdateChannel = updateChannel,
+                    DeleteChannel = deleteChannel,
+                    Read = read,
+                    Write = write,
+                };
+
+                TextChannelPrivilege? finalPrivilege = GetFinalTextChannelPrivilege(userID, textChannelID);
+                if (finalPrivilege == null) {
+                    Logger.Error($"[{MethodBase.GetCurrentMethod}] - final privilege is null");
+                    return DatabaseCommandResult.DatabaseError;
+                }
+
+                PrivilegedUser<TextChannelPrivilege> privilegedUser = new(user, privilege, finalPrivilege);
+                users.Add(privilegedUser);
+            }
+            return DatabaseCommandResult.Success;
+        }
+
 
         public DatabaseCommandResult GetUserIDsInTextChannel(ulong textChannelID,
             out List<ulong>? userIDs, TextChannelPrivilege? privilege = null) {
@@ -449,23 +723,48 @@ namespace ChatServer.Database
             }
         }
 
-        public DatabaseCommandResult CreateDefaultTextChannelPrivilege(ulong textChannelID) {
-            TextChannelPrivilege privilege = new(0, 0, textChannelID);
-            if (InsertDefaultTextChannelPrivilege(privilege) == 0) {
-                return DatabaseCommandResult.DatabaseError;
-            }
-            return DatabaseCommandResult.Success;
-        }
+        //public DatabaseCommandResult CreateDefaultTextChannelPrivilege(ulong textChannelID) {
+        //    TextChannelPrivilege privilege = new(0, 0, textChannelID);
+        //    if (InsertDefaultTextChannelPrivilege(privilege) == 0) {
+        //        return DatabaseCommandResult.DatabaseError;
+        //    }
+        //    return DatabaseCommandResult.Success;
+        //}
 
-        public DatabaseCommandResult CreateTextChannel(CreateTextChannelData data, out TextChannel? textChannel, bool createPrivilege = true) {
+
+        public DatabaseCommandResult CreateTextChannel(ulong categoryID, string textChannelName,
+            TextChannelPrivilege defaultPrivilege, out TextChannel? textChannel, bool createPrivilege = true) {
             DateTime creationTime = DateTime.Now;
             textChannel = null;
             try {
+                ulong guildOwnerID = 0;
+                if (createPrivilege) {
+                    var reader = ExecuteReader($@"
+                        SELECT Guilds.OwnerID
+                        FROM Guilds INNER JOIN Categories ON Guilds.ID = Categories.GuildID
+                        WHERE Categories.ID = '{categoryID}'");
+                    if (reader == null) {
+                        return DatabaseCommandResult.DatabaseError;
+                    }
+                    if (reader.Read()) {
+                        guildOwnerID = reader.GetFieldValue<ulong>(0);
+                    }
+
+                    if (guildOwnerID == 0) {
+                        Logger.Error("Failed to get GuildOwner while creating text channel.");
+                        return DatabaseCommandResult.UnknownError;
+                    }
+                }
+
+                
+
                 ulong textChannelID = Insert("TextChannels",
-                    new Entry("CategoryID", data.CategoryID),
-                    new Entry("Name", data.Name),
+                    new Entry("CategoryID", categoryID),
+                    new Entry("Name", textChannelName),
                     new Entry("CreationTime", creationTime)
                 );
+                defaultPrivilege.ChannelID = textChannelID;
+                textChannel = new TextChannel(textChannelID, categoryID, textChannelName, creationTime);
 
                 if (textChannelID == 0) {
                     Logger.Error("ID of new text channel is '0'!");
@@ -475,34 +774,72 @@ namespace ChatServer.Database
                     string query = $@"
                         SELECT GuildAffiliations.UserID
                         FROM GuildAffiliations
-                            INNER JOIN Guilds ON Guilds.ID = GuildAffiliations.ID
-                            INNER JOIN Categories ON Categories.GuildID = Guilds.ID
-                        WHERE Categories.ID = {data.CategoryID}";
+                            INNER JOIN Categories ON Categories.GuildID = GuildAffiliations.GuildID
+                        WHERE Categories.ID = {categoryID}";
                     var reader = ExecuteReader(query);
                     if (reader == null) {
                         return DatabaseCommandResult.DatabaseError;
                     }
                     while (reader.Read()) {
                         ulong userID = reader.GetFieldValue<ulong>(0);
-                        Insert("TextChannelPrivileges",
-                            new Entry("UserID", userID),
-                            new Entry("ChannelID", textChannelID),
-                            new Entry("UpdateChannel", (byte)PrivilegeValue.Neutral),
-                            new Entry("DeleteChannel", (byte)PrivilegeValue.Neutral),
-                            new Entry("Read", (byte)PrivilegeValue.Neutral),
-                            new Entry("Write", (byte)PrivilegeValue.Neutral),
-                            new Entry("ViewChannel", (byte)PrivilegeValue.Neutral)
-                        );
+                        Logger.Warning($"Creating privilege for user '{userID}' in text channel '{textChannelID}'");
+                        if (userID == guildOwnerID) {
+                            var r2 = CreateTextChannelPrivilegeForOwner(guildOwnerID, textChannelID);
+                            if (r2 != DatabaseCommandResult.Success) {
+                                Logger.Error($"Faield to create owner privilege for text channel '{textChannelID}' in category '{categoryID}'");
+                                return r2;
+                            }
+                            User? user = GetUserByID(userID);
+                            if (user == null) { throw new Exception("User is null"); }
+
+                            TextChannelPrivilege? finalPrivilege = GetFinalTextChannelPrivilege(userID, textChannelID);
+                            if (finalPrivilege == null) {
+                                Logger.Error($"[{MethodBase.GetCurrentMethod}] - final privilege is null");
+                                return DatabaseCommandResult.DatabaseError;
+                            }
+
+                            textChannel.Users.Add(new PrivilegedUser<TextChannelPrivilege>(
+                                user, GetTextChannelPrivilegeForOwner(userID, textChannelID), finalPrivilege));
+                        }
+                        else {
+                            Logger.Warning("WRITE 1: " + defaultPrivilege.Write.ToString());
+                            ulong pid = InsertTextChannelPrivilege(new TextChannelPrivilege(defaultPrivilege) {
+                                UserID = userID,
+                                ChannelID = textChannelID
+                            });
+                            if (pid == 0) {
+                                Logger.Error($"Failed to create regular privilege in text channel '{textChannelID}' in category '{categoryID}'");
+                                return DatabaseCommandResult.DatabaseError;
+                            }
+                            User? user = GetUserByID(userID);
+                            if (user == null) {
+                                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - user is null");
+                                return DatabaseCommandResult.UnknownError;
+                            }
+
+                            TextChannelPrivilege? finalPrivilege = GetFinalTextChannelPrivilege(userID, textChannelID);
+                            if (finalPrivilege == null) {
+                                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - final privilege is null");
+                                return DatabaseCommandResult.DatabaseError;
+                            }
+
+                            textChannel.Users.Add(new PrivilegedUser<TextChannelPrivilege>(
+                                user, new TextChannelPrivilege(defaultPrivilege) { UserID = userID }, finalPrivilege));
+                        }
+                    }
+                    ulong dpid = InsertDefaultTextChannelPrivilege(defaultPrivilege);
+                    if (dpid == 0) {
+                        Logger.Error($"Failed to create default privilege in text channel '{textChannelID}' in category '{categoryID}'");
+                        return DatabaseCommandResult.DatabaseError;
                     }
                 }
-                
-                var r1 = CreateDefaultTextChannelPrivilege(textChannelID);
-                if (r1 != DatabaseCommandResult.Success) {
-                    return r1;
-                }
-                
 
-                textChannel = new TextChannel(textChannelID, data.CategoryID, data.Name, creationTime);
+                //var r2 = CreateDefaultTextChannelPrivilege(textChannelID);
+                //if (r2 != DatabaseCommandResult.Success) {
+                //    return r2;
+                //}
+
+                
                 return DatabaseCommandResult.Success;
             }
             catch (Exception ex) {
@@ -519,6 +856,69 @@ namespace ChatServer.Database
                 return DatabaseCommandResult.Fail;
             }
         }
+
+        //public DatabaseCommandResult CreateTextChannel(CreateTextChannelData data, out TextChannel? textChannel, bool createPrivilege = true) {
+        //    DateTime creationTime = DateTime.Now;
+        //    textChannel = null;
+        //    try {
+        //        ulong textChannelID = Insert("TextChannels",
+        //            new Entry("CategoryID", data.CategoryID),
+        //            new Entry("Name", data.Name),
+        //            new Entry("CreationTime", creationTime)
+        //        );
+
+        //        if (textChannelID == 0) {
+        //            Logger.Error("ID of new text channel is '0'!");
+        //            return DatabaseCommandResult.DatabaseError;
+        //        }
+        //        if (createPrivilege) {
+        //            string query = $@"
+        //                SELECT GuildAffiliations.UserID
+        //                FROM GuildAffiliations
+        //                    INNER JOIN Guilds ON Guilds.ID = GuildAffiliations.ID
+        //                    INNER JOIN Categories ON Categories.GuildID = Guilds.ID
+        //                WHERE Categories.ID = {data.CategoryID}";
+        //            var reader = ExecuteReader(query);
+        //            if (reader == null) {
+        //                return DatabaseCommandResult.DatabaseError;
+        //            }
+        //            while (reader.Read()) {
+        //                ulong userID = reader.GetFieldValue<ulong>(0);
+        //                Insert("TextChannelPrivileges",
+        //                    new Entry("UserID", userID),
+        //                    new Entry("ChannelID", textChannelID),
+        //                    new Entry("UpdateChannel", (byte)PrivilegeValue.Neutral),
+        //                    new Entry("DeleteChannel", (byte)PrivilegeValue.Neutral),
+        //                    new Entry("Read", (byte)PrivilegeValue.Neutral),
+        //                    new Entry("Write", (byte)PrivilegeValue.Neutral),
+        //                    new Entry("ViewChannel", (byte)PrivilegeValue.Neutral)
+        //                );
+        //            }
+        //        }
+                
+        //        var r1 = CreateDefaultTextChannelPrivilege(textChannelID);
+        //        if (r1 != DatabaseCommandResult.Success) {
+        //            return r1;
+        //        }
+                
+
+        //        textChannel = new TextChannel(textChannelID, data.CategoryID, data.Name, creationTime);
+        //        return DatabaseCommandResult.Success;
+        //    }
+        //    catch (Exception ex) {
+        //        var method = MethodBase.GetCurrentMethod();
+        //        if (method != null) {
+        //            const string indent = "\n\t\t\t       ";
+        //            string message = ex.Message.Replace("\n", indent);
+        //            Logger.Error($"{ex.GetType().Name} thrown in [{method.Name}]:{indent}{message}");
+        //        }
+        //        else {
+        //            Logger.Error(ex.Message);
+        //        }
+        //        textChannel = null;
+        //        return DatabaseCommandResult.Fail;
+        //    }
+        //}
 
 
         public DatabaseCommandResult GetTextChannelsInCategory(ulong categoryID, out ObservableCollection<TextChannel>? textChannels) {
@@ -540,8 +940,15 @@ namespace ChatServer.Database
                     string textChannelName = textChannelReader.GetFieldValue<string>(field++);
                     DateTime textChannelCreationTime = textChannelReader.GetFieldValue<DateTime>(field++);
 
+                    var r1 = GetPrivilegedUsersInTextChannel(textChannelID,
+                        out ObservableCollection<PrivilegedUser<TextChannelPrivilege>>? users);
+                    if (r1 != DatabaseCommandResult.Success || users == null) {
+                        return r1;
+                    }
+
                     TextChannel textChannel = new(textChannelID, textChannelCategoryID,
                         textChannelName, textChannelCreationTime);
+                    textChannel.Users = users;
                     textChannels.Add(textChannel);
                 }
                 return DatabaseCommandResult.Success;
@@ -562,6 +969,7 @@ namespace ChatServer.Database
         }
 
         public DatabaseCommandResult GetCategoriesInGuild(ulong guildID, out ObservableCollection<Category>? categories) {
+            categories = null;
             try {
                 var categoryReader = ExecuteReader($@"
                 SELECT Categories.ID, Categories.GuildID, Categories.Name, Categories.CreationTime
@@ -581,17 +989,22 @@ namespace ChatServer.Database
                     string categoryName = categoryReader.GetFieldValue<string>(field++);
                     DateTime categoryCreationTime = DateTime.Parse(categoryReader.GetFieldValue<string>(field++));
 
-                    var result = GetTextChannelsInCategory(categoryID, out ObservableCollection<TextChannel>? textChannels);
-                    
-                    if (result == DatabaseCommandResult.Success && textChannels != null) {
-                        Category category = new(categoryID, categoryGuildID, categoryName, categoryCreationTime);
-                        category.TextChannels = textChannels;
-                        categories.Add(category);
+                    var r1 = GetTextChannelsInCategory(categoryID,
+                        out ObservableCollection<TextChannel>? textChannels);
+                    if (r1 != DatabaseCommandResult.Success || textChannels == null) {
+                        return r1;
                     }
-                    else {
-                        categories = null;
-                        return result;
+
+                    var r2 = GetPrivilegedUsersInCategory(categoryID,
+                        out ObservableCollection<PrivilegedUser<CategoryPrivilege>>? users);
+                    if (r2 != DatabaseCommandResult.Success || users == null) {
+                        return r2;
                     }
+
+                    Category category = new(categoryID, categoryGuildID, categoryName, categoryCreationTime);
+                    category.Users = users;
+                    category.TextChannels = textChannels;
+                    categories.Add(category);
                 }
                 return DatabaseCommandResult.Success;
             }
@@ -651,19 +1064,20 @@ namespace ChatServer.Database
                     Guild guild = new(guildID, guildPublicID, guildName, guildPassword, guildOwnerID, guildCreationTime, guildIcon);
                     guild.Categories = categories;
 
-                    var r2 = GetGuildPrivileges(guild.ID, out ObservableCollection<GuildPrivilege>? privileges);
-                    if (r2 != DatabaseCommandResult.Success || privileges == null) {
-                        Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get privileges in guild '{guildID}'.");
+                    //var r2 = GetGuildPrivileges(guild.ID, out ObservableCollection<GuildPrivilege>? privileges);
+                    //if (r2 != DatabaseCommandResult.Success || privileges == null) {
+                    //    Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get privileges in guild '{guildID}'.");
+                    //    return r2;
+                    //}
+
+                    var r2 = GetPrivilegedUsersInGuild(guild.ID,
+                        out ObservableCollection<PrivilegedUser<GuildPrivilege>>? users);
+                    if (r2 != DatabaseCommandResult.Success || users == null) {
+                        Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get users in guild '{guild.ID}'.");
                         return r2;
                     }
 
-                    var r3 = GetUsersInGuild(guild.ID, out ObservableCollection<User>? users);
-                    if (r3 != DatabaseCommandResult.Success || users == null) {
-                        Logger.Error($"[{MethodBase.GetCurrentMethod()}] Failed to get users in guild '{guild.ID}'.");
-                        return r3;
-                    }
-
-                    guild.Privileges = privileges;
+                    //guild.Privileges = privileges;
                     guild.Users = users;
                     guilds.Add(guild);
                 }
@@ -725,8 +1139,8 @@ namespace ChatServer.Database
             try {
                 var reader = ExecuteReader($@"
                     SELECT Messages.ID, Messages.UserID, Messages.Content, Messages.CreationTime
-                    FROM Messages
-                    WHERE Messages.ID < {first}
+                    FROM Messages INNER JOIN TextChannels ON Messages.TextChannelID = TextChannels.ID
+                    WHERE Messages.ID < {first} AND TextChannels.ID = {textChannelID}
                     LIMIT {limit};");
                 if (reader == null) {
                     messages = null;
@@ -771,6 +1185,79 @@ namespace ChatServer.Database
         }
 
         public DatabaseCommandResult GetGuildPrivileges(ulong guildID, out ObservableCollection<GuildPrivilege>? privileges) {
+            privileges = null;
+            try {
+                SqliteCommand command = Connection.CreateCommand();
+                command.CommandText = $@"
+                SELECT
+                    GuildPrivileges.ID,
+                    GuildPrivileges.UserID,
+                    GuildPrivileges.ManageGuild,
+                    GuildPrivileges.ManagePrivileges,
+                    GuildPrivileges.CreateCategory,
+                    GuildPrivileges.UpdateCategory,
+                    GuildPrivileges.DeleteCategory,
+                    GuildPrivileges.CreateChannel,
+                    GuildPrivileges.UpdateChannel,
+                    GuildPrivileges.DeleteChannel,
+                    GuildPrivileges.Read,
+                    GuildPrivileges.Write
+                FROM GuildPrivileges
+                WHERE GuildPrivileges.GuildID = {guildID}
+                ;";
+                var reader = command.ExecuteReader();
+                if (reader == null) {
+                    return DatabaseCommandResult.DatabaseError;
+                }
+                while (reader.Read()) {
+                    privileges ??= new ObservableCollection<GuildPrivilege>();
+                    byte field = 0;
+                    ulong id = reader.GetFieldValue<ulong>(field++);
+                    ulong userID = reader.GetFieldValue<ulong>(field++);
+                    PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                    PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                    privileges.Add(new GuildPrivilege(id, userID, guildID) {
+                        ManageGuild = manageGuild,
+                        ManagePrivileges = managePrivileges,
+                        CreateCategory = createCategory,
+                        UpdateCategory = updateCategory,
+                        DeleteCategory = deleteCategory,
+                        CreateChannel = createChannel,
+                        UpdateChannel = updateChannel,
+                        DeleteChannel = deleteChannel,
+                        Read = read,
+                        Write = write,
+                    });
+                    return DatabaseCommandResult.Success;
+                }
+                privileges = null;
+                return DatabaseCommandResult.Fail;
+            }
+            catch (Exception ex) {
+                var method = MethodBase.GetCurrentMethod();
+                if (method != null) {
+                    const string indent = "\n\t\t\t       ";
+                    string message = ex.Message.Replace("\n", indent);
+                    Logger.Error($"{ex.GetType().Name} thrown in [{method.Name}]:{indent}{message}");
+                }
+                else {
+                    Logger.Error(ex.Message);
+                }
+                privileges = null;
+                return DatabaseCommandResult.UnknownError;
+            }
+        }
+
+        public DatabaseCommandResult GetCategoryPrivileges(ulong guildID, out ObservableCollection<GuildPrivilege>? privileges) {
             privileges = null;
             try {
                 SqliteCommand command = Connection.CreateCommand();

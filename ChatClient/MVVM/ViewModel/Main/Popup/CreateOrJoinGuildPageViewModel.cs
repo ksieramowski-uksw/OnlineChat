@@ -4,6 +4,7 @@ using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ChatClient.Stores;
 using System.Windows;
+using ChatShared.Models.Privileges;
 
 
 namespace ChatClient.MVVM.ViewModel {
@@ -47,7 +48,7 @@ namespace ChatClient.MVVM.ViewModel {
         void CreateGuild() {
             if (!string.IsNullOrWhiteSpace(NewGuildName) 
                 && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
-                Context.Client.CreateGuild(NewGuildName, NewGuildPassword);
+                Context.Client.CreateGuild(NewGuildName, NewGuildPassword, new GuildPrivilege());
             }
             else {
                 NewGuildFeedback = "Please, fill required fields.";
