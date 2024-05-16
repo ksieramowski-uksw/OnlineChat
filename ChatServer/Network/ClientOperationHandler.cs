@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using ChatShared.Models;
 using ChatShared.Models.Privileges;
 using ChatServer.Database.Enums;
+using System.Reflection;
 
 
 namespace ChatServer.Network
@@ -535,10 +536,23 @@ namespace ChatServer.Network
                     return;
                 }
                 var result = _database.Commands.JoinGuild(data, out Guild? guild);
-                if (result == DatabaseCommandResult.Success) {
+                if (result == DatabaseCommandResult.Success && guild != null) {
                     Logger.Info($"User '{data.UserID}' joined guild with public id '{data.PublicID}'.");
                     string json = JsonSerializer.Serialize(guild);
-                    _client.Send(OperationCode.JoinGuildSuccess, json);
+                    var userIDs = _database.Commands.GetUsersInGuild(guild.ID);
+                    if (userIDs == null) {
+                        Logger.Error($"[{MethodBase.GetCurrentMethod()}] Falied to get target users for MultiCast");
+                        return;
+                    }
+
+                    _client.MultiCast(OperationCode.JoinGuildSuccess, json, (x) => {
+                        foreach (var userID in userIDs) {
+                            if (userID == data.UserID) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    });
                 }
                 else {
                     Logger.Error($"Failed to add user '{data.UserID}' to guild '{data.PublicID}'");

@@ -176,34 +176,68 @@ namespace ChatClient.Network {
 
         private void JoinGuildSuccess(string message) {
             if (JsonSerializer.Deserialize<Guild>(message) is Guild guild) {
-                if (Context.App.Navigation.MainPage is MainPage mainPage) {
-                    bool found = false;
-                    foreach (Guild g in mainPage.ViewModel.Guilds) {
-                        if (guild.PublicID == g.PublicID) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
+                bool found = false;
+                for (int i = 0; i < Context.Guilds.Count; i++) {
+                    if (Context.Guilds[i].ID == guild.ID) {
                         Context.App.Dispatcher.Invoke(() => {
-                            bool resourceFound = false;
-                            int index = 0;
-                            for (; index < Context.App.ResourceStorage.Count; index++) {
-                                if (Context.App.ResourceStorage[index] == guild.Icon) {
-                                    resourceFound = true;
-                                    break;
-                                }
-                            }
-                            if (resourceFound) {
-                                guild.Icon = Context.App.ResourceStorage[index];
-                            }
-                            else {
-                                Context.App.ResourceStorage.Add(guild.Icon);
-                            }
-                            mainPage.ViewModel.Guilds.Add(guild);
+                            Context.Guilds[i] = guild;
                         });
+                        MessageBox.Show("GUILD FOUND");
+                        found = true;
+                        break;
                     }
                 }
+                if (found == false) {
+                    Context.App.Dispatcher.Invoke(() => {
+                        // use / add resource from/to storage
+                        bool resourceFound = false;
+                        int index = 0;
+                        for (; index < Context.App.ResourceStorage.Count; index++) {
+                            if (Context.App.ResourceStorage[index] == guild.Icon) {
+                                resourceFound = true;
+                                break;
+                            }
+                        }
+                        if (resourceFound) {
+                            guild.Icon = Context.App.ResourceStorage[index];
+                        }
+                        else {
+                            Context.App.ResourceStorage.Add(guild.Icon);
+                        }
+
+                        Context.Guilds.Add(guild);
+                        MessageBox.Show("GUILD NOT FOUND");
+                    });
+                }
+
+                //if (Context.App.Navigation.MainPage is MainPage mainPage) {
+                //    bool found = false;
+                //    foreach (Guild g in mainPage.ViewModel.Guilds) {
+                //        if (guild.PublicID == g.PublicID) {
+                //            found = true;
+                //            break;
+                //        }
+                //    }
+                //    if (!found) {
+                //        Context.App.Dispatcher.Invoke(() => {
+                //            bool resourceFound = false;
+                //            int index = 0;
+                //            for (; index < Context.App.ResourceStorage.Count; index++) {
+                //                if (Context.App.ResourceStorage[index] == guild.Icon) {
+                //                    resourceFound = true;
+                //                    break;
+                //                }
+                //            }
+                //            if (resourceFound) {
+                //                guild.Icon = Context.App.ResourceStorage[index];
+                //            }
+                //            else {
+                //                Context.App.ResourceStorage.Add(guild.Icon);
+                //            }
+                //            mainPage.ViewModel.Guilds.Add(guild);
+                //        });
+                //    }
+                //}
             }
         }
 
@@ -336,8 +370,7 @@ namespace ChatClient.Network {
                                 }
                             }
                         }
-                        Context.Guilds = mainPage.ViewModel.Guilds;
-                        mainPage.ViewModel.Guilds.Add(guild);
+                        Context.Guilds.Add(guild);
                     });
                 }
             }

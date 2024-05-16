@@ -3,6 +3,7 @@ using ChatShared.Models;
 using ChatShared.Models.Privileges;
 using Microsoft.Data.Sqlite;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using System.Reflection;
 
 
@@ -40,6 +41,29 @@ namespace ChatServer.Database {
             UserStatus status = reader.GetFieldValue<UserStatus>(field++);
 
             return new User(id, publicID, nickname, pronoun, creationTime, profilePicture, status);
+        }
+
+        public List<ulong>? GetUsersInGuild(ulong guildID) {
+            var reader = ExecuteReader($@"
+                SELECT GuildAffiliations.UserID
+                FROM GuildAffiliations
+                WHERE GuildAffiliations.GuildID = '{guildID}'");
+            if (reader == null) {
+                const string indent = "\n\t\t\t       ";
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}]{indent}Failed to get users in guild '{guildID}' - reader is null");
+                return null;
+            }
+            List<ulong> usersIDs = new();
+            while (reader.Read()) {
+                ulong userID = reader.GetFieldValue<ulong>(0);
+                usersIDs.Add(userID);
+            }
+            if (usersIDs.Count == 0) {
+                const string indent = "\n\t\t\t       ";
+                Logger.Error($"[{MethodBase.GetCurrentMethod()}]{indent}Failed to get users in guild '{guildID}' - user count is 0");
+                return null;
+            }
+            return usersIDs;
         }
 
 

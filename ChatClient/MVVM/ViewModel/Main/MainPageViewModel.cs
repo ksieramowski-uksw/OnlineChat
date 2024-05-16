@@ -37,7 +37,7 @@ namespace ChatClient.MVVM.ViewModel {
         public MainPageViewModel(ChatContext context) {
             Context = context;
 
-            Guilds = new ObservableCollection<Guild>();
+            Guilds = Context.Guilds;
 
             MaskVisibility = Visibility.Hidden;
             
