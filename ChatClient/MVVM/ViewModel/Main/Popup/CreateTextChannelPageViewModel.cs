@@ -32,8 +32,8 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
             Title = $"Create new text channel in category {category.Name}";
             NewTextChannelName = string.Empty;
             Feedback = string.Empty;
+            Privilege = new TextChannelPrivilege();
             _category = category;
-            Privilege = new(0, 0, category.ID);
         }
 
         [RelayCommand]

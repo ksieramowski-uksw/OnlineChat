@@ -66,5 +66,12 @@ namespace ChatClient.MVVM.ViewModel.Main {
                 mainPage.ViewModel.MaskVisibility = Visibility.Visible;
             }
         }
+
+
+        [RelayCommand]
+        private void CopyPublicID(string publicID) {
+            MessageBox.Show(publicID);
+            Clipboard.SetText(publicID);
+        }
     }
 }

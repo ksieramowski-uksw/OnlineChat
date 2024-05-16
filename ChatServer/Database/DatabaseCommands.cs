@@ -946,9 +946,15 @@ namespace ChatServer.Database
                         return r1;
                     }
 
+                    TextChannelPrivilege? defaultPrivilege = GetDefaultTextChannelPrivilege(textChannelID);
+                    if (defaultPrivilege == null) {
+                        return DatabaseCommandResult.DatabaseError;
+                    }
+
                     TextChannel textChannel = new(textChannelID, textChannelCategoryID,
                         textChannelName, textChannelCreationTime);
                     textChannel.Users = users;
+                    textChannel.DefaultPrivilege = defaultPrivilege;
                     textChannels.Add(textChannel);
                 }
                 return DatabaseCommandResult.Success;
@@ -1001,9 +1007,15 @@ namespace ChatServer.Database
                         return r2;
                     }
 
+                    CategoryPrivilege? defaultPrivilege = GetDefaultCategoryPrivilege(categoryID);
+                    if (defaultPrivilege == null) {
+                        return DatabaseCommandResult.DatabaseError;
+                    }
+
                     Category category = new(categoryID, categoryGuildID, categoryName, categoryCreationTime);
                     category.Users = users;
                     category.TextChannels = textChannels;
+                    category.DefaultPrivilege = defaultPrivilege;
                     categories.Add(category);
                 }
                 return DatabaseCommandResult.Success;
@@ -1694,6 +1706,13 @@ namespace ChatServer.Database
                         new Entry("GuildID", guildID),
                         new Entry("UserID", data.UserID));
                     guild = new Guild(guildID, data.PublicID, name, "", owner, time, icon);
+
+                    var r1 = GrantPrivilegesToJoiningUser(data.UserID, guildID);
+                    if (r1 != DatabaseCommandResult.Success) {
+                        return r1;
+                    }
+
+
                     GetCategoriesInGuild(guildID, out ObservableCollection<Category>? categories);
                     if (categories != null) {
                         guild.Categories = categories;
@@ -1705,10 +1724,7 @@ namespace ChatServer.Database
                         }
                     }
 
-                    var r1 = GrantPrivilegesToJoiningUser(data.UserID, guildID);
-                    if (r1 != DatabaseCommandResult.Success) {
-                        return r1;
-                    }
+
 
                     return DatabaseCommandResult.Success;
                 }

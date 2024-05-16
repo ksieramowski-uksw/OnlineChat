@@ -71,8 +71,6 @@ namespace ChatClient.MVVM.ViewModel {
             MaskVisibility = Visibility.Visible;
         }
 
-
-
         [RelayCommand]
         private void FriendList() {
             

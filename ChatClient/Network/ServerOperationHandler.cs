@@ -148,16 +148,10 @@ namespace ChatClient.Network {
                         else {
                             Context.App.ResourceStorage.Add(guild.Icon);
                         }
-                        mainPage.ViewModel.Guilds.Add(guild);
+                        Context.Guilds.Add(guild);
+                        //mainPage.ViewModel.Guilds.Add(guild);
+                        mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
                     });
-                    mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
-                    if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
-                        createOrJoinGuildPage.ViewModel.NewGuildName = string.Empty;
-                        createOrJoinGuildPage.ViewModel.NewGuildPassword = string.Empty;
-                        createOrJoinGuildPage.ViewModel.NewGuildFeedback = string.Empty;
-
-                        Context.App.Navigation.CreateOrJoinGuildPage = null;
-                    }
                 }
                 else {
                     if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinGuildPage) {
@@ -206,38 +200,11 @@ namespace ChatClient.Network {
                         }
 
                         Context.Guilds.Add(guild);
-                        MessageBox.Show("GUILD NOT FOUND");
+                        if (Context.App.Navigation.MainPage is MainPage mainPage) {
+                            mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
+                        }
                     });
                 }
-
-                //if (Context.App.Navigation.MainPage is MainPage mainPage) {
-                //    bool found = false;
-                //    foreach (Guild g in mainPage.ViewModel.Guilds) {
-                //        if (guild.PublicID == g.PublicID) {
-                //            found = true;
-                //            break;
-                //        }
-                //    }
-                //    if (!found) {
-                //        Context.App.Dispatcher.Invoke(() => {
-                //            bool resourceFound = false;
-                //            int index = 0;
-                //            for (; index < Context.App.ResourceStorage.Count; index++) {
-                //                if (Context.App.ResourceStorage[index] == guild.Icon) {
-                //                    resourceFound = true;
-                //                    break;
-                //                }
-                //            }
-                //            if (resourceFound) {
-                //                guild.Icon = Context.App.ResourceStorage[index];
-                //            }
-                //            else {
-                //                Context.App.ResourceStorage.Add(guild.Icon);
-                //            }
-                //            mainPage.ViewModel.Guilds.Add(guild);
-                //        });
-                //    }
-                //}
             }
         }
 
@@ -325,7 +292,9 @@ namespace ChatClient.Network {
         private void GetGuildsForUserSuccess(string message) {
             Guild? guild = JsonSerializer.Deserialize<Guild>(message);
             if (guild is null) { return; }
+
             
+
             if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 bool found = false;
                 foreach (Guild g in mainPage.ViewModel.Guilds) {

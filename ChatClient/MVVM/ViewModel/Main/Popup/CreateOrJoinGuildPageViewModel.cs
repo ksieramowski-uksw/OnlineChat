@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using ChatClient.Stores;
 using System.Windows;
 using ChatShared.Models.Privileges;
+using ChatClient.MVVM.View.Main.Popup;
+using ChatClient.MVVM.View.Main;
 
 
 namespace ChatClient.MVVM.ViewModel {
@@ -46,13 +48,17 @@ namespace ChatClient.MVVM.ViewModel {
 
         [RelayCommand]
         void CreateGuild() {
-            if (!string.IsNullOrWhiteSpace(NewGuildName) 
-                && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
-                Context.Client.CreateGuild(NewGuildName, NewGuildPassword, new GuildPrivilege());
+            if (Context.App.Navigation.MainPage is MainPage mainPage) {
+                mainPage.ViewModel.PopupContent = new FinalizeGuildCreationPage(Context);
             }
-            else {
-                NewGuildFeedback = "Please, fill required fields.";
-            }
+            
+            //if (!string.IsNullOrWhiteSpace(NewGuildName) 
+            //    && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
+            //    Context.Client.CreateGuild(NewGuildName, NewGuildPassword, new GuildPrivilege());
+            //}
+            //else {
+            //    NewGuildFeedback = "Please, fill required fields.";
+            //}
         }
 
         [RelayCommand]

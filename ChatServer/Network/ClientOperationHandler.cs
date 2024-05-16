@@ -539,6 +539,7 @@ namespace ChatServer.Network
                 if (result == DatabaseCommandResult.Success && guild != null) {
                     Logger.Info($"User '{data.UserID}' joined guild with public id '{data.PublicID}'.");
                     string json = JsonSerializer.Serialize(guild);
+                    Logger.Warning($"{json}");
                     var userIDs = _database.Commands.GetUsersInGuild(guild.ID);
                     if (userIDs == null) {
                         Logger.Error($"[{MethodBase.GetCurrentMethod()}] Falied to get target users for MultiCast");

@@ -46,7 +46,7 @@
                              Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding NewTextChannelName}"/>
                 </StackPanel>
 
-                <!-- PORIVILEGES TITLE -->
+                <!-- PRIVILEGES TITLE -->
                 <TextBlock Grid.Column="0" Grid.Row="3" FontSize="16" Foreground="#EEEEEE"
                     Text="Privileges" Margin="30,10,30,0" TextWrapping="Wrap" TextAlignment="Left"/>
 

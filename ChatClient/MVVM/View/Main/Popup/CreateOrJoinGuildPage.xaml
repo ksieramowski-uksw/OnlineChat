@@ -5,14 +5,14 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:ChatClient.MVVM.View.Main"
       mc:Ignorable="d" 
-      d:DesignHeight="580" d:DesignWidth="360"
+      d:DesignHeight="580" d:DesignWidth="400"
       Title="CreateOrJoinGuildPage">
 
 
     <Button Style="{DynamicResource TransparentButtonStyle}"
-            MaxHeight="580" MaxWidth="360" Click="HandleClickEvent">
-        <Border CornerRadius="5" Background="#343434">
-            <Grid>
+            MaxHeight="580" MaxWidth="400"  Click="HandleClickEvent">
+        <Border CornerRadius="5" Background="#343434" >
+            <Grid Width="375">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
@@ -23,43 +23,41 @@
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="30"/>
                     <RowDefinition Height="60"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
                     <RowDefinition Height="60"/>
-                    <RowDefinition Height="60"/>
-                    <RowDefinition Height="30"/>
                     <RowDefinition Height="60"/>
                     <RowDefinition Height="20"/>
                 </Grid.RowDefinitions>
 
-
-                <!-- CREATE NEW GUILD -->
+                
+                <!-- JOIN EXISTING GUILD -->
                 <TextBlock Grid.Column="0" Grid.Row="1" FontSize="19" Foreground="#EEEEEE"
-                           Text="Create new server" Margin="30,10,30,0"/>
+                           Text="Join existing server" VerticalAlignment="Center" Margin="30,0"/>
 
-                <!-- NEW GUILD NAME -->
+                <!-- EXISTING GUILD ID -->
                 <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Server name" Foreground="#EEEEEE" FontSize="16"/>
+                    <TextBlock Text="Server ID" Foreground="#EEEEEE" FontSize="16"/>
                     <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
-                             Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding NewGuildName}"/>
+                             Style="{DynamicResource RoundTextBoxStyle}"
+                             Text="{Binding ExistingGuildId}"/>
                 </StackPanel>
 
-                <!-- NEW GUILD PASSWORD -->
+                <!-- EXISTING GUILD PASSWORD -->
                 <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical" Margin="30,0">
                     <TextBlock Text="Server password" Foreground="#EEEEEE" FontSize="16"/>
                     <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
-                             Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding NewGuildPassword}"/>
+                             Style="{DynamicResource RoundTextBoxStyle}"
+                             Text="{Binding ExistingGuildPassword}"/>
                 </StackPanel>
 
-                <!-- NEW GUILD FEEDBACK -->
-                <TextBlock Grid.Column="0" Grid.Row="4"
+                <!-- EXISTING GUILD FEEDBACK -->
+                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4"
                            Foreground="#F09000" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Text="{Binding NewGuildFeedback}"/>
+                           Text="{Binding ExistingGuildFeedback}"/>
 
-                <!-- NEW GUILD SUBMIT BUTTON -->
-                <Button Grid.Column="0" Grid.Row="5" Margin="30,10,30,10" FontSize="16" Content="Create" 
+                <!-- EXISTING GUILD SUBMIT BUTTON -->
+                <Button Grid.Column="0" Grid.Row="5" Margin="30,10,30,10" FontSize="16" Content="Join"
                         Style="{DynamicResource RoundButtonStyle}"
-                        Command="{Binding CreateGuildCommand}"/>
+                        Command="{Binding JoinGuildCommand}"/>
 
 
                 <!-- 'OR' SEPARATOR -->
@@ -70,36 +68,11 @@
                     <Rectangle Fill="#EEEEEE" Width="120" Height="0.5" Margin="12,4,4,0"/>
                 </StackPanel>
 
-
-                <!-- JOIN EXISTING GUILD -->
-                <TextBlock Grid.Column="0" Grid.Row="7" FontSize="19" Foreground="#EEEEEE"
-                           Text="Join existing server" VerticalAlignment="Center" Margin="30,0"/>
-
-                <!-- EXISTING GUILD ID -->
-                <StackPanel Grid.Column="0" Grid.Row="8" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Server ID" Foreground="#EEEEEE" FontSize="16"/>
-                    <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
-                             Style="{DynamicResource RoundTextBoxStyle}"
-                             Text="{Binding ExistingGuildId}"/>
-                </StackPanel>
-
-                <!-- EXISTING GUILD PASSWORD -->
-                <StackPanel Grid.Column="0" Grid.Row="9" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Server password" Foreground="#EEEEEE" FontSize="16"/>
-                    <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
-                             Style="{DynamicResource RoundTextBoxStyle}"
-                             Text="{Binding ExistingGuildPassword}"/>
-                </StackPanel>
-
-                <!-- EXISTING GUILD FEEDBACK -->
-                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="10"
-                           Foreground="#F09000" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Text="{Binding ExistingGuildFeedback}"/>
-
-                <!-- EXISTING GUILD SUBMIT BUTTON -->
-                <Button Grid.Column="0" Grid.Row="11" Margin="30,10,30,10" FontSize="16" Content="Join"
+                
+                <!-- NEW GUILD SUBMIT BUTTON -->
+                <Button Grid.Column="0" Grid.Row="7" Margin="30,10,30,10" FontSize="16" Content="Create" 
                         Style="{DynamicResource RoundButtonStyle}"
-                        Command="{Binding JoinGuildCommand}"/>
+                        Command="{Binding CreateGuildCommand}"/>
 
             </Grid>
         </Border>

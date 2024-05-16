@@ -9,7 +9,7 @@ namespace ChatShared.Models {
         public string Name { get; set; }
         public DateTime CreationTime { get; set; }
         public ObservableCollection<Message> Messages { get; set; }
-        public TextChannel? DefaultPrivilege { get; set; }
+        public TextChannelPrivilege? DefaultPrivilege { get; set; }
         public ObservableCollection<PrivilegedUser<TextChannelPrivilege>> Users { get; set; }
         public bool Show { get; set; }
 

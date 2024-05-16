@@ -32,5 +32,8 @@ namespace ChatClient.MVVM.View.Main {
             e.Handled = true;
         }
 
+        private void MenuItem_Click(object sender, RoutedEventArgs e) {
+
+        }
     }
 }
