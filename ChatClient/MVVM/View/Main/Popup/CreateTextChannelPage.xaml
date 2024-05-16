@@ -68,9 +68,9 @@
                                Text="View channel" FontSize="14" Foreground="#EEE"/>
                     <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Background="{Binding Privilege.ViewChannel, Converter={StaticResource PositiveConverter}}"
-                                Command="{Binding SetPrivilegeValue_ViewChannel_Positive_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_ViewChannel_Positive_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.ViewChannel, Converter={StaticResource NegativeConverter}}"
-                                Command="{Binding SetPrivilegeValue_ViewChannel_Negative_Command}" Width="20" Height="25"
+                                Command="{Binding SetPrivilegeValue_ViewChannel_Negative_Command}" Width="20" Height="25" Cursor="Hand"
                                 Margin="20,0,0,0"/>
                     </StackPanel>
                     
@@ -78,44 +78,44 @@
                                Text="Update channel" FontSize="14" Foreground="#EEE"/>
                     <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Background="{Binding Privilege.UpdateChannel, Converter={StaticResource PositiveConverter}}"
-                                Command="{Binding SetPrivilegeValue_UpdateChannel_Positive_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_UpdateChannel_Positive_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.UpdateChannel, Converter={StaticResource NeutralConverter}}"
-                                Command="{Binding SetPrivilegeValue_UpdateChannel_Neutral_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_UpdateChannel_Neutral_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.UpdateChannel, Converter={StaticResource NegativeConverter}}"
-                                Command="{Binding SetPrivilegeValue_UpdateChannel_Negative_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_UpdateChannel_Negative_Command}" Width="20" Height="25" Cursor="Hand"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Center"
                                Text="Delete channel" FontSize="14" Foreground="#EEE"/>
                     <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Background="{Binding Privilege.DeleteChannel, Converter={StaticResource PositiveConverter}}"
-                                Command="{Binding SetPrivilegeValue_DeleteChannel_Positive_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_DeleteChannel_Positive_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.DeleteChannel, Converter={StaticResource NeutralConverter}}"
-                                Command="{Binding SetPrivilegeValue_DeleteChannel_Neutral_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_DeleteChannel_Neutral_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.DeleteChannel, Converter={StaticResource NegativeConverter}}"
-                                Command="{Binding SetPrivilegeValue_DeleteChannel_Negative_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_DeleteChannel_Negative_Command}" Width="20" Height="25" Cursor="Hand"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="0" Grid.Row="3" VerticalAlignment="Center"
                                Text="Read" FontSize="14" Foreground="#EEE"/>
                     <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Background="{Binding Privilege.Read, Converter={StaticResource PositiveConverter}}"
-                                Command="{Binding SetPrivilegeValue_Read_Positive_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Read_Positive_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.Read, Converter={StaticResource NeutralConverter}}"
-                                Command="{Binding SetPrivilegeValue_Read_Neutral_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Read_Neutral_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.Read, Converter={StaticResource NegativeConverter}}"
-                                Command="{Binding SetPrivilegeValue_Read_Negative_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Read_Negative_Command}" Width="20" Height="25" Cursor="Hand"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="0" Grid.Row="4" VerticalAlignment="Center"
                                Text="Write" FontSize="14" Foreground="#EEE"/>
                     <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Background="{Binding Privilege.Write, Converter={StaticResource PositiveConverter}}"
-                                Command="{Binding SetPrivilegeValue_Write_Positive_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Write_Positive_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.Write, Converter={StaticResource NeutralConverter}}"
-                                Command="{Binding SetPrivilegeValue_Write_Neutral_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Write_Neutral_Command}" Width="20" Height="25" Cursor="Hand"/>
                         <Button Background="{Binding Privilege.Write, Converter={StaticResource NegativeConverter}}"
-                                Command="{Binding SetPrivilegeValue_Write_Negative_Command}" Width="20" Height="25"/>
+                                Command="{Binding SetPrivilegeValue_Write_Negative_Command}" Width="20" Height="25" Cursor="Hand"/>
                     </StackPanel>
 
                 </Grid>
@@ -126,9 +126,8 @@
                            Text="{Binding Feedback}"/>
 
                 <!-- SUBMIT BUTTON -->
-                <Button Grid.Column="0" Grid.Row="6" Margin="30,10,30,10" FontSize="16" Content="Create"
-                        Style="{DynamicResource RoundButtonStyle}"
-                        Command="{Binding CreateTextChannelCommand}"/>
+                <Button Grid.Column="0" Grid.Row="6" Margin="30,10,30,10" FontSize="16" Content="Create" Cursor="Hand"
+                        Style="{DynamicResource RoundButtonStyle}" Command="{Binding CreateTextChannelCommand}"/>
 
             </Grid>
         </Border>

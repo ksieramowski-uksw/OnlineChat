@@ -175,7 +175,7 @@
 
         <!-- SEND BUTTON -->
         <Button Grid.Column="1" Grid.Row="5" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,8,8,8"
-                VerticalAlignment="Bottom" Padding="8" Height="46" Width="64"
+                VerticalAlignment="Bottom" Padding="8" Height="46" Width="64" Cursor="Hand"
                 Style="{DynamicResource RoundButtonStyle}" Command="{Binding SendMessageCommand}"/>
         
 

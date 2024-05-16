@@ -55,7 +55,7 @@
                            Text="{Binding ExistingGuildFeedback}"/>
 
                 <!-- EXISTING GUILD SUBMIT BUTTON -->
-                <Button Grid.Column="0" Grid.Row="5" Margin="30,10,30,10" FontSize="16" Content="Join"
+                <Button Grid.Column="0" Grid.Row="5" Margin="30,10,30,10" FontSize="16" Content="Join" Cursor="Hand"
                         Style="{DynamicResource RoundButtonStyle}"
                         Command="{Binding JoinGuildCommand}"/>
 
@@ -70,7 +70,7 @@
 
                 
                 <!-- NEW GUILD SUBMIT BUTTON -->
-                <Button Grid.Column="0" Grid.Row="7" Margin="30,10,30,10" FontSize="16" Content="Create" 
+                <Button Grid.Column="0" Grid.Row="7" Margin="30,10,30,10" FontSize="16" Content="Create" Cursor="Hand"
                         Style="{DynamicResource RoundButtonStyle}"
                         Command="{Binding CreateGuildCommand}"/>
 

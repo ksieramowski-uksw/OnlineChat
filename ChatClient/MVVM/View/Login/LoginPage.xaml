@@ -67,12 +67,12 @@
             <Button x:Name="LoginButton" Grid.Column="0" Grid.Row="2"
                 Command="{Binding LogInCommand}"
                 Style="{DynamicResource RoundButtonStyle}"
-                Margin="30,10,15,10" Content="Log in" FontSize="16"/>
+                Margin="30,10,15,10" Content="Log in" FontSize="16" Cursor="Hand"/>
 
             <Button x:Name="RegisterButton" Grid.Column="1" Grid.Row="2"
                 Command="{Binding NavigateToRegisterPageCommand}"
                 Style="{DynamicResource RoundButtonStyle}"
-                Margin="15,10,30,10" Content="Sign up" FontSize="16"/>
+                Margin="15,10,30,10" Content="Sign up" FontSize="16" Cursor="Hand"/>
         </Grid>
         <!-- LOGIN FEEDBACK -->
 

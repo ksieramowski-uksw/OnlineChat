@@ -81,10 +81,10 @@
 
         
 
-        <Button Grid.Column="0" Grid.Row="3" FontSize="16" Margin="30,10,15,10" Content="Sign up"
+        <Button Grid.Column="0" Grid.Row="3" FontSize="16" Margin="30,10,15,10" Content="Sign up" Cursor="Hand"
                 Command="{Binding RegisterCommand}" Style="{DynamicResource RoundButtonStyle}"/>
 
-        <Button  Grid.Column="1" Grid.Row="3" FontSize="16" Margin="15,10,30,10" Content="Back"
+        <Button  Grid.Column="1" Grid.Row="3" FontSize="16" Margin="15,10,30,10" Content="Back" Cursor="Hand"
                 Command="{Binding NavigateToLoginPageCommand}" Style="{DynamicResource RoundButtonStyle}"/>
 
 

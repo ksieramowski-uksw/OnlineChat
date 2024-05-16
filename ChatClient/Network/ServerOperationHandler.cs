@@ -149,7 +149,6 @@ namespace ChatClient.Network {
                             Context.App.ResourceStorage.Add(guild.Icon);
                         }
                         Context.Guilds.Add(guild);
-                        //mainPage.ViewModel.Guilds.Add(guild);
                         mainPage.ViewModel.MaskVisibility = Visibility.Hidden;
                     });
                 }
@@ -209,7 +208,12 @@ namespace ChatClient.Network {
         }
 
         private void JoinGuildFail(string message) {
-
+            if (Context.App.Navigation.CreateOrJoinGuildPage is CreateOrJoinGuildPage createOrJoinPage) {
+                createOrJoinPage.ViewModel.ExistingGuildFeedback = "Failed to join server.";
+            }
+            else {
+                MessageBox.Show(message);
+            }
         }
 
         private void CreateCategorySuccess(string message) {
