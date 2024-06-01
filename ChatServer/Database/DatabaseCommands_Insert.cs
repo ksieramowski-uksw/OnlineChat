@@ -1,154 +1,748 @@
 ﻿using ChatShared;
-using ChatShared.DataModels;
 using ChatShared.Models.Privileges;
-using System.Text;
+using System.Reflection;
+using System.Text.Json;
 
 
 namespace ChatServer.Database {
     public partial class DatabaseCommands {
-        private ulong Insert(string tableName, params Entry[] entries) {
-            StringBuilder query = new($"INSERT INTO {tableName}(");
-            for (int i = 0; i < entries.Length; i++) {
-                if (i != (entries.Length - 1)) {
-                    query.Append($"{entries[i].Key}, ");
-                    continue;
-                }
-                query.Append($"{entries[i].Key}) VALUES (");
-            }
-            for (int i = 0; i < entries.Length; i++) {
-                if (i != (entries.Length - 1)) {
-                    query.Append($"@{entries[i].Key}, ");
-                    continue;
-                }
-                query.Append($"@{entries[i].Key}) RETURNING ID;");
-            }
 
-            using var command = Connection.CreateCommand();
-            command.CommandText = query.ToString();
 
-            for (int i = 0; i < entries.Length; i++) {
-                command.Parameters.AddWithValue($"@{entries[i].Key}", entries[i].Value);
-            }
-
-            ulong id = 0;
+        public ID RegisterUser(string publicID, string email, string password, string nickname, string pronoun, byte[] profilePicture, DateTime creationTime) {
             try {
-                var reader = command.ExecuteReader();
-                if (reader is null) {
-                    return 0;
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO Users
+                                (PublicID, Email, Password, Nickname, Pronoun, ProfilePicture, CreationTime, Status)
+                            VALUES
+                                (@PublicID, @Email, @Password, @Nickname, @Pronoun, @ProfilePicture, @CreationTime, @Status)
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@PublicID", publicID);
+                    command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
+                    command.Parameters.AddWithValue("@Nickname", nickname);
+                    command.Parameters.AddWithValue("@Pronoun", pronoun);
+                    command.Parameters.AddWithValue("@ProfilePicture", profilePicture);
+                    command.Parameters.AddWithValue("@CreationTime", creationTime);
+                    command.Parameters.AddWithValue("@Status", UserStatus.Offline);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
                 }
-                if (reader.Read()) {
-                    id = reader.GetFieldValue<ulong>(0);
-                }
+                return 0;
             }
             catch (Exception ex) {
-                Logger.Error(ex.Message);
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
             }
-
-            return id;
-        }
-
-
-        public ulong InsertUser(RegisterData data, DateTime? creationTime = null) {
-            if (creationTime == null) { creationTime = DateTime.Now; }
-            return Insert("Users",
-                new Entry("PublicID", Guid.NewGuid()),
-                new Entry("Email", data.Email),
-                new Entry("Password", data.Password),
-                new Entry("Nickname", data.Nickname),
-                new Entry("Pronoun", data.Pronoun),
-                new Entry("CreationTime", creationTime),
-                new Entry("ProfilePicture", data.ProfilePicture),
-                new Entry("Status", UserStatus.Offline));
-        }
-
-
-        public ulong InsertGuildPrivilege(GuildPrivilege privilege) {
-            return Insert("GuildPrivileges",
-                new Entry("UserID", privilege.UserID),
-                new Entry("GuildID", privilege.GuildID),
-                new Entry("ManageGuild", privilege.ManageGuild),
-                new Entry("ManagePrivileges", privilege.ManagePrivileges),
-                new Entry("CreateCategory", privilege.CreateCategory),
-                new Entry("UpdateCategory", privilege.UpdateCategory),
-                new Entry("DeleteCategory", privilege.DeleteCategory),
-                new Entry("CreateChannel", privilege.CreateChannel),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
-        }
-
-        public ulong InsertCategoryPrivilege(CategoryPrivilege privilege) {
-            return Insert("CategoryPrivileges",
-                new Entry("UserID", privilege.UserID),
-                new Entry("CategoryID", privilege.CategoryID),
-                new Entry("UpdateCategory", privilege.UpdateCategory),
-                new Entry("DeleteCategory", privilege.DeleteCategory),
-                new Entry("ViewCategory", privilege.ViewCategory),
-                new Entry("CreateChannel", privilege.CreateChannel),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
-        }
-
-        public ulong InsertTextChannelPrivilege(TextChannelPrivilege privilege) {
-            Logger.Warning("WRITE: " + privilege.Write.ToString());
-            return Insert("TextChannelPrivileges",
-                new Entry("UserID", privilege.UserID),
-                new Entry("ChannelID", privilege.ChannelID),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("ViewChannel", privilege.ViewChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
-        }
-
-        public ulong InsertDefaultGuildPrivilege(GuildPrivilege privilege) {
-            return Insert("DefaultGuildPrivileges",
-                new Entry("GuildID", privilege.GuildID),
-                new Entry("ManageGuild", privilege.ManageGuild),
-                new Entry("ManagePrivileges", privilege.ManagePrivileges),
-                new Entry("CreateCategory", privilege.CreateCategory),
-                new Entry("UpdateCategory", privilege.UpdateCategory),
-                new Entry("DeleteCategory", privilege.DeleteCategory),
-                new Entry("CreateChannel", privilege.CreateChannel),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
-        }
-
-        public ulong InsertDefaultCategoryPrivilege(CategoryPrivilege privilege) {
-            return Insert("DefaultCategoryPrivileges",
-                new Entry("CategoryID", privilege.CategoryID),
-                new Entry("UpdateCategory", privilege.UpdateCategory),
-                new Entry("DeleteCategory", privilege.DeleteCategory),
-                new Entry("ViewCategory", privilege.ViewCategory),
-                new Entry("CreateChannel", privilege.CreateChannel),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
-        }
-
-        public ulong InsertDefaultTextChannelPrivilege(TextChannelPrivilege privilege) {
-            return Insert("DefaultTextChannelPrivileges",
-                new Entry("ChannelID", privilege.ChannelID),
-                new Entry("UpdateChannel", privilege.UpdateChannel),
-                new Entry("DeleteChannel", privilege.DeleteChannel),
-                new Entry("ViewChannel", privilege.ViewChannel),
-                new Entry("Read", privilege.Read),
-                new Entry("Write", privilege.Write)
-                );
         }
 
 
 
+        public ID CreateGuildPrivilege(GuildPrivilege privilege) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO GuildPrivileges (
+                                UserID,
+                                GuildID,
+                                ManageGuild,
+                                ManagePrivileges,
+                                CreateCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @GuildID,
+                                @ManageGuild,
+                                @ManagePrivileges,
+                                @CreateCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", privilege.UserID);
+                    command.Parameters.AddWithValue("@GuildID", privilege.GuildID);
+                    command.Parameters.AddWithValue("@ManageGuild", (sbyte)privilege.ManageGuild);
+                    command.Parameters.AddWithValue("@ManagePrivileges", (sbyte)privilege.ManagePrivileges);
+                    command.Parameters.AddWithValue("@CreateCategory", (sbyte)privilege.CreateCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateCategoryPrivilege(CategoryPrivilege privilege) {
+            try {
+                Logger.Warning("category privilege");
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO CategoryPrivileges (
+                                UserID,
+                                CategoryID,
+                                ViewCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @CategoryID,
+                                @ViewCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", privilege.UserID);
+                    command.Parameters.AddWithValue("@CategoryID", privilege.CategoryID);
+                    command.Parameters.AddWithValue("@ViewCategory", (sbyte)privilege.ViewCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateTextChannelPrivilege(TextChannelPrivilege privilege) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO TextChannelPrivileges (
+                                UserID,
+                                ChannelID,
+                                ViewChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @ChannelID,
+                                @ViewChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", privilege.UserID);
+                    command.Parameters.AddWithValue("@ChannelID", privilege.ChannelID);
+                    command.Parameters.AddWithValue("@ViewChannel", (sbyte)privilege.ViewChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateDefaultGuildPrivilege(GuildPrivilege privilege) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO DefaultGuildPrivileges (
+                                GuildID,
+                                ManageGuild,
+                                ManagePrivileges,
+                                CreateCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @GuildID,
+                                @ManageGuild,
+                                @ManagePrivileges,
+                                @CreateCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", privilege.GuildID);
+                    command.Parameters.AddWithValue("@ManageGuild", (sbyte)privilege.ManageGuild);
+                    command.Parameters.AddWithValue("@ManagePrivileges", (sbyte)privilege.ManagePrivileges);
+                    command.Parameters.AddWithValue("@CreateCategory", (sbyte)privilege.CreateCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateDefaultCategoryPrivilege(CategoryPrivilege privilege) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO DefaultCategoryPrivileges (
+                                CategoryID,
+                                ViewCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @CategoryID,
+                                @ViewCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", privilege.CategoryID);
+                    command.Parameters.AddWithValue("@ViewCategory", (sbyte)privilege.ViewCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateDefaultTextChannelPrivilege(TextChannelPrivilege privilege) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO DefaultTextChannelPrivileges (
+                                ChannelID,
+                                ViewChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @ChannelID,
+                                @ViewChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@ChannelID", privilege.ChannelID);
+                    command.Parameters.AddWithValue("@ViewChannel", (sbyte)privilege.ViewChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateGuildPrivilegeForOwner(ID ownerID, ID guildID) {
+            try {
+                GuildPrivilege privilege = GuildPrivilege.OwnerPrivilege(ownerID, guildID);
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO GuildPrivileges (
+                                UserID,
+                                GuildID,
+                                ManageGuild,
+                                ManagePrivileges,
+                                CreateCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @GuildID,
+                                @ManageGuild,
+                                @ManagePrivileges,
+                                @CreateCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", ownerID);
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+                    command.Parameters.AddWithValue("@ManageGuild", (sbyte)privilege.ManageGuild);
+                    command.Parameters.AddWithValue("@ManagePrivileges", (sbyte)privilege.ManagePrivileges);
+                    command.Parameters.AddWithValue("@CreateCategory", (sbyte)privilege.CreateCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateCategoryPrivilegeForOwner(ID ownerID, ID categoryID) {
+           
+            try {
+                CategoryPrivilege privilege = CategoryPrivilege.OwnerPrivilege(ownerID, categoryID);
+                Logger.Warning("owner category privilege");
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO CategoryPrivileges (
+                                UserID,
+                                CategoryID,
+                                ViewCategory,
+                                UpdateCategory,
+                                DeleteCategory,
+                                CreateChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @CategoryID,
+                                @ViewCategory,
+                                @UpdateCategory,
+                                @DeleteCategory,
+                                @CreateChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", ownerID);
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+                    command.Parameters.AddWithValue("@ViewCategory", (sbyte)privilege.ViewCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateCategory);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateTextChannelPrivilegeForOwner(ID ownerID, ID textChannelID) {
+            try {
+                TextChannelPrivilege privilege = TextChannelPrivilege.OwnerPrivilege(ownerID, textChannelID);
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO TextChannelPrivileges (
+                                UserID,
+                                TextChannelID,
+                                ViewChannel,
+                                UpdateChannel,
+                                DeleteChannel,
+                                Read,
+                                Write
+                            )
+                            VALUES (
+                                @UserID,
+                                @TextChannelID,
+                                @ViewChannel,
+                                @UpdateChannel,
+                                @DeleteChannel,
+                                @Read,
+                                @Write
+                            )
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", ownerID);
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+                    command.Parameters.AddWithValue("@ViewChannel", (sbyte)privilege.ViewChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateGuildAffiliation(ID userID, ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO GuildAffiliations (UserID, GuildID)
+                            VALUES (@UserID, @GuildID)
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateGuild(ID ownerID, string publicID, string name, string password, byte[] icon, DateTime creationTime) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO Guilds (Name, PublicID, Password, OwnerID, Icon, CreationTime)
+                            VALUES (@Name, @PublicID, @Password, @OwnerID, @Icon, @CreationTime)
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@PublicID", publicID);
+                    command.Parameters.AddWithValue("@Password", password);
+                    command.Parameters.AddWithValue("@OwnerID", ownerID);
+                    command.Parameters.AddWithValue("@Icon", icon);
+                    command.Parameters.AddWithValue("@CreationTime", creationTime);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateCategory(ID guildID, string name, DateTime creationTime) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO Categories (GuildID, Name, CreationTime)
+                            VALUES (@GuildID, @Name, @CreationTime)
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@CreationTime", creationTime);
+
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateTextChannel(ID categoryID, string name, DateTime creationTime) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO TextChannels (CategoryID, Name, CreationTime)
+                            VALUES (@CategoryID, @Name, @CreationTime)
+                            RETURNING ID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@CreationTime", creationTime);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateDefaultTextChannelPrivilegeForUser(ID userID, ID textChannelID) {
+            try {
+                TextChannelPrivilege? privilege = GetDefaultTextChannelPrivilege(textChannelID);
+                if (privilege == null) {
+                    Logger.Error($"Failed to get default text channel privilege for text channel '{textChannelID}'.", MethodBase.GetCurrentMethod());
+                    return 0;
+                }
+
+                privilege.UserID = userID;
+
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        INSERT INTO TextChannelPrivileges (UserID, ChannelID, ViewChannel, UpdateChannel, DeleteChannel, Read, Write)
+                            VALUES (@UserID, @TextChannelID, @ViewChannel, @UpdateChannel, @DeleteChannel, @Read, @Write)
+                            RETURNING ID
+                            ;";
+                    command.Parameters.AddWithValue("@UserID", privilege.UserID);
+                    command.Parameters.AddWithValue("@TextChannelID", privilege.ChannelID);
+                    command.Parameters.AddWithValue("@ViewChannel", (sbyte)privilege.ViewChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            ID privilegeID = reader.GetFieldValue<ID>(0);
+                            return privilegeID;
+                        }
+                    }
+                }
+                Logger.Error($"Failed to create default text channel privilege for user '{userID}'.", MethodBase.GetCurrentMethod());
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID CreateDefaultCategoryPrivilegeForUser(ID userID, ID categoryID) {
+            try {
+                CategoryPrivilege? privilege = GetDefaultCategoryPrivilege(categoryID);
+                if (privilege == null) {
+                    Logger.Error($"Failed to get default category privilege for user '{userID}' in category '{categoryID}'.", MethodBase.GetCurrentMethod());
+                    return 0;
+                }
+
+                privilege.UserID = userID;
+
+                Logger.Warning("default category privilege for user");
+
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                            INSERT INTO CategoryPrivileges (UserID, CategoryID, ViewCategory, UpdateCategory, DeleteCategory, CreateChannel, UpdateChannel, DeleteChannel, Read, Write)
+                                VALUES (@UserID, @CategoryID, @ViewCategory, @UpdateCategory, @DeleteCategory, @CreateChannel, @UpdateChannel, @DeleteChannel, @Read, @Write)
+                                RETURNING ID;";
+                    command.Parameters.AddWithValue("@UserID", (sbyte)privilege.UserID);
+                    command.Parameters.AddWithValue("@CategoryID", (sbyte)privilege.CategoryID);
+                    command.Parameters.AddWithValue("@ViewCategory", (sbyte)privilege.ViewCategory);
+                    command.Parameters.AddWithValue("@UpdateCategory", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteCategory", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@CreateChannel", (sbyte)privilege.CreateChannel);
+                    command.Parameters.AddWithValue("@UpdateChannel", (sbyte)privilege.UpdateChannel);
+                    command.Parameters.AddWithValue("@DeleteChannel", (sbyte)privilege.DeleteChannel);
+                    command.Parameters.AddWithValue("@Read", (sbyte)privilege.Read);
+                    command.Parameters.AddWithValue("@Write", (sbyte)privilege.Write);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            ID privilegeID = reader.GetFieldValue<ID>(0);
+                            return privilegeID;
+                        }
+                    }
+                }
+                Logger.Error($"Failed to create default category privilege for user '{userID}' in category '{categoryID}'.", MethodBase.GetCurrentMethod());
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
     }
 }

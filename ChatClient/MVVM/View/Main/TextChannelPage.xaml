@@ -11,6 +11,76 @@
 
     <Page.Resources>
         <converters:UserStatusConverter x:Key="UserStatusConverter"/>
+
+
+
+        <!-- Style for ScrollBars -->
+        <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="{TemplateBinding Background}">
+                            <!--<Track Name="PART_Track" IsDirectionReversed="True">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineLeftCommand" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Background="Gray" />
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.LineRightCommand" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>-->
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Style for VerticalScrollBar -->
+        <Style x:Key="ModernVerticalScrollBar" TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Orientation" Value="Vertical"/>
+        </Style>
+
+        <!-- Style for HorizontalScrollBar -->
+        <Style x:Key="ModernHorizontalScrollBar" TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}">
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Orientation" Value="Horizontal"/>
+        </Style>
+
+        <!-- Style for ScrollViewer -->
+        <Style x:Key="ModernScrollViewer" TargetType="ScrollViewer">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+
+                            <ScrollBar Grid.Column="1" Grid.Row="0" Name="PART_VerticalScrollBar" 
+                                       Style="{StaticResource ModernVerticalScrollBar}" 
+                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                            <ScrollBar Grid.Column="0" Grid.Row="1" Name="PART_HorizontalScrollBar" 
+                                       Style="{StaticResource ModernHorizontalScrollBar}" 
+                                       Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
     </Page.Resources>
 
     <Grid HorizontalAlignment="Stretch">
@@ -20,7 +90,7 @@
             <ColumnDefinition Width="256"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="56"/>
+            <RowDefinition Height="54"/>
             <RowDefinition Height="2"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
@@ -36,17 +106,22 @@
         </StackPanel>
         
         <!-- MENU ABOVE USER LIST -->
-        <Grid Grid.Column="2" Grid.Row="0" Background="#282828">
-            
-        </Grid>
+        <Border Grid.Column="2" Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="#222222"
+                Background="#282828">
+            <!--<Grid>
+
+            </Grid>-->
+        </Border>
+
 
         <!-- HORIZONTAL LINE -->
         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="#222222"/>
 
         <!-- MESSAGES -->
-        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
-                      HorizontalScrollBarVisibility="Hidden"
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
+                      HorizontalScrollBarVisibility="Hidden" ScrollChanged="ScrollViewer_ScrollChanged"
                       VerticalScrollBarVisibility="Auto" x:Name="MessageScrollViewer">
+
             <ListView ItemsSource="{Binding TextChannel.Messages}" Style="{DynamicResource BetterListView}"
                       Margin="0,0,0,16" MaxWidth="{Binding ActualWidth, ElementName=MessageScrollViewer}">
                 <ListView.ItemTemplate>
@@ -64,20 +139,28 @@
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
 
-                            <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="3"
-                                   Source="{Binding Author.ProfilePicture}" VerticalAlignment="Top"/>
+                            <Border Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Width="48" Height="48"
+                                        VerticalAlignment="Top" Margin="0,8,0,0">
+                                <Border.Clip>
+                                    <RectangleGeometry Rect="0,0,48,48" RadiusX="24" RadiusY="24"/>
+                                </Border.Clip>
+                                <Image Source="{Binding Author.ProfilePicture}"/>
+                            </Border>
 
-                            <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Author.Nickname}"
-                                       FontWeight="DemiBold" FontSize="16" Foreground="#EEE"  Margin="4,0,0,0"
-                                       VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
-                            <TextBlock Grid.Column="2" Grid.Row="0" Text="{Binding Time}"
-                                       VerticalAlignment="Center" Foreground="#A8A8A8" Margin="6,0,0,0"/>
+                            <TextBox Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left"
+                                     FontWeight="DemiBold" FontSize="16" Foreground="#EEE" Margin="4,0,0,0"
+                                     Text="{Binding Author.Nickname}" IsReadOnly="True" Cursor="Arrow"
+                                     Style="{DynamicResource TransparentTextBoxStyle}"/>
+
+                            <TextBox Grid.Column="2" Grid.Row="0" Text="{Binding Time}" VerticalAlignment="Center"
+                                     Foreground="#A8A8A8" Margin="6,0,0,0" IsReadOnly="True" Cursor="Arrow"
+                                     Style="{DynamicResource TransparentTextBoxStyle}"/>
 
                             <TextBox Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2"
                                        Text="{Binding Content}" Foreground="#EEE" Margin="4,0,0,0" FontSize="16"
-                                       VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True"
-                                       Style="{DynamicResource TransparentTextBoxStyle}" TextWrapping="Wrap" />
+                                       VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True" Cursor="Arrow"
+                                       Style="{DynamicResource TransparentTextBoxStyle}" TextWrapping="Wrap"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -87,45 +170,44 @@
 
         <!-- USERS -->
         <ScrollViewer Grid.Column="2" Grid.Row="2" Grid.RowSpan="4" Background="#282828"
-                      HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <ListView ItemsSource="{Binding TextChannel.Users}" Style="{DynamicResource BetterListView}">
+                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ListView ItemsSource="{Binding VisualUsers}" Style="{DynamicResource BetterListView}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="8,0,0,0" x:Name="TextChannelUserGrid">
+                        <Grid Margin="8,0,0,0" x:Name="TextChannelUserGrid" Visibility="{Binding Visibility}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="41"/>
-                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="41"/>
-                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
 
                             <!-- USER PROFILE IMAGE -->
-                            <Image Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" Grid.RowSpan="2" Margin="2"
-                                   Source="{Binding User.ProfilePicture}"/>
+                            <Border Grid.Column="0" Grid.Row="0" Margin="2" Width="52" Height="52">
+                                <Border.Clip>
+                                    <RectangleGeometry Rect="0,0,52,52" RadiusX="26" RadiusY="26"/>
+                                </Border.Clip>
+                                <Image Source="{Binding User.ProfilePicture}"/>
+                            </Border>
 
                             <!-- USER STATUS -->
-                            <Border Grid.Column="1" Grid.Row="1" BorderThickness="2"
-                                    BorderBrush="#222222" CornerRadius="6"
-                                    Background="{Binding User.Status,
-                                    Converter={StaticResource UserStatusConverter}}"/>
+                            <Border Grid.Column="0" Grid.Row="1" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                    Width="15" Height="15" BorderThickness="2" BorderBrush="#222222" CornerRadius="6"
+                                    Background="{Binding User.Status, Converter={StaticResource UserStatusConverter}}"/>
 
-                            <!-- NICKNAME -->
-                            <TextBlock Grid.Column="3" Grid.Row="0" Grid.RowSpan="2"
-                                       Text="{Binding User.Nickname}"
-                                       Foreground="#A8A8A8" FontSize="18" Margin="4,8,0,0" Padding="8,8,16,8"/>
+                            <StackPanel Grid.Column="3" Grid.Row="0" Orientation="Vertical">
+                                <!-- NICKNAME -->
+                                <TextBox Foreground="#A8A8A8" FontSize="18" Padding="8,4,8,0"
+                                         Text="{Binding User.Nickname}" IsReadOnly="True" Cursor="Arrow"
+                                         Style="{DynamicResource TransparentTextBoxStyle}"/>
+                                <!-- PRONOUN -->
+                                <TextBox Foreground="#A8A8A8" FontSize="14" Padding="10,0,10,0"
+                                         Text="{Binding User.Pronoun}" IsReadOnly="True" Cursor="Arrow"
+                                         Style="{DynamicResource TransparentTextBoxStyle}"/>
+                            </StackPanel>
+
                         </Grid>
-                        <DataTemplate.Triggers>
-                            <!-- Conditionally show the item based on its status -->
-                            <DataTrigger Binding="{Binding FinalPrivilege.ViewChannel}" Value="{x:Static sharedns:PrivilegeValue.Positive}">
-                                <Setter TargetName="TextChannelUserGrid" Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding FinalPrivilege.ViewChannel}" Value="{x:Static sharedns:PrivilegeValue.Negative}">
-                                <Setter TargetName="TextChannelUserGrid" Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -140,7 +222,7 @@
         </ScrollViewer>-->
 
         <!-- INPUT BOX -->
-        <Border Grid.Column="0" Grid.Row="4" Grid.RowSpan="2" Margin="8" Background="#282828" CornerRadius="10">
+        <Border Grid.Column="0" Grid.Row="4" Grid.RowSpan="2" Margin="9,9,9,9" Background="#282828" CornerRadius="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="42"/>
@@ -151,7 +233,8 @@
                 </Grid.RowDefinitions>
 
                 <Button Grid.Column="0" Grid.Row="0" Width="36" Height="36" Cursor="Hand"
-                        Style="{DynamicResource TransparentButtonStyle}" Margin="6,0,0,0">
+                        Style="{DynamicResource TransparentButtonStyle}" Margin="6,0,0,0"
+                        Command="{Binding TestButtonClickCommand}">
                     <Canvas>
                         <Ellipse Fill="#AAA" Width="24" Height="24" Canvas.Left="-12" Canvas.Top="-12"/>
                         <Rectangle Fill="#282828" Width="2" Height="12" Canvas.Left="-1" Canvas.Top="-6"/>
@@ -174,8 +257,8 @@
 
 
         <!-- SEND BUTTON -->
-        <Button Grid.Column="1" Grid.Row="5" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,8,8,8"
-                VerticalAlignment="Bottom" Padding="8" Height="46" Width="64" Cursor="Hand"
+        <Button Grid.Column="1" Grid.Row="5" Grid.RowSpan="1" Content="Send" FontSize="16" Margin="0,9,9,9"
+                VerticalAlignment="Bottom" Height="46" Width="64" Cursor="Hand"
                 Style="{DynamicResource RoundButtonStyle}" Command="{Binding SendMessageCommand}"/>
         
 

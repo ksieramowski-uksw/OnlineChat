@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using ChatClient.MVVM.ViewModel.Main;
+using System.Windows;
 using System.Windows.Input;
 
 
@@ -7,9 +8,16 @@ namespace ChatClient.MVVM.View.Main {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        public MainWindow() {
+        public MainWindowViewModel ViewModel { get; set; }
+
+
+        public MainWindow(ChatContext context) {
             InitializeComponent();
+
+            ViewModel = new MainWindowViewModel(context);
+            DataContext = ViewModel;
         }
+
 
         private void MainWindow_MouseDown(object sender, MouseButtonEventArgs e) {
             if (e.ChangedButton == MouseButton.Left) {

@@ -1,516 +1,1078 @@
 ﻿using ChatShared;
 using ChatShared.Models;
 using ChatShared.Models.Privileges;
-using Microsoft.Data.Sqlite;
-using System.ComponentModel.DataAnnotations;
-using System.Net;
+using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Text.Json;
 
 
 namespace ChatServer.Database {
     public partial class DatabaseCommands {
 
-        public User? GetUserByID(ulong userID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    Users.ID,
-                    Users.PublicID,
-                    Users.Nickname,
-                    Users.Pronoun,
-                    Users.CreationTime,
-                    Users.ProfilePicture,
-                    Users.Status
-                FROM Users
-                WHERE Users.ID = {userID}");
-            if (reader == null) {
+        public User? GetUser(ID userID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                    SELECT
+                            Users.PublicID,
+                            Users.Nickname,
+                            Users.Pronoun,
+                            Users.CreationTime,
+                            Users.ProfilePicture,
+                            Users.Status
+                        FROM Users
+                        WHERE Users.ID = @UserID
+                    ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            string publicID = reader.GetFieldValue<string>(field++);
+                            string nickname = reader.GetFieldValue<string>(field++);
+                            string pronoun = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(field++));
+                            byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                            UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                            return new User(userID, publicID, nickname, pronoun, creationTime, profilePicture, status);
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                return GetUser(reader);
-            }
-            return null;
-        }
-        public User GetUser(SqliteDataReader reader) {
-            byte field = 0;
-            ulong id = reader.GetFieldValue<ulong>(field++);
-            string publicID = reader.GetFieldValue<string>(field++);
-            string nickname = reader.GetFieldValue<string>(field++);
-            string pronoun = reader.GetFieldValue<string>(field++);
-            DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(field++));
-            byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
-            UserStatus status = reader.GetFieldValue<UserStatus>(field++);
-
-            return new User(id, publicID, nickname, pronoun, creationTime, profilePicture, status);
-        }
-
-        public List<ulong>? GetUsersInGuild(ulong guildID) {
-            var reader = ExecuteReader($@"
-                SELECT GuildAffiliations.UserID
-                FROM GuildAffiliations
-                WHERE GuildAffiliations.GuildID = '{guildID}'");
-            if (reader == null) {
-                const string indent = "\n\t\t\t       ";
-                Logger.Error($"[{MethodBase.GetCurrentMethod()}]{indent}Failed to get users in guild '{guildID}' - reader is null");
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            List<ulong> usersIDs = new();
-            while (reader.Read()) {
-                ulong userID = reader.GetFieldValue<ulong>(0);
-                usersIDs.Add(userID);
-            }
-            if (usersIDs.Count == 0) {
-                const string indent = "\n\t\t\t       ";
-                Logger.Error($"[{MethodBase.GetCurrentMethod()}]{indent}Failed to get users in guild '{guildID}' - user count is 0");
+        }
+
+
+
+        public User? GetUserByLoginDetails(string email, string password) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                    SELECT
+                            Users.ID,
+                            Users.PublicID,
+                            Users.Nickname,
+                            Users.Pronoun,
+                            Users.CreationTime,
+                            Users.ProfilePicture,
+                            Users.Status
+                        FROM Users
+                        WHERE Users.Email = @Email
+                            AND Users.Password = @Password
+                    ;";
+                    command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID id = reader.GetFieldValue<ID>(field++);
+                            string publicID = reader.GetFieldValue<string>(field++);
+                            string nickname = reader.GetFieldValue<string>(field++);
+                            string pronoun = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(field++));
+                            byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                            UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                            return new User(id, publicID, nickname, pronoun, creationTime, profilePicture, status);
+                        }
+                    }
+                }
                 return null;
             }
-            return usersIDs;
-        }
-
-
-        public Guild? GetGuildByID(ulong guildID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    Guilds.ID,
-                    Guilds.PublicID,
-                    Guilds.Name,
-                    Guilds.Password,
-                    Guilds.OwnerID,
-                    Guilds.CreationTime,
-                    Guilds.Icon
-                FROM Guilds
-                WHERE Guilds.ID = '{guildID}'");
-            if (reader == null) {
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            if (reader.Read()) {
-                return GetGuild(reader);
-            }
-            return null;
-        }
-        public Guild GetGuild(SqliteDataReader reader) {
-            byte field = 0;
-            ulong guildID = reader.GetFieldValue<ulong>(field++);
-            string publicID = reader.GetFieldValue<string>(field++);
-            string name = reader.GetFieldValue<string>(field++);
-            string password = reader.GetFieldValue<string>(field++);
-            ulong ownerID = reader.GetFieldValue<ulong>(field++);
-            DateTime CreationTime = reader.GetFieldValue<DateTime>(field++);
-            byte[] icon = reader.GetFieldValue<byte[]>(field++);
-
-            return new Guild(guildID, publicID, name, password, ownerID, CreationTime, icon);
         }
 
-        public Category? GetCategoryByID(ulong categoryID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    Categories.ID,
-                    Categories.GuildID,
-                    Categories.Name,
-                    Categories.CreationTime
-                FROM Categories
-                WHERE Categories.ID = '{categoryID}'");
-            if (reader == null) {
+
+
+        public User? GetUserByEmail(string email) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                    SELECT
+                            Users.ID,
+                            Users.PublicID,
+                            Users.Nickname,
+                            Users.Pronoun,
+                            Users.CreationTime,
+                            Users.ProfilePicture,
+                            Users.Status
+                        FROM Users
+                        WHERE Users.Email = @Email
+                    ;";
+                    command.Parameters.AddWithValue("@Email", email);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID id = reader.GetFieldValue<ID>(field++);
+                            string publicID = reader.GetFieldValue<string>(field++);
+                            string nickname = reader.GetFieldValue<string>(field++);
+                            string pronoun = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = DateTime.Parse(reader.GetFieldValue<string>(field++));
+                            byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                            UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                            return new User(id, publicID, nickname, pronoun, creationTime, profilePicture, status);
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                return GetCategory(reader);
-            }
-            return null;
-        }
-        public Category GetCategory(SqliteDataReader reader) {
-            byte field = 0;
-            ulong id = reader.GetFieldValue<ulong>(field++);
-            ulong guildID = reader.GetFieldValue<ulong>(field++);
-            string name = reader.GetFieldValue<string>(field++);
-            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
-
-            return new Category(id, guildID, name, creationTime);
-        }
-
-
-        public TextChannel? GetTextChannelByID(ulong textChannelID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    TextChannels.ID,
-                    TextChannels.CategoryID,
-                    TextChannels.Name,
-                    TextChannels.CreationTime
-                FROM TextChannels
-                WHERE TextChannels.ID = '{textChannelID}'");
-            if (reader == null) {
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            if (reader.Read()) {
-                return GetTextChannel(reader);
-            }
-            return null;
         }
-        public TextChannel GetTextChannel(SqliteDataReader reader) {
-            byte field = 0;
-            ulong textChannelID = reader.GetFieldValue<ulong>(field++);
-            ulong categoryID = reader.GetFieldValue<ulong>(field++);
-            string name = reader.GetFieldValue<string>(field++);
-            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
 
-            return new TextChannel(textChannelID, categoryID, name, creationTime);
+
+
+        public string? GetUniquePublicID(string tableName) {
+            try {
+                while (true) {
+                    string publicID = Guid.NewGuid().ToString();
+                    using (var command = Connection.CreateCommand()) {
+                        command.CommandText = $@"
+                            SELECT ID
+                                FROM [{tableName}]
+                                WHERE [{tableName}].PublicID LIKE @PublicID
+                            ;";
+                        command.Parameters.AddWithValue("@PublicID", publicID);
+
+                        using (var reader = command.ExecuteReader()) {
+                            if (!reader.HasRows) {
+                                return publicID;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public ID GetGuildOwnerID(ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                            WHERE GuildAffiliations.GuildID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID GetCategoryOwnerID(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                                INNER JOIN Categories ON Categories.GuildID = GuildAffiliations.GuildID
+                            WHERE Categories.ID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public ID GetGuildAffiliationID(ID userID, ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.ID
+                            FROM GuildAffiliations
+                            WHERE GuildAffiliations.UserID = @UserID
+                                AND GuildAffiliations.GuildID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            return reader.GetFieldValue<ID>(0);
+                        }
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return 0;
+            }
+        }
+
+
+
+        public Guild? GetGuild(ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT
+                            Guilds.PublicID,
+                            Guilds.Name,
+                            Guilds.OwnerID,
+                            Guilds.Icon,
+                            Guilds.CreationTime
+                        FROM Guilds
+                        WHERE Guilds.ID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            string publicID = reader.GetFieldValue<string>(field++);
+                            string name = reader.GetFieldValue<string>(field++);
+                            ID ownerID = reader.GetFieldValue<ID>(field++);
+                            byte[] icon = reader.GetFieldValue<byte[]>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+                            return new Guild(guildID, publicID, name, ownerID, icon, creationTime);
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public Guild? GetGuildByJoinDetails(string publicID, string password) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                                Guilds.ID,
+                                Guilds.Name,
+                                Guilds.OwnerID,
+                                Guilds.Icon,
+                                Guilds.CreationTime
+                            FROM Guilds
+                            WHERE Guilds.PublicID = @GuildPublicID
+                                AND Guilds.Password = @GuildPassword
+                        ;";
+                    command.Parameters.AddWithValue("@GuildPublicID", publicID);
+                    command.Parameters.AddWithValue("@GuildPassword", password);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID guildID = reader.GetFieldValue<ID>(field++);
+                            string name = reader.GetFieldValue<string>(field++);
+                            ID ownerID = reader.GetFieldValue<ID>(field++);
+                            byte[] icon = reader.GetFieldValue<byte[]>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+                            return new Guild(guildID, publicID, name, ownerID, icon, creationTime);
+                        }
+                    }
+                }
+                Logger.Error($"Failed to get guild by join details with publicID '{publicID}'.", MethodBase.GetCurrentMethod());
+                return null;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public Category? GetCategory(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT
+                            Categories.GuildID,
+                            Categories.Name,
+                            Categories.CreationTime
+                        FROM Categories
+                        WHERE Categories.ID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID guildID = reader.GetFieldValue<ID>(field++);
+                            string categoryName = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+                            return new Category(categoryID, guildID, categoryName, creationTime);
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public TextChannel? GetTextChannel(ID textChannelID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                            TextChannels.CategoryID,
+                            TextChannels.Name,
+                            TextChannels.CreationTime
+                        FROM TextChannels
+                        WHERE TextChannels.ID = @TextChannelID
+                        ;";
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID categoryID = reader.GetFieldValue<ID>(field++);
+                            string name = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+                            return new TextChannel(textChannelID, categoryID, name, creationTime);
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
         }
 
 
 
         #region Privileges
 
-        public GuildPrivilege? GetGuildPrivilege(ulong userID, ulong guildID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    GuildPrivileges.ID,
-                    GuildPrivileges.ManageGuild,
-                    GuildPrivileges.ManagePrivileges,
-                    GuildPrivileges.CreateCategory,
-                    GuildPrivileges.UpdateCategory,
-                    GuildPrivileges.DeleteCategory,
-                    GuildPrivileges.CreateChannel,
-                    GuildPrivileges.UpdateChannel,
-                    GuildPrivileges.DeleteChannel,
-                    GuildPrivileges.Read,
-                    GuildPrivileges.Write
-                FROM GuildPrivileges
-                WHERE GuildPrivileges.UserID = '{userID}' AND GuildPrivileges.GuildID = '{guildID}'
-                ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+        public GuildPrivilege? GetGuildPrivilege(ID userID, ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT
+                            GuildPrivileges.ID,
+                            GuildPrivileges.ManageGuild,
+                            GuildPrivileges.ManagePrivileges,
+                            GuildPrivileges.CreateCategory,
+                            GuildPrivileges.UpdateCategory,
+                            GuildPrivileges.DeleteCategory,
+                            GuildPrivileges.CreateChannel,
+                            GuildPrivileges.UpdateChannel,
+                            GuildPrivileges.DeleteChannel,
+                            GuildPrivileges.Read,
+                            GuildPrivileges.Write
+                        FROM GuildPrivileges
+                        WHERE GuildPrivileges.UserID = @UserID AND GuildPrivileges.GuildID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            return new GuildPrivilege(privilegeID, userID, guildID) {
+                                ManageGuild = manageGuild,
+                                ManagePrivileges = managePrivileges,
+                                CreateCategory = createCategory,
+                                UpdateCategory = updateCategory,
+                                DeleteCategory = deleteCategory,
+                                CreateChannel = createChannel,
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);      
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new GuildPrivilege(privilegeID, userID, guildID) {
-                    ManageGuild = manageGuild,
-                    ManagePrivileges = managePrivileges,
-                    CreateCategory = createCategory,
-                    UpdateCategory = updateCategory,
-                    DeleteCategory = deleteCategory,
-                    CreateChannel = createChannel,
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    Read = read,
-                    Write = write,
-                };
-            }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
-        }
-
-        public CategoryPrivilege? GetCategoryPrivilege(ulong userID, ulong categoryID) {
-            var reader = ExecuteReader($@"
-                SELECT 
-                    CategoryPrivileges.ID,
-                    CategoryPrivileges.UpdateCategory,
-                    CategoryPrivileges.DeleteCategory,
-                    CategoryPrivileges.ViewCategory,
-                    CategoryPrivileges.CreateChannel,
-                    CategoryPrivileges.UpdateChannel,
-                    CategoryPrivileges.DeleteChannel,
-                    CategoryPrivileges.Read,
-                    CategoryPrivileges.Write
-                FROM CategoryPrivileges
-                WHERE CategoryPrivileges.UserID = '{userID}' AND CategoryPrivileges.CategoryID = '{categoryID}'
-            ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new CategoryPrivilege(privilegeID, userID, categoryID) {
-                    UpdateCategory = updateCategory,
-                    DeleteCategory = deleteCategory,
-                    ViewCategory = viewCategory,
-                    CreateChannel = createChannel,
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    Read = read,
-                    Write = write,
-                };
-            }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
 
-        public TextChannelPrivilege? GetTextChannelPrivilege(ulong userID, ulong textChannelID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    TextChannelPrivileges.ID,
-                    TextChannelPrivileges.UpdateChannel,
-                    TextChannelPrivileges.DeleteChannel,
-                    TextChannelPrivileges.ViewChannel,
-                    TextChannelPrivileges.Read,
-                    TextChannelPrivileges.Write
-                FROM TextChannelPrivileges
-                WHERE TextChannelPrivileges.UserID = '{userID}' AND TextChannelPrivileges.ChannelID = '{textChannelID}'
-                ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+
+
+        public CategoryPrivilege? GetCategoryPrivilege(ID userID, ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT 
+                            CategoryPrivileges.ID,
+                            CategoryPrivileges.UpdateCategory,
+                            CategoryPrivileges.DeleteCategory,
+                            CategoryPrivileges.ViewCategory,
+                            CategoryPrivileges.CreateChannel,
+                            CategoryPrivileges.UpdateChannel,
+                            CategoryPrivileges.DeleteChannel,
+                            CategoryPrivileges.Read,
+                            CategoryPrivileges.Write
+                        FROM CategoryPrivileges
+                        WHERE CategoryPrivileges.UserID = @UserID AND CategoryPrivileges.CategoryID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            return new CategoryPrivilege(privilegeID, userID, categoryID) {
+                                UpdateCategory = updateCategory,
+                                DeleteCategory = deleteCategory,
+                                ViewCategory = viewCategory,
+                                CreateChannel = createChannel,
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new TextChannelPrivilege(privilegeID, userID, textChannelID) {
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    ViewChannel = viewChannel,
-                    Read = read,
-                    Write = write,
-                };
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
             }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
+
+
+
+        public ObservableCollection<CategoryPrivilege>? GetAllPrivilegesInCategory(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                                CategoryPrivileges.ID,
+                                CategoryPrivileges.UserID,
+                                CategoryPrivileges.UpdateCategory,
+                                CategoryPrivileges.DeleteCategory,
+                                CategoryPrivileges.ViewCategory,
+                                CategoryPrivileges.CreateChannel,
+                                CategoryPrivileges.UpdateChannel,
+                                CategoryPrivileges.DeleteChannel,
+                                CategoryPrivileges.Read,
+                                CategoryPrivileges.Write
+                            FROM CategoryPrivileges
+                            WHERE CategoryPrivileges.CategoryID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    ObservableCollection<CategoryPrivilege> privileges = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            ID userID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            privileges.Add(new CategoryPrivilege(privilegeID, userID, categoryID) {
+                                UpdateCategory = updateCategory,
+                                DeleteCategory = deleteCategory,
+                                ViewCategory = viewCategory,
+                                CreateChannel = createChannel,
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                Read = read,
+                                Write = write,
+                            });
+                        }
+                        return privileges;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public TextChannelPrivilege? GetTextChannelPrivilege(ID userID, ID textChannelID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                            TextChannelPrivileges.ID,
+                            TextChannelPrivileges.UpdateChannel,
+                            TextChannelPrivileges.DeleteChannel,
+                            TextChannelPrivileges.ViewChannel,
+                            TextChannelPrivileges.Read,
+                            TextChannelPrivileges.Write
+                        FROM TextChannelPrivileges
+                        WHERE TextChannelPrivileges.UserID = @UserID
+                            AND TextChannelPrivileges.ChannelID = @TextChannelID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            return new TextChannelPrivilege(privilegeID, userID, textChannelID) {
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                ViewChannel = viewChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public ObservableCollection<TextChannelPrivilege>? GetAllPrivilegesInTextChannel(ID textChannelID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                                TextChannelPrivileges.ID,
+                                TextChannelPrivileges.UserID,
+                                TextChannelPrivileges.UpdateChannel,
+                                TextChannelPrivileges.DeleteChannel,
+                                TextChannelPrivileges.ViewChannel,
+                                TextChannelPrivileges.Read,
+                                TextChannelPrivileges.Write
+                            FROM TextChannelPrivileges
+                            WHERE TextChannelPrivileges.ChannelID = @TextChannelID
+                        ;";
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+
+                    ObservableCollection<TextChannelPrivilege> privileges = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            ID userID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            privileges.Add(new TextChannelPrivilege(privilegeID, userID, textChannelID) {
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                ViewChannel = viewChannel,
+                                Read = read,
+                                Write = write,
+                            });
+                        }
+                        return privileges;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
 
         #endregion Privileges
 
         #region Defeault Privileges
 
-        public GuildPrivilege? GetDefaultGuildPrivilege(ulong guildID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    DefaultGuildPrivileges.ID,
-                    DefaultGuildPrivileges.ManageGuild,
-                    DefaultGuildPrivileges.ManagePrivileges,
-                    DefaultGuildPrivileges.CreateCategory,
-                    DefaultGuildPrivileges.UpdateCategory,
-                    DefaultGuildPrivileges.DeleteCategory,
-                    DefaultGuildPrivileges.CreateChannel,
-                    DefaultGuildPrivileges.UpdateChannel,
-                    DefaultGuildPrivileges.DeleteChannel,
-                    DefaultGuildPrivileges.Read,
-                    DefaultGuildPrivileges.Write
-                FROM DefaultGuildPrivileges
-                WHERE DefaultGuildPrivileges.GuildID = '{guildID}'
-                ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+        public GuildPrivilege? GetDefaultGuildPrivilege(ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                            DefaultGuildPrivileges.ID,
+                            DefaultGuildPrivileges.ManageGuild,
+                            DefaultGuildPrivileges.ManagePrivileges,
+                            DefaultGuildPrivileges.CreateCategory,
+                            DefaultGuildPrivileges.UpdateCategory,
+                            DefaultGuildPrivileges.DeleteCategory,
+                            DefaultGuildPrivileges.CreateChannel,
+                            DefaultGuildPrivileges.UpdateChannel,
+                            DefaultGuildPrivileges.DeleteChannel,
+                            DefaultGuildPrivileges.Read,
+                            DefaultGuildPrivileges.Write
+                        FROM DefaultGuildPrivileges
+                        WHERE DefaultGuildPrivileges.GuildID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            GuildPrivilege privilege = new(privilegeID, 0, guildID) {
+                                ManageGuild = manageGuild,
+                                ManagePrivileges = managePrivileges,
+                                CreateCategory = createCategory,
+                                UpdateCategory = updateCategory,
+                                DeleteCategory = deleteCategory,
+                                CreateChannel = createChannel,
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                            return privilege;
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue manageGuild = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue managePrivileges = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new GuildPrivilege(privilegeID, 0, guildID) {
-                    ManageGuild = manageGuild,
-                    ManagePrivileges = managePrivileges,
-                    CreateCategory = createCategory,
-                    UpdateCategory = updateCategory,
-                    DeleteCategory = deleteCategory,
-                    CreateChannel = createChannel,
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    Read = read,
-                    Write = write,
-                };
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
             }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
 
 
-        public CategoryPrivilege? GetDefaultCategoryPrivilege(ulong categoryID) {
-            var reader = ExecuteReader($@"
-                SELECT 
-                    DefaultCategoryPrivileges.ID,
-                    DefaultCategoryPrivileges.UpdateCategory,
-                    DefaultCategoryPrivileges.DeleteCategory,
-                    DefaultCategoryPrivileges.ViewCategory,
-                    DefaultCategoryPrivileges.CreateChannel,
-                    DefaultCategoryPrivileges.UpdateChannel,
-                    DefaultCategoryPrivileges.DeleteChannel,
-                    DefaultCategoryPrivileges.Read,
-                    DefaultCategoryPrivileges.Write
-                FROM DefaultCategoryPrivileges
-                WHERE DefaultCategoryPrivileges.CategoryID = '{categoryID}'
-            ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+        public CategoryPrivilege? GetDefaultCategoryPrivilege(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT 
+                            DefaultCategoryPrivileges.ID,
+                            DefaultCategoryPrivileges.UpdateCategory,
+                            DefaultCategoryPrivileges.DeleteCategory,
+                            DefaultCategoryPrivileges.ViewCategory,
+                            DefaultCategoryPrivileges.CreateChannel,
+                            DefaultCategoryPrivileges.UpdateChannel,
+                            DefaultCategoryPrivileges.DeleteChannel,
+                            DefaultCategoryPrivileges.Read,
+                            DefaultCategoryPrivileges.Write
+                        FROM DefaultCategoryPrivileges
+                        WHERE DefaultCategoryPrivileges.CategoryID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            return new CategoryPrivilege(privilegeID, 0, categoryID) {
+                                UpdateCategory = updateCategory,
+                                DeleteCategory = deleteCategory,
+                                ViewCategory = viewCategory,
+                                CreateChannel = createChannel,
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue updateCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue viewCategory = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue createChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new CategoryPrivilege(privilegeID, 0, categoryID) {
-                    UpdateCategory = updateCategory,
-                    DeleteCategory = deleteCategory,
-                    ViewCategory = viewCategory,
-                    CreateChannel = createChannel,
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    Read = read,
-                    Write = write,
-                };
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
             }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
 
-        public TextChannelPrivilege? GetDefaultTextChannelPrivilege(ulong textChannelID) {
-            var reader = ExecuteReader($@"
-                SELECT
-                    DefaultTextChannelPrivileges.ID,
-                    DefaultTextChannelPrivileges.UpdateChannel,
-                    DefaultTextChannelPrivileges.DeleteChannel,
-                    DefaultTextChannelPrivileges.ViewChannel,
-                    DefaultTextChannelPrivileges.Read,
-                    DefaultTextChannelPrivileges.Write
-                FROM DefaultTextChannelPrivileges
-                WHERE DefaultTextChannelPrivileges.ChannelID = '{textChannelID}'
-                ;");
-            if (reader == null) {
-                Logger.Error($"{MethodBase.GetCurrentMethod()} - reader is null");
+
+
+        public TextChannelPrivilege? GetDefaultTextChannelPrivilege(ID textChannelID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT
+                            DefaultTextChannelPrivileges.ID,
+                            DefaultTextChannelPrivileges.UpdateChannel,
+                            DefaultTextChannelPrivileges.DeleteChannel,
+                            DefaultTextChannelPrivileges.ViewChannel,
+                            DefaultTextChannelPrivileges.Read,
+                            DefaultTextChannelPrivileges.Write
+                        FROM DefaultTextChannelPrivileges
+                        WHERE DefaultTextChannelPrivileges.ChannelID = @TextChannelID
+                        ;";
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+
+                    using (var reader = command.ExecuteReader()) {
+                        if (reader.Read()) {
+                            byte field = 0;
+                            ID privilegeID = reader.GetFieldValue<ID>(field++);
+                            PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
+                            PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
+
+                            return new TextChannelPrivilege(privilegeID, 0, textChannelID) {
+                                UpdateChannel = updateChannel,
+                                DeleteChannel = deleteChannel,
+                                ViewChannel = viewChannel,
+                                Read = read,
+                                Write = write,
+                            };
+                        }
+                    }
+                }
                 return null;
             }
-            if (reader.Read()) {
-                byte field = 0;
-                ulong privilegeID = reader.GetFieldValue<ulong>(field++);
-                PrivilegeValue updateChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue deleteChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue viewChannel = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue read = reader.GetFieldValue<PrivilegeValue>(field++);
-                PrivilegeValue write = reader.GetFieldValue<PrivilegeValue>(field++);
-
-                return new TextChannelPrivilege(privilegeID, 0, textChannelID) {
-                    UpdateChannel = updateChannel,
-                    DeleteChannel = deleteChannel,
-                    ViewChannel = viewChannel,
-                    Read = read,
-                    Write = write,
-                };
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
             }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
 
         #endregion Default Privileges
 
 
-        public GuildPrivilege? GetFinalGuildPrivilege(ulong userID, ulong guildID) {
-            return GetGuildPrivilege(userID, guildID);
-        }
 
-        public CategoryPrivilege? GetFinalCategoryPrivilege(ulong userID, ulong categoryID) {
-            var reader = ExecuteReader($@"
-                SELECT Categories.GuildID
-                FROM Categories
-                WHERE Categories.ID = '{categoryID}'
-            ;");
-            if (reader == null) {
-                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - reader is null");
+        public List<ID>? GetKnownUsers(ID userID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                            WHERE GuildAffiliations.GuildID = @UserID
+                        ;";
+                    command.Parameters.AddWithValue("@UserID", userID);
+
+                    List<ID>? users = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            ID id = reader.GetFieldValue<ID>(0);
+                            users.Add(id);
+                        }
+                    }
+                    return users;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            if (reader.Read()) {
-                ulong guildID = reader.GetFieldValue<ulong>(0);
-
-                GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
-                if (guildPrivilege == null) {
-                    Logger.Error($"{MethodBase.GetCurrentMethod()} - guild privilege is null");
-                    return null;
-                }
-
-                CategoryPrivilege? categoryPrivilege = GetCategoryPrivilege(userID, categoryID);
-                if (categoryPrivilege == null) {
-                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - category privilege is null");
-                    return null;
-                }
-
-                CategoryPrivilege finalPrivilege = categoryPrivilege.Merge(guildPrivilege);
-                return finalPrivilege;
-            }
-            Logger.Error($"{MethodBase.GetCurrentMethod()} - nothing to read");
-            return null;
         }
 
-        public TextChannelPrivilege? GetFinalTextChannelPrivilege(ulong userID, ulong textChannelID) {
-            var reader = ExecuteReader($@"
-                SELECT Categories.ID, Categories.GuildID
-                FROM TextChannels INNER JOIN Categories ON TextChannels.CategoryID = Categories.ID
-                WHERE TextChannels.ID = '{textChannelID}'
-            ;");
-            if (reader == null) {
-                Logger.Error($"[{MethodBase.GetCurrentMethod()}] - reader is null");
+
+
+
+        public List<ID>? GetUsersInGuild(ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                            WHERE GuildAffiliations.GuildID = @GuildID";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    List<ID>? users = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            users.Add(reader.GetFieldValue<ID>(0));
+                        }
+                    }
+                    return users;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
                 return null;
             }
-            if (reader.Read()) {
-                ulong categoryID = reader.GetFieldValue<ulong>(0);
-                ulong guildID = reader.GetFieldValue<ulong>(1);
+        }
 
-                GuildPrivilege? guildPrivilege = GetGuildPrivilege(userID, guildID);
-                if (guildPrivilege == null) {
-                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - guild privilege is null");
-                    return null;
+
+
+        public ObservableCollection<User>? GetUsersInGuild<T>(ID guildID) where T : User {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT Users.ID, Users.PublicID, Users.Nickname, Users.Pronoun, Users.CreationTime, Users.ProfilePicture, Users.Status
+                            FROM GuildAffiliations
+                                INNER JOIN Users ON Users.ID = GuildAffiliations.UserID
+                            WHERE GuildAffiliations.GuildID = @GuildID";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    ObservableCollection<User>? users = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            byte field = 0;
+                            ID userID = reader.GetFieldValue<ID>(field++);
+                            string publicID = reader.GetFieldValue<string>(field++);
+                            string nickname = reader.GetFieldValue<string>(field++);
+                            string pronoun = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+                            byte[] profilePicture = reader.GetFieldValue<byte[]>(field++);
+                            UserStatus status = reader.GetFieldValue<UserStatus>(field++);
+
+                            users.Add(new User(userID, publicID, nickname, pronoun, creationTime, profilePicture, status));
+                        }
+                    }
+                    return users;
                 }
-
-                CategoryPrivilege? categoryPrivilege = GetCategoryPrivilege(userID, categoryID);
-                if (categoryPrivilege == null) {
-                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - category privilege is null");
-                    return null;
-                }
-
-                TextChannelPrivilege? textChannelPrivilege = GetTextChannelPrivilege(userID, textChannelID);
-                if (textChannelPrivilege == null) {
-                    Logger.Error($"[{MethodBase.GetCurrentMethod()}] - text channel privilege is null");
-                    return null;
-                }
-
-                CategoryPrivilege mergedPrivilege = categoryPrivilege.Merge(guildPrivilege);
-                TextChannelPrivilege finalPrivilege = textChannelPrivilege.Merge(mergedPrivilege);
-                return finalPrivilege;
             }
-            Logger.Error($"[{MethodBase.GetCurrentMethod()}] - nothing to read");
-            return null;
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public List<ID>? GetUsersInCategory(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                                INNER JOIN Guilds on GuildAffiliations.GuildID = Guilds.ID
+                                INNER JOIN Categories on Guilds.ID = Categories.GuildID
+                            WHERE Categories.ID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    List<ID> users = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            users.Add(reader.GetFieldValue<ID>(0));
+                        }
+                    }
+                    return users;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+
+        public List<ID>? GetUsersInTextChannel(ID textChannelID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = @"
+                        SELECT GuildAffiliations.UserID
+                            FROM GuildAffiliations
+                                INNER JOIN Guilds ON GuildAffiliations.GuildID = Guilds.ID
+                                INNER JOIN Categories ON Guilds.ID = Categories.GuildID
+                                INNER JOIN TextChannels ON TextChannels.CategoryID = Categories.ID
+                            WHERE TextChannels.ID = @TextChannelID
+                        ;";
+                    command.Parameters.AddWithValue("@TextChannelID", textChannelID);
+
+                    List<ID> users = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            users.Add(reader.GetFieldValue<ID>(0));
+                        }
+                    }
+                    return users;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+        public ObservableCollection<Category>? GetCategoriesInGuild(ID guildID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT Categories.ID, Categories.GuildID, Categories.Name, Categories.CreationTime
+                            FROM Categories
+                            WHERE Categories.GuildID = @GuildID
+                        ;";
+                    command.Parameters.AddWithValue("@GuildID", guildID);
+
+                    ObservableCollection<Category> categories = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            byte field = 0;
+                            ID categoryID = reader.GetFieldValue<ID>(field++);
+                            ID categoryGuildID = reader.GetFieldValue<ID>(field++);
+                            string categoryName = reader.GetFieldValue<string>(field++);
+                            DateTime categoryCreationTime = DateTime.Parse(reader.GetFieldValue<string>(field++));
+
+                            Category category = new(categoryID, categoryGuildID, categoryName, categoryCreationTime);
+
+                            category.Privileges = GetAllPrivilegesInCategory(categoryID);
+                            if (category.Privileges == null) {
+                                Logger.Error($"Failed to get privileges in category '{category.ID}'.", MethodBase.GetCurrentMethod());
+                                return null;
+                            }
+                            category.DefaultPrivilege = GetDefaultCategoryPrivilege(categoryID);
+                            if (category.DefaultPrivilege == null) {
+                                Logger.Error($"Failed to get privileges in category '{category.ID}'.", MethodBase.GetCurrentMethod());
+                                return null;
+                            }
+                            category.TextChannels = GetTextChannelsInCategory(categoryID);
+                            if (category.TextChannels == null) {
+                                Logger.Error($"Failed to get text channels in category '{category.ID}'.", MethodBase.GetCurrentMethod());
+                                return null;
+                            }
+
+                            categories.Add(category);
+                        }
+                        return categories;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
+        }
+
+
+        public ObservableCollection<TextChannel>? GetTextChannelsInCategory(ID categoryID) {
+            try {
+                using (var command = Connection.CreateCommand()) {
+                    command.CommandText = $@"
+                        SELECT TextChannels.ID, TextChannels.Name, TextChannels.CreationTime
+                            FROM TextChannels
+                            WHERE TextChannels.CategoryID = @CategoryID
+                        ;";
+                    command.Parameters.AddWithValue("@CategoryID", categoryID);
+
+                    ObservableCollection<TextChannel> textChannels = new();
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            byte field = 0;
+                            ID textChannelID = reader.GetFieldValue<ID>(field++);
+                            string textChannelName = reader.GetFieldValue<string>(field++);
+                            DateTime creationTime = reader.GetFieldValue<DateTime>(field++);
+
+                            TextChannel textChannel = new(textChannelID, categoryID, textChannelName, creationTime);
+
+                            textChannel.Privileges = GetAllPrivilegesInTextChannel(textChannelID);
+                            if (textChannel.Privileges == null) {
+                                Logger.Error($"Failed to get privileges in text channel '{textChannel.ID}'.", MethodBase.GetCurrentMethod());
+                                return null;
+                            }
+                            textChannel.DefaultPrivilege = GetDefaultTextChannelPrivilege(textChannelID);
+                            if (textChannel.DefaultPrivilege == null) {
+                                Logger.Error($"Failed to get default privilege in text channel '{textChannel.ID}'.", MethodBase.GetCurrentMethod());
+                                return null;
+                            }
+
+                            textChannels.Add(textChannel);
+                        }
+                        return textChannels;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return null;
+            }
         }
 
     }

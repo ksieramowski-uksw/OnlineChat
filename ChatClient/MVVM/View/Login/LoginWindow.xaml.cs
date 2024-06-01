@@ -1,8 +1,6 @@
-﻿using ChatClient.Stores;
+﻿using ChatClient.MVVM.ViewModel.Login;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 
 namespace ChatClient.MVVM.View {
@@ -10,11 +8,14 @@ namespace ChatClient.MVVM.View {
     /// Interaction logic for LoginWindow.xaml
     /// </summary>
     public partial class LoginWindow : Window {
+        public LoginWindowViewModel ViewModel { get; }
 
         public LoginWindow(ChatContext context) {
             InitializeComponent();
+            ViewModel = new LoginWindowViewModel(context);
             context.App.Navigation.LoginPage = new LoginPage(context);
-            MainFrame.Content = context.App.Navigation.LoginPage;
+            ViewModel.Navigate(context.App.Navigation.LoginPage);
+            DataContext = ViewModel;
         }
 
         private void LoginWindow_MouseDown(object sender, MouseButtonEventArgs e) {

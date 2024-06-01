@@ -1,11 +1,7 @@
-﻿using System.Diagnostics;
+﻿global using ID = ulong;
+
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Markup;
-using System.Windows.Navigation;
 using ChatClient.MVVM.View;
-using ChatClient.MVVM.ViewModel;
-using ChatClient.Network;
 using ChatClient.Stores;
 
 

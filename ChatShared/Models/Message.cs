@@ -1,26 +1,34 @@
-﻿
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-using System.Collections.ObjectModel;
 
 namespace ChatShared.Models {
-    public class Message {
-        public ulong ID { get; set; }
-        public ulong ChannelID { get; set; }
-        public ulong AuthorID { get; set; }
-        public User? Author { get; set; }
-        public string Content { get; set; }
-        public DateTime Time { get; set; }
-        public ObservableCollection<MessageAttachment> Attachments { get; set; }
+    public partial class Message : ObservableObject {
+
+        [ObservableProperty]
+        private ID _ID;
+
+        [ObservableProperty]
+        private ID _channelID;
+
+        [ObservableProperty]
+        private ID _authorID;
+
+        [ObservableProperty]
+        private User? _author;
+
+        [ObservableProperty]
+        private string _content;
+
+        [ObservableProperty]
+        private DateTime _time;
 
 
-        public Message(ulong id, ulong channelID, ulong authorID, string content, DateTime time) {
+        public Message(ID id, ID channelID, ID authorID, string content, DateTime time) {
             ID = id;
             ChannelID = channelID;
             AuthorID = authorID;
             Content = content;
             Time = time;
-
-            Attachments = new ObservableCollection<MessageAttachment>();
         }
     }
 }

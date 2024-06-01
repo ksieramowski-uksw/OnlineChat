@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using ChatServer.Config;
 using ChatServer.Database;
 
 
 namespace ChatServer.Network
 {
     public class Server {
-        public ServerConfig Config { get; private set; }
+        public Config Config { get; private set; }
 
         public List<ClientConnection> Clients { get; set; }
 
@@ -22,13 +16,13 @@ namespace ChatServer.Network
 
         public DatabaseConnection Database { get; private set; }
 
-        public Server(ServerConfig config) {
+        public Server(Config config) {
             Config = config;
 
             Clients = new List<ClientConnection>();
 
-            _address = IPAddress.Parse(config.IPv4);
-            _ip = new IPEndPoint(_address, Config.Port);
+            _address = IPAddress.Parse(config.Current.IPv4);
+            _ip = new IPEndPoint(_address, Config.Current.Port);
             _listener = new Socket(_ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             Database = new DatabaseConnection();
@@ -37,7 +31,7 @@ namespace ChatServer.Network
 
         public void Start() {
             _listener.Bind(_ip);
-            _listener.Listen(Config.MaxQueueSize);
+            _listener.Listen(Config.Current.MaxQueueSize);
 
             Logger.Info($"Server listening at [{_ip.AddressFamily}: {_ip.Address}:{_ip.Port}]");
 
@@ -57,7 +51,7 @@ namespace ChatServer.Network
         }
 
         private void HandleClientConnection(Socket socket) {
-            ClientConnection client = new(this, socket, Config.MaxMessageLength);
+            ClientConnection client = new(this, socket, Config.Current.MessageBufferSizePerClient);
             Clients.Add(client);
             Task.Run(client.HandleConnection);
         }

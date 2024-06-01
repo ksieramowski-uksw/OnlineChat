@@ -17,12 +17,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Images\942840997837168660.png" />
-    <None Remove="Resources\Images\Gear.png" />
+    <None Remove="Resources\Images\Default.png" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,8 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Images\942840997837168660.png" />
-    <Resource Include="Resources\Images\Gear.png" />
+    <Resource Include="Resources\Images\Default.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,20 @@
-﻿
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace ChatShared.Models {
-    public class MessageAttachment {
-        public ulong ID { get; set; }
-        public ulong MessageID { get; set; }
-        public byte[] Content { get; set; }
+    public partial class MessageAttachment : ObservableObject {
 
-        public MessageAttachment(ulong id, ulong messageID, byte[] content) {
+        [ObservableProperty]
+        private ID _ID;
+
+        [ObservableProperty]
+        private ID _messageID;
+
+        [ObservableProperty]
+        private byte[] _content;
+
+
+        public MessageAttachment(ID id, ID messageID, byte[] content) {
             ID = id;
             MessageID = messageID;
             Content = content;

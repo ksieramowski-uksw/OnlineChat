@@ -1,15 +1,19 @@
-﻿
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace ChatShared.Models.Privileges {
-    public class PrivilegedUser<PrivilegeType> where PrivilegeType : class, IPrivilege {
-        public User User { get; set; }
-        public PrivilegeType Privilege { get; set; }
-        public PrivilegeType FinalPrivilege { get; set; }
+    public partial class PrivilegedUser<PrivilegeType>
+            : ObservableObject where PrivilegeType : class, IPrivilege {
 
-        public PrivilegedUser(User user, PrivilegeType privilege, PrivilegeType finalPrivilege) {
+        [ObservableProperty]
+        private User _user;
+
+        [ObservableProperty]
+        private PrivilegeType _privilege;
+
+        public PrivilegedUser(User user, PrivilegeType privilege) {
             User = user;
             Privilege = privilege;
-            FinalPrivilege = finalPrivilege;
         }
 
     }

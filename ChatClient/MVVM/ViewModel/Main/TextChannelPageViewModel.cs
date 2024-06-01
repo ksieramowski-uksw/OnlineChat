@@ -1,12 +1,12 @@
-﻿using ChatClient.Stores;
-using ChatShared.DataModels;
+﻿using ChatClient.MVVM.Model;
+using ChatClient.MVVM.View.Main;
+using ChatClient.MVVM.View.Main.Popup;
+using ChatShared;
 using ChatShared.Models;
-using ChatShared.Models.Privileges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Text.Json;
-using System.Windows;
+using System.Windows.Controls;
 
 
 namespace ChatClient.MVVM.ViewModel.Main {
@@ -19,65 +19,60 @@ namespace ChatClient.MVVM.ViewModel.Main {
         [ObservableProperty]
         private string _messageContent;
 
+        [ObservableProperty]
+        private ObservableCollection<ObservableUser> _visualUsers;
 
-        public TextChannelPageViewModel(ChatContext context, TextChannel textChannel) {
+        public bool CanLoadMoreMessages { get; set; }
+        public bool LastMessage { get; set; }
+
+        public ScrollViewer? Scroll { get; set; }
+
+        public TextChannelPageViewModel(ChatContext context, TextChannel textChannel, ObservableCollection<ObservableUser> visualUsers) {
             Context = context;
 
             TextChannel = textChannel;
             MessageContent = string.Empty;
 
-            Context.Client.GetMessageRange(TextChannel.ID, ulong.MaxValue, 20);
+            CanLoadMoreMessages = true;
+            LastMessage = false;
 
-            
+            VisualUsers = visualUsers;
+
+            foreach (var vu in VisualUsers) {
+                vu.Update(textChannel);
+            }
         }
 
-        //public void UpdateVisibility() {
-        //    GuildPrivilege ? g = null;
-        //    foreach (var guild in Context.Guilds) {
-        //        foreach (var user in guild.Users) {
-        //            if (user.User.ID == )
-        //        }
-
-
-        //        foreach (var category in guild.Categories) {
-        //            foreach (var channel in category.TextChannels) {
-        //                if (channel.ID == TextChannel.ID) {
-
-        //                }
-        //            }
-        //        }
-        //    }
-        //    foreach (var user in TextChannel.Users) {
-        //        user.User.
-        //    }
-        //}
+        public void LoadMoreMessages(byte limit) {
+            if (LastMessage == true) { return; }
+            ID first = int.MaxValue;
+            if (TextChannel.Messages.Count > 0) {
+                first = TextChannel.Messages[0].ID;
+            }
+            Context.Client.GetMessageRange(TextChannel.ID, first, limit);
+        }
 
 
         [RelayCommand]
         private void SendMessage() {
-            if (Context.CurrentUser == null) { return; }
-            bool canWrite = false;
-            foreach (var u in TextChannel.Users) {
-                if (u.User.ID == Context.CurrentUser.ID) {
-                    if (u.FinalPrivilege.Write == ChatShared.PrivilegeValue.Positive) {
-                        canWrite = true;
-                        break;
-                    }
-                }
-            }
-            if (canWrite == false) {
-                MessageBox.Show("You don't have privilege to write on this channel");
+            if (Context.CurrentTextChannelPrivilege == null) { return; }
+            if (Context.CurrentTextChannelPrivilege.Write != PrivilegeValue.Positive) {
+                NotificationPage.Show(Context, "You don't have permission to\nwrite on this channel.");
                 return;
             }
-            else {
-                MessageBox.Show("can write");
-            }
-            
+            if (Context.CurrentUser == null) { return; }
             if (MessageContent != string.Empty && Context.CurrentUser is User user) {
-                MessageData data = new(user.ID, TextChannel.ID, MessageContent);
-                string json = JsonSerializer.Serialize(data);
-                Context.Client.ServerConnection.Send(OperationCode.SendMessage, json);
+                Context.Client.SendMessage(user.ID, TextChannel.ID, MessageContent);
                 MessageContent = string.Empty;
+            }
+        }
+
+        [RelayCommand]
+        private void TestButtonClick() {
+            if (Context.CurrentUser != null && uint.TryParse(MessageContent, out uint n)) {
+                for (uint i = 1; i <= n; i++) {
+                    Context.Client.SendMessage(Context.CurrentUser.ID, TextChannel.ID, i.ToString());
+                }
             }
         }
     }

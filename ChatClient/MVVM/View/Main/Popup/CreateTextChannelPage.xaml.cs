@@ -1,12 +1,10 @@
 ﻿using ChatClient.MVVM.ViewModel.Main.Popup;
-using ChatClient.Stores;
 using ChatShared.Models;
 using System.Windows;
 using System.Windows.Controls;
 
 
-namespace ChatClient.MVVM.View.Main.Popup
-{
+namespace ChatClient.MVVM.View.Main.Popup {
     /// <summary>
     /// Interaction logic for CreateTextChannelPage.xaml
     /// </summary>
@@ -19,6 +17,7 @@ namespace ChatClient.MVVM.View.Main.Popup
             ViewModel = new CreateTextChannelPageViewModel(context, category);
             DataContext = ViewModel;
         }
+
 
         private void HandleClickEvent(object sender, RoutedEventArgs e) {
             e.Handled = true;

@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿global using ID = ulong;
+
+using System.Reflection;
+using System.Text;
 
 
 namespace ChatServer {
@@ -91,6 +94,26 @@ namespace ChatServer {
             const Severity severity = Severity.Error;
             SaveMessageToFile(message, severity);
             PrintMessage(message, severity);
+        }
+
+        public static void Error(string message, MethodBase? method, string indent = "\n\t\t\t           ") {
+            message = message.Replace("\n", indent);
+            if (method != null) {
+                Error($"[{method.Name}]:{indent}{message}");
+            }
+            else {
+                Error(message);
+            }
+        }
+
+        public static void Error(Exception ex, MethodBase? method, string indent = "\n\t\t\t           ") {
+            string message = ex.Message.Replace("\n", indent);
+            if (method != null) {
+                Error($"[{method.Name}] ({ex.GetType().Name}):{indent}{message}");
+            }
+            else {
+                Error($"({ex.GetType().Name}):{indent}{message}");
+            }
         }
 
         public static void Message(string message) {

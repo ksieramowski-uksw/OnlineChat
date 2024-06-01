@@ -1,129 +1,76 @@
 ﻿
 
-namespace ChatClient {
+namespace ChatShared {
     public enum OperationCode : byte {
         InvalidOperation,
+
+        // user
+        Register,
+        RegisterSuccess,
+        RegisterFail,
 
         LogIn,
         LogInSuccess,
         LogInFail,
 
-        LogOut,
-        LogOutSuccess,
-        LogOutFail,
+        UpdateUser,
+        UpdateUserSuccess,
+        UpdateUserFail,
 
-        Register,
-        RegisterSuccess,
-        RegisterFail,
+        UserStatusChanged,
+
+        // guild
+        JoinGuild,
+        JoinGuildSuccess,
+        JoinGuildFail,
 
         CreateGuild,
         CreateGuildSuccess,
         CreateGuildFail,
 
-        JoinGuild,
-        JoinGuildSuccess,
-        JoinGuildFail,
+        UpdateGuild,
+        UpdateGuildSuccess,
+        UpdateGuildFail,
 
         DeleteGuild,
         DeleteGuildSuccess,
         DeleteGuildFail,
 
-        UpdateGuild,
-        UpdateGuildSuccess,
-        UpdateGuildFail,
+        GetGuildsForCurrentUser,
+        GetGuildsForCurrentUserSuccess,
+        GetGuildsForCurrentUserFail,
 
+        GetGuildDetails,
+        GetGuildDetailsSuccess,
+        GetGuildDetailsFail,
+
+        // category
         CreateCategory,
         CreateCategorySuccess,
         CreateCategoryFail,
-
-        DeleteCategory,
-        DeleteCategorySuccess,
-        DeleteCategoryFail,
 
         UpdateCategory,
         UpdateCategorySuccess,
         UpdateCategoryFail,
 
-        MoveCategory,
-        MoveCategorySuccess,
-        MoveCategoryFail,
+        DeleteCategory,
+        DeleteCategorySuccess,
+        DeleteCategoryFail,
 
+        // text channel
         CreateTextChannel,
         CreateTextChannelSuccess,
         CreateTextChannelFail,
-
-        DeleteTextChannel,
-        DeleteTextChannelSuccess,
-        DeleteTextChannelFail,
 
         UpdateTextChannel,
         UpdateTextChannelSuccess,
         UpdateTextChannelFail,
 
-        MoveTextChannel, // change channel's category
-        MoveTextChannelSuccess,
-        MoveTextChannelFail,
+        DeleteTextChannel,
+        DeleteTextChannelSuccess,
+        DeleteTextChannelFail,
 
-        GetGuildsForUser,
-        GetGuildsForUserSuccess,
-        GetGuildsForUserFail,
-
-        GetCategoriesInGuild,
-        GetCategoriesInGuildSuccess,
-        GetCategoriesInGuildFail,
-
-        CreateGuildPrivilege,
-        CreateGuildPrivilegeSuccess,
-        CreateGuildPrivilegeFail,
-
-        UpdateGuildPrivilege,
-        UpdateGuildPrivilegeSuccess,
-        UpdateGuildPrivilegeFail,
-
-        CreateCategoryPrivilege,
-        CreateCategoryPrivilegeSuccess,
-        CreateCategoryPrivilegeFail,
-
-        UpdateCategoryPrivilege,
-        UpdateCategoryPrivilegeSuccess,
-        UpdateCategoryPrivilegeFail,
-
-        CreateTextChannelPrivilege,
-        CreateTextChannelPrivilegeSuccess,
-        CreateTextChannelPrivilegeFail,
-
-        UpdateTextChannelPrivilege,
-        UpdateTextChannelPrivilegeSuccess,
-        UpdateTextChannelPrivilageFail,
-
-        GetTextChannelsInCategory,
-        GetTextChannelsInCategorySuccess,
-        GetTextChannelsInCategoryFail,
-
-        GetGuildPrivilegeForUser,
-        GetGuildPrivilegeForUserSuccess,
-        GetGuildPrivilegeForUserFail,
-
-        GetCategoryPrivilegeForUser,
-        GetCategoryPrivilegeForUserSuccess,
-        GetCategoryPrivilegeForUserFail,
-
-        GetTextChannelPrivilegeForUser,
-        GetTextChannelPrivilegeForUserSuccess,
-        GetTextChannelPrivilegeForUserFail,
-
-        AddFriend,
-        AddFriendSuccess,
-        AddFriendFail,
-
-        RemoveFriend,
-        RemoveFriendSuccess,
-        RemoveFriendFail,
-
-        GetFriendList,
-        GetFriendListSuccess,
-        GetFriendListFail,
-
+        // message
         SendMessage,
         SendMessageSuccess,
         SendMessageFail,
@@ -131,6 +78,79 @@ namespace ChatClient {
         GetMessageRange,
         GetMessageRangeSuccess,
         GetMessageRangeFail,
+
+
+
+
+
+        //MoveCategory,
+        //MoveCategorySuccess,
+        //MoveCategoryFail,
+
+        //MoveTextChannel, // change channel's category
+        //MoveTextChannelSuccess,
+        //MoveTextChannelFail,
+
+        //GetGuildsForUser,
+        //GetGuildsForUserSuccess,
+        //GetGuildsForUserFail,
+
+        //GetCategoriesInGuild,
+        //GetCategoriesInGuildSuccess,
+        //GetCategoriesInGuildFail,
+
+        //CreateGuildPrivilege,
+        //CreateGuildPrivilegeSuccess,
+        //CreateGuildPrivilegeFail,
+
+        //UpdateGuildPrivilege,
+        //UpdateGuildPrivilegeSuccess,
+        //UpdateGuildPrivilegeFail,
+
+        //CreateCategoryPrivilege,
+        //CreateCategoryPrivilegeSuccess,
+        //CreateCategoryPrivilegeFail,
+
+        //UpdateCategoryPrivilege,
+        //UpdateCategoryPrivilegeSuccess,
+        //UpdateCategoryPrivilegeFail,
+
+        //CreateTextChannelPrivilege,
+        //CreateTextChannelPrivilegeSuccess,
+        //CreateTextChannelPrivilegeFail,
+
+        //UpdateTextChannelPrivilege,
+        //UpdateTextChannelPrivilegeSuccess,
+        //UpdateTextChannelPrivilageFail,
+
+        //GetTextChannelsInCategory,
+        //GetTextChannelsInCategorySuccess,
+        //GetTextChannelsInCategoryFail,
+
+        //GetGuildPrivilegeForUser,
+        //GetGuildPrivilegeForUserSuccess,
+        //GetGuildPrivilegeForUserFail,
+
+        //GetCategoryPrivilegeForUser,
+        //GetCategoryPrivilegeForUserSuccess,
+        //GetCategoryPrivilegeForUserFail,
+
+        //GetTextChannelPrivilegeForUser,
+        //GetTextChannelPrivilegeForUserSuccess,
+        //GetTextChannelPrivilegeForUserFail,
+
+        //AddFriend,
+        //AddFriendSuccess,
+        //AddFriendFail,
+
+        //RemoveFriend,
+        //RemoveFriendSuccess,
+        //RemoveFriendFail,
+
+        //GetFriendList,
+        //GetFriendListSuccess,
+        //GetFriendListFail,
+
 
 
         SimpleTextMessage

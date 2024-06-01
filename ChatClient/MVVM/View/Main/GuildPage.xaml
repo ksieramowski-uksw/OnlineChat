@@ -8,10 +8,12 @@
       xmlns:sharedns="clr-namespace:ChatShared;assembly=ChatShared"
       mc:Ignorable="d" 
       d:DesignHeight="1200" d:DesignWidth="1136"
-      Title="GuildPage">
+      Title="GuildPage"
+      x:Name="GuildPageName">
 
     <Page.Resources>
         <converter:VisibilityConverter x:Key="VisibilityConverter"/>
+        <converter:VisibilityConverter_Negative x:Key="VisibilityConverter_Negative"/>
     </Page.Resources>
     
     <Grid>
@@ -21,63 +23,62 @@
             <ColumnDefinition Width="256"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="56"/>
-            <RowDefinition Height="2"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- GUILD TITLE BAR -->
-        <Button Grid.Column="0" Grid.Row="0" Style="{DynamicResource TransparentButtonStyle}"
-                Command="{Binding CreateCategoryCommand}">
-            <Grid Background="#282828" Cursor="Hand" Width="256" Height="56">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="32"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <Border Grid.Column="0" Grid.Row="0" BorderBrush="#222222" BorderThickness="0,0,2,2">
+            <Button Style="{DynamicResource TransparentButtonStyle}">
+                <Grid Background="#282828" Width="256" Height="54">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="32"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                <Button Grid.Column="0" Grid.Row="0" Margin="8,0,0,0" Cursor="Hand"
-                    VerticalAlignment="Center" HorizontalAlignment="Left"
-                     Style="{DynamicResource RoundButton8Style}">
-                    <Button.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Copy public ID"
+                    <Button Grid.Column="0" Grid.Row="0" Margin="8,0,0,0" Cursor="Hand"
+                        VerticalAlignment="Center" HorizontalAlignment="Left"
+                        Style="{DynamicResource RoundButton8Style}">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Copy public ID" Foreground="#EEE"
                                       Command="{Binding CopyPublicIDCommand}"
                                       CommandParameter="{Binding Guild.PublicID}"/>
-                            <MenuItem Header="Manage properties" />
-                        </ContextMenu>
-                    </Button.ContextMenu>
+                                <MenuItem Header="Manage properties" Foreground="#EEE"
+                                      Command="{Binding GuildPropertiesCommand}"/>
+                                <MenuItem Header="Delete" Foreground="#EEE"
+                                      Command="{Binding DeleteGuildCommand}"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
 
-                    <TextBlock Text="{Binding Guild.Name}" FontSize="18" FontWeight="Bold" Foreground="#A8A8A8" Padding="8"/>
-                </Button>
+                        <TextBlock Text="{Binding Guild.Name}" FontSize="18" FontWeight="Bold" Foreground="#A8A8A8" Padding="8"/>
+                    </Button>
 
 
-                <Button Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" 
+                    <Button Grid.Column="1" Grid.Row="0" VerticalAlignment="Center" Cursor="Hand"
                         Command="{Binding CreateCategoryCommand}"
-                        CommandParameter="{Binding Guild}"
                         Style="{DynamicResource RoundButton8Style}"
                     Height="32" Width="32" Margin="-8,0,8,0">
-                    <Canvas>
-                        <Rectangle Width="2" Height="18" Fill="#A8A8A8" Canvas.Left="-1" Canvas.Top="-9"/>
-                        <Rectangle Width="18" Height="2" Fill="#A8A8A8" Canvas.Left="-9" Canvas.Top="-1"/>
-                    </Canvas>
-                </Button>
-            </Grid>
-        </Button>
+                        <Canvas>
+                            <Rectangle Width="2" Height="18" Fill="#A8A8A8" Canvas.Left="-1" Canvas.Top="-9"/>
+                            <Rectangle Width="18" Height="2" Fill="#A8A8A8" Canvas.Left="-9" Canvas.Top="-1"/>
+                        </Canvas>
+                    </Button>
+                </Grid>
+            </Button>
+        </Border>
 
-
-        <!-- HORIZONTAL LINE -->
-        <StackPanel Grid.Column="0" Grid.Row="1" Background="#222222"/>
 
         <!-- CATEGORIES -->
-        <ScrollViewer Grid.Column="0" Grid.Row="2" Margin="0,0,0,64" Background="#282828"
+        <ScrollViewer Grid.Column="0" Grid.Row="1" Margin="0,0,0,64" Background="#282828"
                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-            <ListView ItemsSource="{Binding Guild.Categories}" Style="{DynamicResource BetterListView}">
+            <ListView ItemsSource="{Binding Categories}" Style="{DynamicResource BetterListView}" x:Name="categoryList">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid x:Name="CategoryUserGrid">
+                        <Grid x:Name="CategoryUserGrid" Visibility="{Binding Visibility}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
@@ -85,42 +86,66 @@
                                 <RowDefinition Height="24"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
-
                             <ToggleButton Grid.Column="0" Grid.Row="0" Cursor="Hand"
-                                          IsChecked="{Binding Expanded, Mode=TwoWay}"
+                                          IsChecked="{Binding Expanded}"
                                           Style="{DynamicResource TransparentToggleButtonStyle}">
+
                                 <Grid Width="256">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="auto"/>
+                                        <ColumnDefinition Width="auto"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="32"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="24"/>
                                     </Grid.RowDefinitions>
+                                    <Grid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Properties" Click="CategoryProperties_Click" Tag="{Binding Category}" Foreground="#EEE"/>
+                                            <MenuItem Header="Delete" Click="CategoryDelete_Click" Tag="{Binding Category}" Foreground="#EEE"/>
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
 
-                                    <Button Grid.Column="0" Grid.Row="0" Cursor="Hand"
+                                    <Button Grid.Column="0" Grid.Row="0" Cursor="Hand" Height="20" Width="16" Margin="2,2,2,0" 
                                             Style="{DynamicResource TransparentButtonStyle}"
-                                            Height="24" Width="16" Margin="2,2,0,0">
+                                            Command="{Binding ToggelExpandedCommand}">
                                         <Canvas>
-                                            <Rectangle Width="8" Height="1" Fill="#666" Canvas.Left="0" Canvas.Top="3">
+                                            <Rectangle Width="8" Height="1" Fill="#666" Canvas.Left="0" Canvas.Top="3"
+                                                       Visibility="{Binding Expanded, Converter={StaticResource VisibilityConverter}}">
                                                 <Rectangle.RenderTransform>
                                                     <RotateTransform Angle="225"/>
                                                 </Rectangle.RenderTransform>
                                             </Rectangle>
-                                            <Rectangle Width="9" Height="1" Fill="#666" Canvas.Left="0" Canvas.Top="2">
+                                            <Rectangle Width="9" Height="1" Fill="#666" Canvas.Left="0" Canvas.Top="3"
+                                                       Visibility="{Binding Expanded, Converter={StaticResource VisibilityConverter}}">
                                                 <Rectangle.RenderTransform>
                                                     <RotateTransform Angle="-45"/>
+                                                </Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            
+                                            <Rectangle Width="8" Height="1" Fill="#666" Canvas.Left="3" Canvas.Top="0"
+                                                       Visibility="{Binding Expanded, Converter={StaticResource VisibilityConverter_Negative}}">
+                                                <Rectangle.RenderTransform>
+                                                    <RotateTransform Angle="135"/>
+                                                </Rectangle.RenderTransform>
+                                            </Rectangle>
+                                            <Rectangle Width="9" Height="1" Fill="#666" Canvas.Left="3" Canvas.Top="0"
+                                                       Visibility="{Binding Expanded, Converter={StaticResource VisibilityConverter_Negative}}">
+                                                <Rectangle.RenderTransform>
+                                                    <RotateTransform Angle="-135"/>
                                                 </Rectangle.RenderTransform>
                                             </Rectangle>
                                         </Canvas>
                                     </Button>
 
-                                    <TextBlock Grid.Column="1" Grid.Row="0" Margin="0,0,8,0"
-                                               FontWeight="Bold" Text="{Binding Name}" FontSize="12" Foreground="#666"
-                                               VerticalAlignment="Center" HorizontalAlignment="Left" Padding="8"/>
 
-                                    <Button Grid.Column="2" Grid.Row="0" VerticalAlignment="Center" Cursor="Hand"
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Margin="0,0,8,0" Padding="8"
+                                               Text="{Binding Category.Name}" FontWeight="Bold" FontSize="12"
+                                               Foreground="#666" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                    
+                                    
+                                    <Button Grid.Column="3" Grid.Row="0" VerticalAlignment="Center" Cursor="Hand"
                                             Command="{Binding DataContext.CreateTextChannelCommand,
                                                       RelativeSource={RelativeSource Mode=FindAncestor,
                                                       AncestorType={x:Type Page}}}"
@@ -144,17 +169,25 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                 </Grid.RowDefinitions>
-                                
+
                                 <ListView Grid.Column="0" Grid.Row="0" Margin="0,-6,0,0"
-                                          ItemsSource="{Binding TextChannels}" Style="{DynamicResource BetterListView}">
+                                          ItemsSource="{Binding TextChannels}" Style="{DynamicResource BetterListView}" x:Name="tcList">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <Button Grid.Column="0" Grid.Row="0" Cursor="Hand" x:Name="TextChannelUserButton"
-                                                    Style="{DynamicResource TransparentButtonStyle}" 
+                                                    Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Page}}}"
+                                                    Style="{DynamicResource TransparentButtonStyle_WithMouseOver}" 
                                                     Command="{Binding DataContext.SelectTextChannelCommand,
                                                         RelativeSource={RelativeSource Mode=FindAncestor,
                                                         AncestorType={x:Type Page}}}"
-                                                    CommandParameter="{Binding ID}">
+                                                    CommandParameter="{Binding TextChannel.ID}"
+                                                    Visibility="{Binding Visibility}">
+                                                <Button.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Properties" Click="TextChannelProperties_Click" Tag="{Binding TextChannel}" Foreground="#EEE"/>
+                                                        <MenuItem Header="Delete" Click="TextChannelDelete_Click" Tag="{Binding TextChannel}" Foreground="#EEE"/>
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
 
                                                 <Grid HorizontalAlignment="Left">
                                                     <Grid.ColumnDefinitions>
@@ -164,24 +197,22 @@
                                                         <RowDefinition Height="24"/>
                                                     </Grid.RowDefinitions>
 
+
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="#" FontSize="20" FontWeight="Bold" Foreground="#AAA"
-                                Margin="0,-3,3,0"/>
+                                                                   Margin="0,-3,3,0"/>
                                                         <TextBlock Grid.Column="0" Grid.Row="0" FontSize="16" FontWeight="Bold" Foreground="#AAA"
-                                Text="{Binding Name}"/>
+                                                                   Text="{Binding TextChannel.Name}"/>
                                                     </StackPanel>
 
                                                 </Grid>
-
-
                                             </Button>
 
                                             <DataTemplate.Triggers>
-                                                <!-- Conditionally show the item based on its status -->
-                                                <DataTrigger Binding="{Binding Show}" Value="True">
+                                                <DataTrigger Binding="{Binding Visibility}" Value="True">
                                                     <Setter TargetName="TextChannelUserButton" Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding Show}" Value="False">
+                                                <DataTrigger Binding="{Binding Visibility}" Value="False">
                                                     <Setter TargetName="TextChannelUserButton" Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </DataTemplate.Triggers>
@@ -190,16 +221,6 @@
                                 </ListView>
                             </Grid>
                         </Grid>
-
-                        <DataTemplate.Triggers>
-                            <!-- Conditionally show the item based on its status -->
-                            <DataTrigger Binding="{Binding Show}" Value="True">
-                                <Setter TargetName="CategoryUserGrid" Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Show}" Value="False">
-                                <Setter TargetName="CategoryUserGrid" Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

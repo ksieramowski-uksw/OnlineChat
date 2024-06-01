@@ -1,0 +1,77 @@
+﻿<Page x:Class="ChatClient.MVVM.View.Main.Popup.UpdateUserPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ChatClient.MVVM.View.Main.Popup"
+      xmlns:converters="clr-namespace:ChatClient.Converters"
+      xmlns:privilegeConverters="clr-namespace:ChatClient.Converters.Privilege"
+      mc:Ignorable="d" 
+      d:DesignHeight="360" d:DesignWidth="360"
+      Title="UpdateUserPage">
+
+    <Page.Resources>
+        <privilegeConverters:PositiveConverter x:Key="PositiveConverter"/>
+        <privilegeConverters:NeutralConverter x:Key="NeutralConverter"/>
+        <privilegeConverters:NegativeConverter x:Key="NegativeConverter"/>
+    </Page.Resources>
+
+
+    <Button Style="{DynamicResource TransparentButtonStyle}" MaxWidth="360"
+            Click="HandleClickEvent">
+        <Border CornerRadius="5" Background="#343434" Width="360">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+
+                <!-- TEXT CHANNEL PROPERTIES -->
+                <TextBlock Grid.Column="0" Grid.Row="1" FontSize="19" Foreground="#EEEEEE"
+                           Text="Account properties" Margin="30,10,30,20" TextWrapping="Wrap" TextAlignment="Center"/>
+
+
+                <!-- TEXT CHANNEL NAME -->
+                <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Vertical" Margin="30,0">
+                    <TextBlock Text="Nickname" Foreground="#EEEEEE" FontSize="16"/>
+                    <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
+                             Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding Nickname}"/>
+                </StackPanel>
+
+                <!-- TEXT CHANNEL NAME -->
+                <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical" Margin="30,0">
+                    <TextBlock Text="Pronoun" Foreground="#EEEEEE" FontSize="16"/>
+                    <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
+                             Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding Pronoun}"/>
+                </StackPanel>
+
+                <!-- ICON -->
+                <StackPanel Grid.Column="0" Grid.Row="4" HorizontalAlignment="Left" Margin="30,0,0,0">
+                    <Button Content="[Select icon file]" FontSize="16" Cursor="Hand"
+                            Foreground="#4466FF" Style="{DynamicResource TransparentButtonStyle}"
+                            Command="{Binding SelectProfilePictureFileCommand}"/>
+                    <TextBlock Text="{Binding ProfilePictureFilePathText}" FontSize="14" Foreground="#EEE" Margin="15,0,0,0"/>
+                </StackPanel>
+
+                <!-- FEEDBACK -->
+                <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5"
+                           Foreground="#F09000" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Text="{Binding Feedback}"/>
+
+                <!-- SUBMIT BUTTON -->
+                <Button Grid.Column="0" Grid.Row="6" Margin="30,10,30,10" FontSize="16" Content="Apply" Cursor="Hand"
+                        Style="{DynamicResource RoundButtonStyle}" Command="{Binding UpdateUserCommand}"/>
+
+            </Grid>
+        </Border>
+    </Button>
+</Page>

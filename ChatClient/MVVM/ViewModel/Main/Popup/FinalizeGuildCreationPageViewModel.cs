@@ -2,6 +2,7 @@
 using ChatShared.Models.Privileges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 
 
 namespace ChatClient.MVVM.ViewModel.Main.Popup {
@@ -20,7 +21,11 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
         [ObservableProperty]
         private GuildPrivilege _privilege;
 
+        [ObservableProperty]
+        private string _iconFilePath;
 
+        [ObservableProperty]
+        private string _iconFilePathText;
 
         public FinalizeGuildCreationPageViewModel(ChatContext context) {
             Context = context;
@@ -29,6 +34,9 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
             GuildPassword = string.Empty;
             Feedback = string.Empty;
             Privilege = new GuildPrivilege();
+
+            IconFilePath = ResourceHelper.DefaultImage;
+            IconFilePathText = "Default";
         }
 
 
@@ -36,10 +44,23 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
         private void CreateGuild() {
             if (!string.IsNullOrWhiteSpace(GuildName)
                 && !string.IsNullOrWhiteSpace(GuildPassword)) {
-                Context.Client.CreateGuild(GuildName, GuildPassword, Privilege);
+                Context.Client.CreateGuild(GuildName, GuildPassword, Privilege, IconFilePath);
             }
             else {
                 Feedback = "Please, fill required fields.";
+            }
+        }
+
+        [RelayCommand]
+        private void SelectIconFile() {
+            OpenFileDialog openFileDialog = new() {
+                Filter = "Image files (*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.tiff)|*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.tiff|All files (*.*)|*.*",
+                FilterIndex = 1,
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            };
+            if (openFileDialog.ShowDialog() == true) {
+                IconFilePath = openFileDialog.FileName;
+                IconFilePathText = openFileDialog.FileName;
             }
         }
 

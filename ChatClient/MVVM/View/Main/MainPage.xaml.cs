@@ -11,14 +11,16 @@ namespace ChatClient.MVVM.View.Main {
     public partial class MainPage : Page {
         public MainPageViewModel ViewModel { get; }
 
+
         public MainPage(ChatContext context) {
             InitializeComponent();
             ViewModel = new MainPageViewModel(context);
             DataContext = ViewModel;
         }
 
+
         private void MaskGrid_MouseDown(object sender, MouseButtonEventArgs e) {
-            ViewModel.MaskVisibility = Visibility.Hidden;
+            ViewModel.HideMask();
         }
 
         private void ScrollViewer_MouseWheel(object sender, MouseWheelEventArgs e) {

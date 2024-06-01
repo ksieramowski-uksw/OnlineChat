@@ -1,9 +1,6 @@
 ﻿using ChatClient.MVVM.View;
-using ChatClient.Stores;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows;
-using System.Windows.Input;
 
 
 namespace ChatClient.MVVM.ViewModel {
@@ -60,7 +57,7 @@ namespace ChatClient.MVVM.ViewModel {
         private void NavigateToLoginPage() {
             if (Context.App.Navigation.LoginWindow is LoginWindow loginWindow) {
                 Context.App.Navigation.LoginPage ??= new LoginPage(Context);
-                loginWindow.MainFrame.Navigate(Context.App.Navigation.LoginPage);
+                loginWindow.ViewModel.Navigate(Context.App.Navigation.LoginPage);
             }
         }
 

@@ -1,11 +1,8 @@
 ﻿using ChatShared;
-using ChatShared.DataModels;
 using ChatShared.Models;
 using ChatShared.Models.Privileges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Text.Json;
-using System.Windows;
 
 
 namespace ChatClient.MVVM.ViewModel.Main.Popup {

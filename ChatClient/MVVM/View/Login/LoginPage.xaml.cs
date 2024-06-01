@@ -1,6 +1,4 @@
 ﻿using ChatClient.MVVM.ViewModel;
-using ChatClient.Stores;
-using System.Windows;
 using System.Windows.Controls;
 
 

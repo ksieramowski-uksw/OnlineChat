@@ -1,24 +1,51 @@
-﻿
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
 
 namespace ChatShared.Models.Privileges {
-    public class GuildPrivilege : IPrivilege {
-        public ulong ID { get; set; }
-        public ulong UserID { get; set; }
-        public ulong GuildID { get; set; }
+    public partial class GuildPrivilege : ObservableObject, IPrivilege {
 
-        public PrivilegeValue ManageGuild { get; set; }
-        public PrivilegeValue ManagePrivileges { get; set; }
+        [ObservableProperty]
+        private ID _ID;
 
-        public PrivilegeValue CreateCategory { get; set; }
-        public PrivilegeValue UpdateCategory { get; set; }
-        public PrivilegeValue DeleteCategory { get; set; }
+        [ObservableProperty]
+        private ID _userID;
 
-        public PrivilegeValue CreateChannel { get; set; }
-        public PrivilegeValue UpdateChannel { get; set; }
-        public PrivilegeValue DeleteChannel { get; set; }
+        [ObservableProperty]
+        private ID _guildID;
 
-        public PrivilegeValue Read { get; set; }
-        public PrivilegeValue Write { get; set; }
+
+        [ObservableProperty]
+        private PrivilegeValue _manageGuild;
+
+        [ObservableProperty]
+        private PrivilegeValue _managePrivileges;
+
+
+        [ObservableProperty]
+        private PrivilegeValue _createCategory;
+
+        [ObservableProperty]
+        private PrivilegeValue _updateCategory;
+
+        [ObservableProperty]
+        private PrivilegeValue _deleteCategory;
+
+
+        [ObservableProperty]
+        private PrivilegeValue _createChannel;
+
+        [ObservableProperty]
+        private PrivilegeValue _updateChannel;
+
+        [ObservableProperty]
+        private PrivilegeValue _deleteChannel;
+
+
+        [ObservableProperty]
+        private PrivilegeValue _read;
+
+        [ObservableProperty]
+        private PrivilegeValue _write;
 
 
         public GuildPrivilege() {
@@ -41,7 +68,7 @@ namespace ChatShared.Models.Privileges {
             Write = PrivilegeValue.Positive;
         }
 
-        public GuildPrivilege(ulong id, ulong userID, ulong guildID) {
+        public GuildPrivilege(ID id, ID userID, ID guildID) {
             ID = id;
             UserID = userID;
             GuildID = guildID;
@@ -61,6 +88,61 @@ namespace ChatShared.Models.Privileges {
             Write = PrivilegeValue.Positive;
         }
 
+        public GuildPrivilege(GuildPrivilege? privilege) {
+            if (privilege == null) { return; }
+            ID = privilege.ID;
+            UserID = privilege.UserID;
+            GuildID = privilege.GuildID;
 
+            ManageGuild = privilege.ManageGuild;
+            ManagePrivileges = privilege.ManagePrivileges;
+
+            CreateCategory = privilege.CreateCategory;
+            UpdateCategory = privilege.UpdateCategory;
+            DeleteCategory = privilege.DeleteCategory;
+
+            CreateChannel = privilege.CreateChannel;
+            UpdateChannel = privilege.UpdateChannel;
+            DeleteChannel = privilege.DeleteChannel;
+
+            Read = privilege.Read;
+            Write = privilege.Write;
+        }
+
+        public static GuildPrivilege OwnerPrivilege(ID ownerID, ID guildID) {
+            return new GuildPrivilege(0, ownerID, guildID) {
+                ManageGuild = PrivilegeValue.Positive,
+                ManagePrivileges = PrivilegeValue.Positive,
+
+                CreateCategory = PrivilegeValue.Positive,
+                UpdateCategory = PrivilegeValue.Positive,
+                DeleteCategory = PrivilegeValue.Positive,
+
+                CreateChannel = PrivilegeValue.Positive,
+                UpdateChannel = PrivilegeValue.Positive,
+                DeleteChannel = PrivilegeValue.Positive,
+
+                Read = PrivilegeValue.Positive,
+                Write = PrivilegeValue.Positive
+            };
+        }
+
+        public bool HasEqualValue(GuildPrivilege privilege) {
+            if (privilege == null) { return false; }
+
+            if (privilege.ManageGuild != ManageGuild
+                || privilege.ManagePrivileges != ManagePrivileges
+                || privilege.CreateCategory != CreateCategory
+                || privilege.UpdateCategory != UpdateCategory
+                || privilege.DeleteCategory != DeleteCategory
+                || privilege.CreateChannel != CreateChannel
+                || privilege.UpdateChannel != UpdateChannel
+                || privilege.DeleteChannel != DeleteChannel
+                || privilege.Read != Read
+                || privilege.Write != Write) {
+                return false;
+            }
+            return true;
+        }
     }
 }

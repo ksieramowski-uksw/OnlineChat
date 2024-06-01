@@ -60,6 +60,6 @@
             </Button>
         </Grid>
 
-        <Frame x:Name="MainFrame" Grid.Column="0" Grid.Row="1" NavigationUIVisibility="Hidden"/>
+        <Frame Content="{Binding MainPage}" Grid.Column="0" Grid.Row="1" NavigationUIVisibility="Hidden"/>
     </Grid>
 </Window>

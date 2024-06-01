@@ -39,7 +39,7 @@ namespace ChatClient.MVVM.ViewModel {
         private void NavigateToRegisterPage() {
             if (Context.App.Navigation.LoginWindow is LoginWindow loginWindow) {
                 Context.App.Navigation.RegisterPage ??= new RegisterPage(Context);
-                loginWindow.MainFrame.Navigate(Context.App.Navigation.RegisterPage);
+                loginWindow.ViewModel.Navigate(Context.App.Navigation.RegisterPage);
             }
         }
 

@@ -2,11 +2,11 @@
 
 namespace ChatShared.DataModels {
     public class MessageData {
-        public ulong UserID { get; set; }
-        public ulong TextChannelID { get; set; }
+        public ID UserID { get; set; }
+        public ID TextChannelID { get; set; }
         public string Content { get; set; }
 
-        public MessageData(ulong userID, ulong textChannelID, string content) {
+        public MessageData(ID userID, ID textChannelID, string content) {
             UserID = userID;
             TextChannelID = textChannelID;
             Content = content;

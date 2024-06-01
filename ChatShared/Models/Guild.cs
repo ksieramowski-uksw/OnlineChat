@@ -1,34 +1,92 @@
 ﻿using ChatShared.Models.Privileges;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 
 
 namespace ChatShared.Models {
-    public class Guild {
-        public ulong ID { get; set; }
-        public string PublicID { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public ulong OwnerID { get; set; }
-        public DateTime CreationTime { get; set; }
-        public byte[] Icon { get; set; }
+    public partial class Guild : ObservableObject {
 
-        public ObservableCollection<Category> Categories { get; set; }
-        public ObservableCollection<PrivilegedUser<GuildPrivilege>> Users { get; set; }
-        //public ObservableCollection<GuildPrivilege> Privileges { get; set; }
-        public GuildPrivilege? DefaultPrivilege { get; set; }
+        [ObservableProperty]
+        private ID _ID;
 
-        public Guild(ulong id, string publicID, string name, string password, ulong ownerID,
-                     DateTime creationTime, byte[] icon) {
+        [ObservableProperty]
+        private string _publicID;
+
+        [ObservableProperty]
+        private string _name;
+
+        [ObservableProperty]
+        private ID _ownerID;
+
+        [ObservableProperty]
+        private byte[] _icon;
+
+        [ObservableProperty]
+        private DateTime _creationTime;
+
+        [ObservableProperty]
+        private ObservableCollection<Category>? _categories;
+
+        [ObservableProperty]
+        private ObservableCollection<User>? _users;
+
+        [ObservableProperty]
+        private ObservableCollection<GuildPrivilege>? _privileges;
+
+        [ObservableProperty]
+        private GuildPrivilege? _defaultPrivilege;
+
+
+        public Guild(ID id, string publicID, string name, ID ownerID, byte[] icon, DateTime creationTime) {
             ID = id;
             PublicID = publicID;
             Name = name;
-            Password = password;
             OwnerID = ownerID;
             CreationTime = creationTime;
             Icon = icon;
-            Categories = new ObservableCollection<Category>();
-            Users = new ObservableCollection<PrivilegedUser<GuildPrivilege>>();
-            //Privileges = new ObservableCollection<GuildPrivilege>();
+        }
+
+
+        public GuildPrivilege? GetPrivilege(ID userID) {
+            if (Privileges == null) { return null; }
+
+            GuildPrivilege? privilege = null;
+            foreach (var p in Privileges) {
+                if (p.UserID == userID) {
+                    privilege = p;
+                    break;
+                }
+            }
+
+            return privilege;
+        }
+
+        public void DisposeDetails() {
+            if (Categories != null) {
+                foreach (Category category in Categories) {
+                    if (category.TextChannels == null) { continue; }
+                    foreach (TextChannel textChannel in category.TextChannels) {
+                        textChannel.Messages.Clear();
+                        textChannel.Users?.Clear();
+                        textChannel.Users = null;
+                    }
+                    category.TextChannels.Clear();
+                    category.TextChannels = null;
+                    category.Users?.Clear();
+                    category.Users = null;
+                }
+            }
+
+            Categories?.Clear();
+            Categories = null;
+
+            DefaultPrivilege = null;
+
+            Privileges?.Clear();
+            Privileges = null;
+
+            Users?.Clear();
+            Users = null;
         }
     }
 }
