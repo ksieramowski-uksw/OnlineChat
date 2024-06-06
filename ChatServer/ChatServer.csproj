@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Resource\Images\Default.png" />
+    <None Remove="Resources\Images\Default.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resource\Images\Default.png">
+    <Resource Include="Resources\Images\Default.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

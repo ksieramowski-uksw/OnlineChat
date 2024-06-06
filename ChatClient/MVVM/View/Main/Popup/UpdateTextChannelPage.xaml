@@ -95,11 +95,11 @@
                                 <RectangleGeometry Rect="0,0,62,24" RadiusX="6" RadiusY="6"/>
                             </StackPanel.Clip>
                             <Button Background="{Binding SelectedTarget.Privilege.ViewChannel, Converter={StaticResource PositiveConverter}}"
-                                    Command="{Binding SetPrivilegeValue_ViewChannel_Positive_Command}" Width="20" Height="30" Cursor="Hand"
+                                    Command="{Binding SetPrivilegeValue_ViewChannel_Positive_Command}" Width="20" Height="25" Cursor="Hand"
                                     Style="{DynamicResource TransparentButtonStyle}"/>
                             <Border BorderBrush="#242424" BorderThickness="1,0,1,0" Width="22"/>
                             <Button Background="{Binding SelectedTarget.Privilege.ViewChannel, Converter={StaticResource NegativeConverter}}"
-                                    Command="{Binding SetPrivilegeValue_ViewChannel_Negative_Command}" Width="20" Height="30" Cursor="Hand"
+                                    Command="{Binding SetPrivilegeValue_ViewChannel_Negative_Command}" Width="20" Height="25" Cursor="Hand"
                                     Style="{DynamicResource TransparentButtonStyle}"/>
                         </StackPanel>
                     </Border>
@@ -113,15 +113,15 @@
                                 <RectangleGeometry Rect="0,0,62,24" RadiusX="6" RadiusY="6"/>
                             </StackPanel.Clip>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource PositiveConverter}}"
-                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Positive_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource NeutralConverter}}"
-                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Neutral_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource NegativeConverter}}"
-                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Negative_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_UpdateChannel_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
                         </StackPanel>
                     </Border>
@@ -137,11 +137,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteChannel_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource NeutralConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteChannel_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteChannel_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -157,15 +157,15 @@
                                 <RectangleGeometry Rect="0,0,62,24" RadiusX="6" RadiusY="6"/>
                             </StackPanel.Clip>
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource PositiveConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Read_Positive_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Read_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource NeutralConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Read_Neutral_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Read_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource NegativeConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Read_Negative_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Read_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
                         </StackPanel>
                     </Border>
@@ -179,15 +179,15 @@
                                 <RectangleGeometry Rect="0,0,62,24" RadiusX="6" RadiusY="6"/>
                             </StackPanel.Clip>
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource PositiveConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Write_Positive_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Write_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource NeutralConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Write_Neutral_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Write_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource NegativeConverter}}"
-                                    Command="{Binding SetPrivilegeValue_Write_Negative_Command}" Width="20" Height="30"
+                                    Command="{Binding SetPrivilegeValue_Write_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
                         </StackPanel>
                     </Border>

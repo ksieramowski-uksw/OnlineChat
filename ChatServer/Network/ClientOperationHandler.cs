@@ -126,12 +126,14 @@ namespace ChatServer.Network {
                     Client.Multicast(OperationCode.UserStatusChanged, json, targetUsers);
                 }
                 else {
-                    Client.Unicast(OperationCode.LogInFail, DEFAULT_FAIL_MESSAGE);
+                    string errorMsg = "We couldn't log you in with what you have entered.";
+                    Client.Unicast(OperationCode.LogInFail, errorMsg);
                     Logger.Warning($"Failed to log in with email '{data.Email}'.");
                 }
             }
             catch (Exception ex) {
                 Logger.Error(ex, MethodBase.GetCurrentMethod());
+                return;
             }
         }
 

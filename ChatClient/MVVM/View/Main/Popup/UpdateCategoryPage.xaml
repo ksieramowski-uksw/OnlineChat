@@ -118,11 +118,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateCategory, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_UpdateCategory_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateCategory, Converter={StaticResource NeutralConverter}}"
                                 Command="{Binding SetPrivilegeValue_UpdateCategory_Neutral_Command}" Width="20" Height="25"
                                 Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateCategory, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_UpdateCategory_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -140,11 +140,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteCategory, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteCategory_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteCategory, Converter={StaticResource NeutralConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteCategory_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteCategory, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteCategory_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -162,11 +162,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.CreateChannel, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_CreateChannel_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.CreateChannel, Converter={StaticResource NeutralConverter}}"
                                     Command="{Binding SetPrivilegeValue_CreateChannel_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.CreateChannel, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_CreateChannel_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -184,11 +184,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_UpdateChannel_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource NeutralConverter}}"
                                     Command="{Binding SetPrivilegeValue_UpdateChannel_Neutral_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.UpdateChannel, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_UpdateChannel_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -206,11 +206,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteChannel_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource NeutralConverter}}"
                                 Command="{Binding SetPrivilegeValue_DeleteChannel_Neutral_Command}" Width="20" Height="25"
                                 Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.DeleteChannel, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_DeleteChannel_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -228,11 +228,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_Read_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource NeutralConverter}}"
                                 Command="{Binding SetPrivilegeValue_Read_Neutral_Command}" Width="20" Height="25"
                                 Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Read, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_Read_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
@@ -250,11 +250,11 @@
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource PositiveConverter}}"
                                     Command="{Binding SetPrivilegeValue_Write_Positive_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource NeutralConverter}}"
                                 Command="{Binding SetPrivilegeValue_Write_Neutral_Command}" Width="20" Height="25"
                                 Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>
-                            <Border Background="#242424" Height="20" Width="1"/>
+                            <Border Background="#242424" Height="25" Width="1"/>
                             <Button Background="{Binding SelectedTarget.Privilege.Write, Converter={StaticResource NegativeConverter}}"
                                     Command="{Binding SetPrivilegeValue_Write_Negative_Command}" Width="20" Height="25"
                                     Style="{DynamicResource TransparentButtonStyle}" Cursor="Hand"/>

@@ -85,9 +85,9 @@
 
     <Grid HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" MinWidth="250"/>
             <ColumnDefinition Width="72"/>
-            <ColumnDefinition Width="256"/>
+            <ColumnDefinition Width="256" MinWidth="150"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="54"/>
@@ -118,7 +118,7 @@
         <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" Background="#222222"/>
 
         <!-- MESSAGES -->
-        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" 
+        <ScrollViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2"
                       HorizontalScrollBarVisibility="Hidden" ScrollChanged="ScrollViewer_ScrollChanged"
                       VerticalScrollBarVisibility="Auto" x:Name="MessageScrollViewer">
 
