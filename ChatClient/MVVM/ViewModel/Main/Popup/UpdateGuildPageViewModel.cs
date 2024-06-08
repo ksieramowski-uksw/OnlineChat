@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Controls;
 
 
 namespace ChatClient.MVVM.ViewModel.Main.Popup {
@@ -18,9 +19,6 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
         [ObservableProperty]
         private string _guildName;
-
-        [ObservableProperty]
-        private string _guildPassword;
 
         [ObservableProperty]
         private string _iconFilePath;
@@ -50,7 +48,6 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
             Guild = guild;
 
             GuildName = new string(guild.Name);
-            GuildPassword = string.Empty;
 
             IconFilePath = ResourceHelper.DefaultImage;
             IconFilePathText = "Default";
@@ -84,7 +81,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
 
         [RelayCommand]
-        private void UpdateGuild() {
+        private void UpdateGuild(PasswordBox passwordBox) {
             if (Context.CurrentUser == null) { return; }
             if (SelectedTarget == null) { return; }
             if (Guild.DefaultPrivilege == null) { return; }
@@ -121,11 +118,12 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
                 return;
             }
 
+            string password = passwordBox.Password;
             if (IconFilePathText == "Default") {
-                Context.Client.UpdateGuild(Guild.ID, GuildName, GuildPassword, SelectedTarget.Privilege, IconFilePathText);
+                Context.Client.UpdateGuild(Guild.ID, GuildName, password, SelectedTarget.Privilege, IconFilePathText);
             }
             else {
-                Context.Client.UpdateGuild(Guild.ID, GuildName, GuildPassword, SelectedTarget.Privilege, IconFilePath);
+                Context.Client.UpdateGuild(Guild.ID, GuildName, password, SelectedTarget.Privilege, IconFilePath);
             }
         }
 

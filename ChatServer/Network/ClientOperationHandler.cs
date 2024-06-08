@@ -372,7 +372,7 @@ namespace ChatServer.Network {
             if (joiningUser != null) {
                 if (joiningUser.Guild == null || joiningUser.User == null) {
                     Client.Unicast(OperationCode.JoinGuildFail, joiningUser.Message);
-                    Logger.Warning($"User '{data.UserID}' tried to join guild with public id '{data.PublicID}', but couldn't.");
+                    Logger.Warning($"User '{data.UserID}' tried to join guild with public id '{data.PublicID}', but failed.");
                 }
                 else {
                     string json = JsonSerializer.Serialize(joiningUser);

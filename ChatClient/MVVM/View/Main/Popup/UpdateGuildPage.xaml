@@ -52,8 +52,8 @@
                 <!-- PASSWORD -->
                 <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical" Margin="30,0">
                     <TextBlock Text="Server password" Foreground="#EEEEEE" FontSize="16"/>
-                    <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
-                             Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding GuildPassword}"/>
+                    <PasswordBox x:Name="Password" Foreground="#EEEEEE" FontSize="16" Padding="5"
+                             Style="{DynamicResource RoundPasswordBoxStyle}"/>
                 </StackPanel>
 
                 <!-- ICON -->
@@ -302,7 +302,9 @@
 
                 <!-- SUBMIT BUTTON -->
                 <Button Grid.Column="0" Grid.Row="8" Margin="30,10,30,10" FontSize="16" Content="Apply" Cursor="Hand"
-                        Style="{DynamicResource RoundButtonStyle}" Command="{Binding UpdateGuildCommand}"/>
+                        Style="{DynamicResource RoundButtonStyle}"
+                        Command="{Binding UpdateGuildCommand}"
+                        CommandParameter="{Binding ElementName=Password}"/>
 
 
 

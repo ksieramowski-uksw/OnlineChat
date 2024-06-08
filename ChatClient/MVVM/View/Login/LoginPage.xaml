@@ -43,7 +43,7 @@
                 <TextBlock Text="Password" FontSize="16" Foreground="#EEEEEE"/>
                 <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
             </StackPanel>
-            <TextBox Text="{Binding Password}" Style="{DynamicResource RoundTextBoxStyle}" Padding="5" FontSize="16"/>
+            <PasswordBox x:Name="Password" Style="{DynamicResource RoundPasswordBoxStyle}" Padding="5" FontSize="16"/>
         </StackPanel>
 
 
@@ -66,9 +66,10 @@
 
 
             <Button x:Name="LoginButton" Grid.Column="0" Grid.Row="2"
-                Command="{Binding LogInCommand}"
-                Style="{DynamicResource RoundButtonStyle}"
-                Margin="30,10,15,10" Content="Log in" FontSize="16" Cursor="Hand"/>
+                    Command="{Binding LogInCommand}"
+                    CommandParameter="{Binding ElementName=Password}"
+                    Style="{DynamicResource RoundButtonStyle}"
+                    Margin="30,10,15,10" Content="Log in" FontSize="16" Cursor="Hand"/>
 
             <Button x:Name="RegisterButton" Grid.Column="1" Grid.Row="2"
                 Command="{Binding NavigateToRegisterPageCommand}"

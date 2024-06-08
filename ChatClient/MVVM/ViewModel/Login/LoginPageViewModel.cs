@@ -1,6 +1,7 @@
 ﻿using ChatClient.MVVM.View;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Windows.Controls;
 
 
 namespace ChatClient.MVVM.ViewModel {
@@ -11,9 +12,6 @@ namespace ChatClient.MVVM.ViewModel {
         private string _email;
 
         [ObservableProperty]
-        private string _password;
-
-        [ObservableProperty]
         private string _feedback;
 
 
@@ -21,18 +19,18 @@ namespace ChatClient.MVVM.ViewModel {
             Context = context;
 
             Email = string.Empty;
-            Password = string.Empty;
             Feedback = "Enter your login details.";
         }
 
 
         [RelayCommand]
-        private void LogIn() {
-            if (string.IsNullOrWhiteSpace(Email) ||string.IsNullOrWhiteSpace(Password)) {
+        private void LogIn(PasswordBox passwordBox) {
+            string password = passwordBox.Password;
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(password)) {
                 Feedback = "Please, fill all fields marked with '*'.\"";
                 return;
             }
-            Context.Client.LogIn(Email, Password);
+            Context.Client.LogIn(Email, password);
         }
 
         [RelayCommand]
