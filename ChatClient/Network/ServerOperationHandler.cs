@@ -200,6 +200,7 @@ namespace ChatClient.Network {
             // current user is joining user
             if (Context.CurrentUser != null && joiningUser.User.ID == Context.CurrentUser.ID) {
                 Context.App.Dispatcher.Invoke(() => {
+
                     mainPage.ViewModel.Guilds.Add(joiningUser.Guild);
                 });
             }
@@ -1025,14 +1026,23 @@ namespace ChatClient.Network {
 
         public void UserStatusChanged(string message) {
             UserStatusChangedData? data = JsonSerializer.Deserialize<UserStatusChangedData>(message);
-            if (data == null) { return; }
+            if (data == null) {
+                MessageBox.Show("Invalid user status.");
+                return;
+            }
 
+            bool success = false;
             foreach (var user in Context.Users) {
                 if (user.ID == data.UserID) {
                     user.Status = data.Status;
+                    success = true;
                     break;
                 }
             }
+            if (success == false) {
+                MessageBox.Show("Invalid user in user status handler.");
+            }
+
         }
     }
 }

@@ -816,6 +816,21 @@ namespace ChatServer.Database
                     return null;
                 }
 
+                GuildPrivilege? privilege = GetDefaultGuildPrivilege(guild.ID);
+                if (privilege == null) {
+                    Logger.Error($"Failed to get default privilege in guild '{guild.ID}'.", MethodBase.GetCurrentMethod());
+                    return null;
+                }
+
+                privilege.UserID = userID;
+
+                ID privilegeID = CreateGuildPrivilege(privilege);
+                if (privilegeID == 0) {
+                    Logger.Error($"Failed to create guild privilege for user '{user.ID}' in guild '{guild.ID}'.", MethodBase.GetCurrentMethod());
+                    return null;
+                }
+
+
                 return new JoiningUser(user, guild, string.Empty);
             }
             catch (Exception ex) {

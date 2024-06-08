@@ -126,6 +126,7 @@ namespace ChatClient.MVVM.Model {
                     MessageBox.Show("Guild privileges in ObservableUser are NULL.", MethodBase.GetCurrentMethod()?.Name);
                     return;
                 }
+                MessageBox.Show(category.Guild.Privileges.Count.ToString());
                 foreach (var p in category.Guild.Privileges) {
                     if (p.UserID == User.ID) {
                         GuildPrivilege = p;
