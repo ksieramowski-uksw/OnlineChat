@@ -6,6 +6,7 @@ using ChatClient.MVVM.ViewModel.Main;
 using ChatShared;
 using ChatShared.DataModels;
 using ChatShared.Models;
+using ChatShared.Models.Privileges;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Text.Json;
@@ -222,12 +223,33 @@ namespace ChatClient.Network {
                             }
                             g.Users?.Add(user);
 
-                            if (Context.App.Navigation.TextChannelPage is TextChannelPage textChannelPage) {
-                                ObservableUser vu = new(user, Context);
-                                vu.Update(textChannelPage.ViewModel.TextChannel);
-                                textChannelPage.ViewModel.VisualUsers.Add(vu);
+                            // guild privilege
+                            GuildPrivilege gp = new(g.DefaultPrivilege) { UserID = joiningUser.User.ID };
+                            g.Privileges?.Add(gp);
+
+                            // category privilege
+                            if (g.Categories != null) {
+                                foreach (var c in g.Categories) {
+                                    CategoryPrivilege cp = new(c.DefaultPrivilege) { UserID = user.ID };
+                                    c.Privileges?.Add(cp);
+                                    
+                                    // text channel privilege
+                                    if (c.TextChannels == null) { continue; }
+                                    foreach (var t in c.TextChannels) {
+                                        TextChannelPrivilege tp = new (t.DefaultPrivilege) { UserID = user.ID };
+                                        t.Privileges?.Add(tp);
+                                    }
+                                }
                             }
-                            else if (Context.App.Navigation.GuildPage is GuildPage guildPage) {
+
+
+                            //if (Context.App.Navigation.TextChannelPage is TextChannelPage textChannelPage) {
+                            //    ObservableUser vu = new(user, Context);
+                            //    vu.Update(textChannelPage.ViewModel.TextChannel);
+                            //    textChannelPage.ViewModel.VisualUsers.Add(vu);
+                            //}
+                            //else
+                            if (Context.App.Navigation.GuildPage is GuildPage guildPage) {
                                 ObservableUser vu = new(user, Context);
                                 vu.Update(guildPage.ViewModel.Guild);
                                 guildPage.ViewModel.VisualUsers.Add(vu);
@@ -1031,17 +1053,22 @@ namespace ChatClient.Network {
                 return;
             }
 
-            bool success = false;
+            if (Context.CurrentUser is User currentUser && currentUser.ID == data.UserID) {
+                currentUser.Status = data.Status;
+                return;
+            }
+
+            //bool success = false;
             foreach (var user in Context.Users) {
                 if (user.ID == data.UserID) {
                     user.Status = data.Status;
-                    success = true;
+                    //success = true;
                     break;
                 }
             }
-            if (success == false) {
-                MessageBox.Show("Invalid user in user status handler.");
-            }
+            //if (success == false) {
+                //MessageBox.Show("Invalid user in user status handler.");
+            //}
 
         }
     }

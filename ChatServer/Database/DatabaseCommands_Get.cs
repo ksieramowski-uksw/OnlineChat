@@ -3,7 +3,6 @@ using ChatShared.Models;
 using ChatShared.Models.Privileges;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Text.Json;
 
 
 namespace ChatServer.Database {
