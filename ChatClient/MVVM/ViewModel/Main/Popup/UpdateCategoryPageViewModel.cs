@@ -101,7 +101,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
             }
 
             if (string.IsNullOrWhiteSpace(CategoryName)) {
-                Feedback = "Please, fill all fields.";
+                Feedback = "Please, fill all fields marked with '*'.";
                 return;
             }
 

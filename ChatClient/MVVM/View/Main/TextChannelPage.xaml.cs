@@ -3,6 +3,7 @@ using ChatShared.Models;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 
 namespace ChatClient.MVVM.ViewModel.Main {
@@ -36,6 +37,18 @@ namespace ChatClient.MVVM.ViewModel.Main {
                 ViewModel.CanLoadMoreMessages = false;
                 //scrollViewer.ScrollToVerticalOffset(1);
                 ViewModel.LoadMoreMessages(50);
+            }
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e) {
+            if (e.Key == Key.Enter) {
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) == 0) {
+                    if (sender is TextBox textBox) {
+                        ViewModel.SendMessage(textBox.Text);
+                        textBox.Text = string.Empty;
+                        e.Handled = true;
+                    }
+                }
             }
         }
 

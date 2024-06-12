@@ -44,8 +44,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
 
         [RelayCommand]
         private void UpdateUser() {
-            if (!string.IsNullOrWhiteSpace(Nickname)
-                && !string.IsNullOrWhiteSpace(Pronoun)) {
+            if (!string.IsNullOrWhiteSpace(Nickname)) {
                 if (ProfilePictureFilePathText == "Default") {
                     Context.Client.UpdateUser(User.ID, Nickname, Pronoun, ProfilePictureFilePathText);
                 }
@@ -54,7 +53,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
                 }
             }
             else {
-                Feedback = "Please, fill required fields.";
+                Feedback = "Please, fill all fields marked with '*'.";
             }
         }
 

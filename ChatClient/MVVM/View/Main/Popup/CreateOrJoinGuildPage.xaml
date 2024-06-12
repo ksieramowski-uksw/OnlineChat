@@ -35,7 +35,10 @@
 
                 <!-- EXISTING GUILD ID -->
                 <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Server ID" Foreground="#EEEEEE" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Server ID" Foreground="#EEEEEE" FontSize="16"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
                     <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
                              Style="{DynamicResource RoundTextBoxStyle}"
                              Text="{Binding ExistingGuildId}"/>
@@ -43,7 +46,10 @@
 
                 <!-- EXISTING GUILD PASSWORD -->
                 <StackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Server password" Foreground="#EEEEEE" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Server password" Foreground="#EEEEEE" FontSize="16"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
                     <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
                              Style="{DynamicResource RoundTextBoxStyle}"
                              Text="{Binding ExistingGuildPassword}"/>

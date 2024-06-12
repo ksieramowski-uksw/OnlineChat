@@ -51,14 +51,6 @@ namespace ChatClient.MVVM.ViewModel {
             if (Context.App.Navigation.MainPage is MainPage mainPage) {
                 mainPage.ViewModel.PopupContent = new FinalizeGuildCreationPage(Context);
             }
-            
-            //if (!string.IsNullOrWhiteSpace(NewGuildName) 
-            //    && !string.IsNullOrWhiteSpace(NewGuildPassword)) {
-            //    Context.Client.CreateGuild(NewGuildName, NewGuildPassword, new GuildPrivilege());
-            //}
-            //else {
-            //    NewGuildFeedback = "Please, fill required fields.";
-            //}
         }
 
         [RelayCommand]
@@ -68,7 +60,7 @@ namespace ChatClient.MVVM.ViewModel {
                 Context.Client.JoinGuild(ExistingGuildId, ExistingGuildPassword);
             }
             else {
-                ExistingGuildFeedback = "Please, fill required fields.";
+                ExistingGuildFeedback = "Please, fill all fields marked with '*'.";
             }
         }
 

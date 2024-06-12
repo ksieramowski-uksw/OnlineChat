@@ -47,7 +47,7 @@ namespace ChatClient.MVVM.ViewModel.Main.Popup {
                 Context.Client.CreateGuild(GuildName, GuildPassword, Privilege, IconFilePath);
             }
             else {
-                Feedback = "Please, fill required fields.";
+                Feedback = "Please, fill all fields marked with '*'..";
             }
         }
 

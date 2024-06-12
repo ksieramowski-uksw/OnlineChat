@@ -13,8 +13,6 @@ namespace ChatServer.Database {
             _connection = new SqliteConnection(connectionString);
             SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_e_sqlite3());
             Commands = new(_connection);
-
-            
         }
 
         ~DatabaseConnection() {

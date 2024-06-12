@@ -11,76 +11,6 @@
 
     <Page.Resources>
         <converters:UserStatusConverter x:Key="UserStatusConverter"/>
-
-
-
-        <!-- Style for ScrollBars -->
-        <Style x:Key="ModernScrollBar" TargetType="ScrollBar">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Width" Value="8"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ScrollBar">
-                        <Grid Background="{TemplateBinding Background}">
-                            <!--<Track Name="PART_Track" IsDirectionReversed="True">
-                                <Track.DecreaseRepeatButton>
-                                    <RepeatButton Command="ScrollBar.LineLeftCommand" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
-                                </Track.DecreaseRepeatButton>
-                                <Track.Thumb>
-                                    <Thumb Background="Gray" />
-                                </Track.Thumb>
-                                <Track.IncreaseRepeatButton>
-                                    <RepeatButton Command="ScrollBar.LineRightCommand" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
-                                </Track.IncreaseRepeatButton>
-                            </Track>-->
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Style for VerticalScrollBar -->
-        <Style x:Key="ModernVerticalScrollBar" TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}">
-            <Setter Property="Width" Value="8"/>
-            <Setter Property="Orientation" Value="Vertical"/>
-        </Style>
-
-        <!-- Style for HorizontalScrollBar -->
-        <Style x:Key="ModernHorizontalScrollBar" TargetType="ScrollBar" BasedOn="{StaticResource ModernScrollBar}">
-            <Setter Property="Height" Value="8"/>
-            <Setter Property="Orientation" Value="Horizontal"/>
-        </Style>
-
-        <!-- Style for ScrollViewer -->
-        <Style x:Key="ModernScrollViewer" TargetType="ScrollViewer">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ScrollViewer">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
-
-                            <ScrollBar Grid.Column="1" Grid.Row="0" Name="PART_VerticalScrollBar" 
-                                       Style="{StaticResource ModernVerticalScrollBar}" 
-                                       Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-                            <ScrollBar Grid.Column="0" Grid.Row="1" Name="PART_HorizontalScrollBar" 
-                                       Style="{StaticResource ModernHorizontalScrollBar}" 
-                                       Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-
     </Page.Resources>
 
     <Grid HorizontalAlignment="Stretch">
@@ -244,12 +174,13 @@
 
 
                 <TextBox Grid.Column="1" Grid.Row="0"
-                     Padding="3,11,8,0" TextWrapping="Wrap"
-                     Text="{Binding MessageContent}"
-                     Style="{DynamicResource RoundedTextBoxStyle}"
-                     VerticalScrollBarVisibility="Auto"
-                     AcceptsReturn="True" TextChanged="TextBox_TextChanged"
-                     Height="46" MaxHeight="128"/>
+                         Padding="3,11,8,0" TextWrapping="Wrap"
+                         Text="{Binding MessageContent}"
+                         Style="{DynamicResource RoundedTextBoxStyle}"
+                         VerticalScrollBarVisibility="Auto"
+                         AcceptsReturn="True" TextChanged="TextBox_TextChanged"
+                         Height="46" MaxHeight="128"
+                         PreviewKeyDown="TextBox_PreviewKeyDown"/>
             </Grid>
         </Border>
 

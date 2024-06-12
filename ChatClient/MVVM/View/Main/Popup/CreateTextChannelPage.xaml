@@ -40,7 +40,10 @@
 
                 <!-- NEW TEXT CHANNEL NAME -->
                 <StackPanel Grid.Column="0" Grid.Row="2" Orientation="Vertical" Margin="30,0">
-                    <TextBlock Text="Text channel name" Foreground="#EEEEEE" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Text channel name" Foreground="#EEEEEE" FontSize="16"/>
+                        <TextBlock Text="*" FontSize="16" Foreground="#F09000" Margin="1,0,0,0"/>
+                    </StackPanel>
                     <TextBox Foreground="#EEEEEE" FontSize="16" Padding="5"
                              Style="{DynamicResource RoundTextBoxStyle}" Text="{Binding NewTextChannelName}"/>
                 </StackPanel>

@@ -6,6 +6,7 @@ using ChatShared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
 
 
@@ -54,15 +55,19 @@ namespace ChatClient.MVVM.ViewModel.Main {
 
 
         [RelayCommand]
-        private void SendMessage() {
+        public void SendMessage(string? message = null) {
             if (Context.CurrentTextChannelPrivilege == null) { return; }
             if (Context.CurrentTextChannelPrivilege.Write != PrivilegeValue.Positive) {
                 NotificationPage.Show(Context, "You don't have permission to\nwrite on this channel.");
                 return;
             }
-            if (Context.CurrentUser == null) { return; }
-            if (MessageContent != string.Empty && Context.CurrentUser is User user) {
+            if (Context.CurrentUser is not User user) { return; }
+            if (MessageContent != string.Empty) {
                 Context.Client.SendMessage(user.ID, TextChannel.ID, MessageContent);
+                MessageContent = string.Empty;
+            }
+            else if (!string.IsNullOrWhiteSpace(message)) {
+                Context.Client.SendMessage(user.ID, TextChannel.ID, message);
                 MessageContent = string.Empty;
             }
         }

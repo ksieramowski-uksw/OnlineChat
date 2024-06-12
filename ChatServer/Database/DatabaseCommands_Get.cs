@@ -135,10 +135,14 @@ namespace ChatServer.Database {
 
 
 
-        public string? GetUniquePublicID(string tableName) {
+        public string? GetUniquePublicID(string tableName, int length = 6) {
             try {
                 while (true) {
-                    string publicID = Guid.NewGuid().ToString();
+                    string publicID;// = Guid.NewGuid().ToString();
+                    const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                    Random random = new();
+                    publicID = new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+
                     using (var command = Connection.CreateCommand()) {
                         command.CommandText = $@"
                             SELECT ID
